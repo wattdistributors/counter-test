@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -7,8 +7,8 @@
 
   <style>
     :root { --bg1:#1b86c8; --bg2:#0b5a86; }
-
     html, body { touch-action: manipulation; }
+
     body{
       margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -16,7 +16,7 @@
       color:#fff;
     }
 
-    .wrap{ width:min(560px, 94vw); padding:22px 14px 26px; }
+    .wrap{ width:min(480px, 94vw); padding:22px 14px 26px; }
 
     .card{
       background: rgba(255,255,255,.10);
@@ -28,10 +28,10 @@
 
     .topbar{
       display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
-      margin-bottom:10px;
+      margin-bottom:12px;
     }
 
-    .title{ font-weight:900; letter-spacing:.02em; font-size:18px; line-height:1.1; }
+    .title{ font-weight:800; letter-spacing:.02em; font-size:18px; line-height:1.1; }
     .subtitle{ opacity:.9; font-size:13px; margin-top:4px; }
 
     .btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
@@ -40,42 +40,14 @@
       border:1px solid rgba(255,255,255,.40);
       background:rgba(255,255,255,.12);
       color:#fff; padding:10px 12px; border-radius:12px;
-      cursor:pointer; font-size:14px; font-weight:800;
+      cursor:pointer; font-size:14px; font-weight:700;
       user-select:none; touch-action: manipulation;
     }
     .btn:active{ transform: scale(.98); }
+
     .btn.primary{
       background: rgba(255,255,255,.22);
       border-color: rgba(255,255,255,.55);
-    }
-
-    /* ---------- Tabs ---------- */
-    .tabs{
-      display:flex;
-      gap:8px;
-      margin: 0 0 12px;
-      padding: 6px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.12);
-      border: 1px solid rgba(255,255,255,.16);
-    }
-    .tab{
-      flex:1;
-      border:1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.08);
-      color:#fff;
-      padding: 10px 12px;
-      border-radius: 14px;
-      font-weight:900;
-      letter-spacing:.02em;
-      cursor:pointer;
-      user-select:none;
-      text-align:center;
-    }
-    .tab.active{
-      background: rgba(255,255,255,.22);
-      border-color: rgba(255,255,255,.50);
-      box-shadow: 0 10px 25px rgba(0,0,0,.14);
     }
 
     .center{
@@ -107,6 +79,7 @@
       flex: 1 1 auto;
       min-width:0;
     }
+
     .sessionInfo .left .line1{
       font-weight:900; letter-spacing:.02em;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -125,7 +98,7 @@
 
     .metrics{ margin-top:10px; }
     .row{ text-align:center; margin:16px 0; }
-    .label{ font-weight:900; letter-spacing:.10em; margin-bottom:8px; font-size:20px; }
+    .label{ font-weight:800; letter-spacing:.08em; margin-bottom:8px; font-size:20px; }
 
     .pill{
       margin:0 auto;
@@ -136,12 +109,14 @@
       color:#111;
       touch-action: manipulation;
     }
+
     .pill button, .pill .val{
       flex:1; display:flex; align-items:center; justify-content:center;
       border:0; background:transparent; font-size:26px; cursor:pointer;
       touch-action: manipulation;
     }
-    .pill .val{ flex:1.2; font-weight:900; font-size:24px; user-select:none; }
+
+    .pill .val{ flex:1.2; font-weight:800; font-size:24px; user-select:none; }
     .sep{ width:2px; background:#111; opacity:.8; }
     .pill button:active{ transform: scale(.97); }
 
@@ -157,143 +132,6 @@
     }
     .ind .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
     .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
-
-    /* ---------- Weekly header ---------- */
-    .weeklyHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin: 6px 0 10px;
-    }
-    .weeklyHeader .h1{
-      font-weight:900;
-      letter-spacing:.02em;
-      font-size:16px;
-      line-height:1.15;
-    }
-    .weeklyHeader .h2{
-      opacity:.9;
-      font-size:12px;
-      margin-top:4px;
-    }
-
-    /* ---------- Weekly visual grid (Mon-Sun) ---------- */
-    .weekGrid{
-      display:grid;
-      grid-template-columns: repeat(7, minmax(140px, 1fr));
-      gap:10px;
-      margin-top: 10px;
-      overflow-x:auto;
-      padding-bottom: 6px;
-      scroll-snap-type: x mandatory;
-    }
-
-    .weekCard{
-      scroll-snap-align: start;
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 16px;
-      padding: 10px 10px 12px;
-      min-width: 140px;
-    }
-
-    .weekCard .top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:8px;
-      margin-bottom: 8px;
-    }
-
-    .weekCard .dow{
-      font-weight:900;
-      letter-spacing:.02em;
-      font-size:13px;
-    }
-    .weekCard .date{
-      opacity:.85;
-      font-size:11px;
-      margin-top:2px;
-    }
-
-    .weekCard .badge{
-      font-size:11px;
-      font-weight:900;
-      padding: 6px 8px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.12);
-      opacity:.95;
-      white-space:nowrap;
-    }
-
-    .weekNums{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:8px;
-    }
-
-    .weekNum{
-      background: rgba(0,0,0,.14);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 12px;
-      padding: 8px 8px;
-    }
-
-    .weekNum .k{
-      font-size:11px;
-      opacity:.85;
-      margin-bottom: 4px;
-    }
-    .weekNum .v{
-      font-size:16px;
-      font-weight:900;
-      letter-spacing:.02em;
-    }
-
-    .weekCard.muted{
-      opacity:.55;
-    }
-
-    .weekTotalsBlock{
-      margin-top:12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.10);
-      padding: 12px;
-    }
-    .weekTotalsTitle{
-      font-weight:900;
-      letter-spacing:.02em;
-      margin-bottom: 10px;
-    }
-
-    .miniGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:10px;
-      margin-top:10px;
-    }
-    .mini{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 14px;
-      padding: 10px 12px;
-    }
-    .mini .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
-    .mini .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
-
-    .empty{
-      margin-top:10px;
-      padding: 14px 12px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.08);
-      border: 1px dashed rgba(255,255,255,.18);
-      text-align:center;
-      opacity:.9;
-      font-size:13px;
-    }
 
     .footer{
       margin-top:10px;
@@ -316,7 +154,7 @@
     .overlay.show{ display:flex; }
 
     .modal{
-      width:min(560px, 96vw);
+      width:min(520px, 96vw);
       background: rgba(255,255,255,.12);
       border: 1px solid rgba(255,255,255,.20);
       border-radius: 18px;
@@ -391,7 +229,7 @@
       word-break: break-word;
     }
 
-    /* ✅ Elegant QR */
+    /* ✅ More elegant, centered QR */
     .qrWrap{
       margin-top:12px;
       border-radius: 16px;
@@ -436,13 +274,18 @@
       text-align:center;
       line-height:1.25;
     }
+    .qrNote{
+      opacity:.90;
+      font-size:12px;
+      text-align:center;
+      line-height:1.25;
+      max-width: 420px;
+    }
 
     @media (max-width: 420px){
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
-      .miniGrid{ grid-template-columns: 1fr 1fr; }
-      .weekGrid{ grid-template-columns: repeat(7, minmax(150px, 1fr)); }
     }
   </style>
 </head>
@@ -456,107 +299,50 @@
           <div class="title" id="today_title">KPIs Counter</div>
           <div class="subtitle" id="today_date"></div>
         </div>
+        <div class="btnrow" id="top_actions"></div>
       </div>
 
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab active" id="tab_today" type="button">Today</button>
-        <button class="tab" id="tab_weekly" type="button">Weekly</button>
+      <!-- Start screen -->
+      <div id="start_screen" class="center">
+        <div style="opacity:.9; font-size:13px; max-width: 360px;">
+          Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
+          Tap <b>Start day</b> to enter your name and store.
+        </div>
+        <button class="btn primary" id="start_day">Iniciar día / Start day</button>
       </div>
 
-      <!-- TODAY TAB -->
-      <div id="panel_today">
-
-        <!-- Start screen -->
-        <div id="start_screen" class="center">
-          <div style="opacity:.9; font-size:13px; max-width: 360px;">
-            Tap <b>Start day</b> to enter your name and store.
+      <!-- Active session screen -->
+      <div id="session_screen" style="display:none;">
+        <div class="sessionInfo">
+          <div class="left">
+            <div class="line1" id="who_line">—</div>
+            <div class="line2" id="date_line">—</div>
           </div>
-          <button class="btn primary" id="start_day">Start day</button>
-        </div>
-
-        <!-- Active session screen -->
-        <div id="session_screen" style="display:none;">
-          <div class="sessionInfo">
-            <div class="left">
-              <div class="line1" id="who_line">—</div>
-              <div class="line2" id="date_line">—</div>
-            </div>
-            <div class="timerBox">
-              <div class="t1">Session</div>
-              <div class="t2" id="timer">00:00:00</div>
-            </div>
-          </div>
-
-          <div class="metrics" id="list"></div>
-
-          <div class="indicators">
-            <div class="ind">
-              <div class="k">% Aggressiveness (Z/S)</div>
-              <div class="v" id="aggr">—</div>
-            </div>
-            <div class="ind">
-              <div class="k">% Close (X/Z)</div>
-              <div class="v" id="close">0.0%</div>
-            </div>
-          </div>
-
-          <div class="btnrow" style="margin-top:12px; justify-content:center;">
-            <button class="btn primary" id="finish_day">End day</button>
+          <div class="timerBox">
+            <div class="t1">Session</div>
+            <div class="t2" id="timer">00:00:00</div>
           </div>
         </div>
 
+        <div class="metrics" id="list"></div>
+
+        <div class="indicators">
+          <div class="ind">
+            <div class="k">% Agresividad (Z/S)</div>
+            <div class="v" id="aggr">—</div>
+          </div>
+          <div class="ind">
+            <div class="k">% Cierre (X/Z)</div>
+            <div class="v" id="close">0.0%</div>
+          </div>
+        </div>
+
+        <div class="btnrow" style="margin-top:12px; justify-content:center;">
+          <button class="btn primary" id="finish_day">Finalizar día / End day</button>
+        </div>
       </div>
 
-      <!-- WEEKLY TAB -->
-      <div id="panel_weekly" style="display:none;">
-
-        <div class="weeklyHeader">
-          <div>
-            <div class="h1">Weekly summary</div>
-            <div class="h2" id="week_range">—</div>
-          </div>
-          <div class="btnrow" style="justify-content:flex-end;">
-            <button class="btn" id="week_refresh" type="button">Refresh</button>
-          </div>
-        </div>
-
-        <!-- Visual Mon-Sun cards -->
-        <div id="week_grid" class="weekGrid"></div>
-
-        <!-- Totals + percentages -->
-        <div class="weekTotalsBlock">
-          <div class="weekTotalsTitle">Week totals</div>
-
-          <div class="indicators">
-            <div class="ind">
-              <div class="k">% Aggressiveness (Z/S)</div>
-              <div class="v" id="w_aggr">—</div>
-            </div>
-            <div class="ind">
-              <div class="k">% Close (X/Z)</div>
-              <div class="v" id="w_close">—</div>
-            </div>
-          </div>
-
-          <div class="miniGrid" style="margin-top:10px;">
-            <div class="mini"><div class="k">S total</div><div class="v" id="w_S">0</div></div>
-            <div class="mini"><div class="k">Z total</div><div class="v" id="w_Z">0</div></div>
-            <div class="mini"><div class="k">X total</div><div class="v" id="w_X">0</div></div>
-            <div class="mini"><div class="k">CC total</div><div class="v" id="w_CC">0</div></div>
-            <div class="mini"><div class="k">C total</div><div class="v" id="w_C">0</div></div>
-            <div class="mini"><div class="k">Days logged</div><div class="v" id="w_days">0</div></div>
-          </div>
-        </div>
-
-        <div id="week_empty" class="empty" style="display:none;">
-          No completed days saved yet for this week.<br/>
-          Finish a day (Copy/Share) to see it here.
-        </div>
-
-      </div>
-
-      <div class="footer">KPIs Counter v5.1 — Designed by Alen Cordero</div>
+      <div class="footer">KPIs Counter v4.2 — Designed by Alen Cordero</div>
     </div>
   </div>
 
@@ -564,26 +350,27 @@
   <div class="overlay" id="modal_start">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Start day">
       <div class="modalHeader">
-        <div class="modalTitle">Start day</div>
+        <div class="modalTitle">Iniciar día / Start day</div>
         <button class="xbtn" id="start_x" aria-label="Close">×</button>
       </div>
       <div class="modalBody">
         <div style="opacity:.9; font-size:13px;">
+          Ingresa tus datos para iniciar.<br/>
           Enter your info to start.
         </div>
         <div class="grid2">
           <div class="field">
-            <label>Name</label>
-            <input id="start_name" placeholder="e.g., Alen" autocomplete="name" />
+            <label>Nombre / Name</label>
+            <input id="start_name" placeholder="Ej: Alen" autocomplete="name" />
           </div>
           <div class="field">
-            <label>Store</label>
-            <input id="start_store" placeholder="e.g., El Rancho — Irving" />
+            <label>Tienda / Store</label>
+            <input id="start_store" placeholder="Ej: El Rancho — Irving" />
           </div>
         </div>
         <div class="modalActions">
-          <button class="btn" id="start_cancel">Cancel</button>
-          <button class="btn primary" id="start_confirm">Start</button>
+          <button class="btn" id="start_cancel">Cancelar / Cancel</button>
+          <button class="btn primary" id="start_confirm">Comenzar / Start</button>
         </div>
       </div>
     </div>
@@ -593,41 +380,51 @@
   <div class="overlay" id="modal_report">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Day summary">
       <div class="modalHeader">
-        <div class="modalTitle">Day summary</div>
+        <div class="modalTitle">Resumen del día / Day summary</div>
         <button class="xbtn" id="report_x" aria-label="Back">×</button>
       </div>
       <div class="modalBody">
 
         <!-- QR -->
         <div id="qr_wrap" class="qrWrap" style="display:none;">
-          <div class="qrTitle">Open this report on your phone</div>
+          <div class="qrTitle">Abre este reporte en tu teléfono / Open this report on your phone</div>
           <div class="qrCard">
             <div id="qr_box"></div>
           </div>
-          <div class="qrHint">Scan with your phone camera • Then Copy/Share</div>
+          <div class="qrHint">Escanea con la cámara • Luego copia/compártelo / Scan with your camera • Then copy/share</div>
+
+          <!-- ✅ New: Tablet instruction note (bilingual) -->
+          <div class="qrNote" id="qr_note">
+            Escanea el QR y envía el reporte desde tu teléfono. Luego presiona <b>Finalizar día</b>.<br/>
+            Scan the QR and send the report from your phone. Then press <b>End day</b>.
+          </div>
         </div>
 
         <div class="reportBox" id="report_box">—</div>
 
-        <div class="modalActions">
+        <div class="modalActions" id="report_actions">
+          <!-- Phone actions -->
           <button class="btn" id="copy_btn">Copy</button>
           <button class="btn primary" id="share_btn">Share</button>
+
+          <!-- Tablet action -->
+          <button class="btn primary" id="end_btn" style="display:none;">Finalizar día / End day</button>
         </div>
-        <div style="margin-top:10px; opacity:.8; font-size:12px;">
-          Copy or share ends the day and resets.
+
+        <div id="report_hint" style="margin-top:10px; opacity:.8; font-size:12px;">
+          Copia o comparte para terminar el día y resetear. / Copy or share ends the day and resets.
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Libraries -->
+  <!-- ✅ Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 
 <script>
   const metrics = ["S","Z","CC","C","X"];
-  const STATE_KEY = "kpi_state_v51";
-  const HISTORY_KEY = "kpi_history_v51";
+  const STATE_KEY = "kpi_state_v42";
   const AGGR_MIN_STOPS = 20;
 
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
@@ -659,37 +456,9 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   };
 
-  // Nice date for week range (e.g., Feb 2, 2026)
-  const fmtNiceDate = (yyyyMmDd) => {
-    const [y,m,d] = yyyyMmDd.split("-").map(Number);
-    const dt = new Date(y, m-1, d);
-    return dt.toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
-  };
-
-  // Monday-start week (Mon..Sun)
-  function weekBoundsISO(dateObj = new Date()) {
-    const d = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-    const day = d.getDay(); // 0 Sun .. 6 Sat
-    const diffToMon = (day === 0) ? -6 : (1 - day);
-    const start = new Date(d);
-    start.setDate(d.getDate() + diffToMon);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-
-    const toIso = (x) => {
-      const yyyy = x.getFullYear();
-      const mm = String(x.getMonth()+1).padStart(2,"0");
-      const dd = String(x.getDate()).padStart(2,"0");
-      return `${yyyy}-${mm}-${dd}`;
-    };
-
-    return { startStr: toIso(start), endStr: toIso(end) };
-  }
-
-  // Prevent double-tap zoom (extra guard for iOS Safari)
   document.addEventListener("dblclick", (e) => e.preventDefault(), { passive:false });
 
-  // ---------- Load state ----------
+  // ---------- Load ----------
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
   const state = {
     active: !!saved.active,
@@ -701,28 +470,8 @@
   };
   metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
 
-  // ---------- History ----------
-  function loadHistory() {
-    try {
-      const arr = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-      return Array.isArray(arr) ? arr : [];
-    } catch {
-      return [];
-    }
-  }
-  function saveHistory(arr) {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
-  }
-
   // ---------- DOM ----------
   const todayDateEl = document.getElementById("today_date");
-
-  // Tabs / panels
-  const tabToday = document.getElementById("tab_today");
-  const tabWeekly = document.getElementById("tab_weekly");
-  const panelToday = document.getElementById("panel_today");
-  const panelWeekly = document.getElementById("panel_weekly");
-
   const startScreen = document.getElementById("start_screen");
   const sessionScreen = document.getElementById("session_screen");
   const list = document.getElementById("list");
@@ -731,19 +480,6 @@
   const timerEl = document.getElementById("timer");
   const aggrEl = document.getElementById("aggr");
   const closeEl = document.getElementById("close");
-
-  // Weekly DOM
-  const weekRangeEl = document.getElementById("week_range");
-  const weekGrid = document.getElementById("week_grid");
-  const wAggrEl = document.getElementById("w_aggr");
-  const wCloseEl = document.getElementById("w_close");
-  const wS = document.getElementById("w_S");
-  const wZ = document.getElementById("w_Z");
-  const wX = document.getElementById("w_X");
-  const wCC = document.getElementById("w_CC");
-  const wC = document.getElementById("w_C");
-  const wDays = document.getElementById("w_days");
-  const weekEmpty = document.getElementById("week_empty");
 
   // Modals
   const modalStart = document.getElementById("modal_start");
@@ -756,7 +492,13 @@
   const qrWrap = document.getElementById("qr_wrap");
   const qrBox = document.getElementById("qr_box");
 
-  // ---------- Save state ----------
+  // Report actions
+  const reportHint = document.getElementById("report_hint");
+  const endBtn = document.getElementById("end_btn");
+  const copyBtn = document.getElementById("copy_btn");
+  const shareBtn = document.getElementById("share_btn");
+
+  // ---------- Save ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
   function saveState() { try { saveStateNow(); } catch {} }
 
@@ -768,7 +510,7 @@
   // ---------- UI ----------
   const valEls = {};
   function renderHeader() {
-    todayDateEl.textContent = `Date: ${isoDateLocal()}`;
+    todayDateEl.textContent = `Date: ${state.date}`;
   }
 
   function renderSessionInfo() {
@@ -823,20 +565,6 @@
     renderIndicators();
   }
 
-  // ---------- Tabs ----------
-  function setTab(which) {
-    const isToday = which === "today";
-    tabToday.classList.toggle("active", isToday);
-    tabWeekly.classList.toggle("active", !isToday);
-    panelToday.style.display = isToday ? "" : "none";
-    panelWeekly.style.display = isToday ? "none" : "";
-
-    if (!isToday) renderWeekly();
-  }
-
-  tabToday.addEventListener("click", () => setTab("today"));
-  tabWeekly.addEventListener("click", () => setTab("weekly"));
-
   // ---------- Timer ----------
   let timerInterval = null;
   function startTimerLoop() {
@@ -880,7 +608,7 @@
     startTimerLoop();
   }
 
-  // English-only report
+  // ✅ English-only report
   function buildReport(endTs) {
     const S = state.values.S, Z = state.values.Z, CC = state.values.CC, C = state.values.C, X = state.values.X;
 
@@ -923,6 +651,20 @@
     showStartScreen();
   }
 
+  // ---------- Report mode ----------
+  function setReportMode(mode) {
+    // mode: "tablet" | "phone"
+    const isPhone = mode === "phone";
+
+    // Phone: Copy/Share visible + hint visible
+    copyBtn.style.display = isPhone ? "" : "none";
+    shareBtn.style.display = isPhone ? "" : "none";
+    reportHint.style.display = isPhone ? "" : "none";
+
+    // Tablet: only End day button
+    endBtn.style.display = isPhone ? "none" : "";
+  }
+
   // ---------- QR ----------
   function makeShareUrlFromReport(text) {
     const payload = LZString.compressToEncodedURIComponent(text);
@@ -930,12 +672,13 @@
   }
 
   function showQRForText(text) {
+    // Reset + show
     qrBox.innerHTML = "";
     qrWrap.style.display = "";
 
     const url = makeShareUrlFromReport(text);
 
-    // Less dense QR: low correction + elegant card
+    // ✅ Less dense: smaller error correction (L) + a bit bigger size
     new QRCode(qrBox, {
       text: url,
       width: 176,
@@ -954,118 +697,19 @@
       if (!text) return false;
 
       reportBox.textContent = text;
+
+      // Phone view: no need to show QR
       qrWrap.style.display = "none";
+
+      // Phone: show copy/share + hint
+      setReportMode("phone");
+
       openModal(modalReport);
       return true;
     } catch {
       return false;
     }
   }
-
-  // ---------- Weekly (visual Mon-Sun) ----------
-  function renderWeekly() {
-    const { startStr, endStr } = weekBoundsISO(new Date());
-    weekRangeEl.textContent = `${fmtNiceDate(startStr)} → ${fmtNiceDate(endStr)}`;
-
-    const history = loadHistory();
-
-    // Index by date (keep latest for same date)
-    const byDate = {};
-    for (const it of history) {
-      if (!it || typeof it.date !== "string") continue;
-      if (it.date < startStr || it.date > endStr) continue;
-
-      const prev = byDate[it.date];
-      if (!prev) byDate[it.date] = it;
-      else {
-        const a = Number(prev.endTs || 0);
-        const b = Number(it.endTs || 0);
-        if (b >= a) byDate[it.date] = it;
-      }
-    }
-
-    // Create 7 dates (Mon..Sun)
-    const [y,m,d] = startStr.split("-").map(Number);
-    const start = new Date(y, m-1, d);
-
-    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-    // Totals
-    let totals = { S:0, Z:0, CC:0, C:0, X:0 };
-    let daysCount = 0;
-
-    weekGrid.innerHTML = "";
-
-    for (let i = 0; i < 7; i++) {
-      const dt = new Date(start);
-      dt.setDate(start.getDate() + i);
-
-      const yyyy = dt.getFullYear();
-      const mm = String(dt.getMonth()+1).padStart(2,"0");
-      const dd = String(dt.getDate()).padStart(2,"0");
-      const iso = `${yyyy}-${mm}-${dd}`;
-
-      const item = byDate[iso];
-      const v = item?.values || {};
-
-      const S = Number(v.S || 0);
-      const Z = Number(v.Z || 0);
-      const CC = Number(v.CC || 0);
-      const C = Number(v.C || 0);
-      const X = Number(v.X || 0);
-
-      const hasData = !!item;
-
-      if (hasData) {
-        totals.S += S; totals.Z += Z; totals.CC += CC; totals.C += C; totals.X += X;
-        daysCount += 1;
-      }
-
-      const name = (item?.rep || "").trim();
-      const badge = hasData ? (name ? name : "Saved") : "—";
-
-      const card = document.createElement("div");
-      card.className = "weekCard" + (hasData ? "" : " muted");
-      card.innerHTML = `
-        <div class="top">
-          <div>
-            <div class="dow">${dayNames[i]}</div>
-            <div class="date">${mm}/${dd}</div>
-          </div>
-          <div class="badge">${badge}</div>
-        </div>
-
-        <div class="weekNums">
-          <div class="weekNum"><div class="k">S</div><div class="v">${S}</div></div>
-          <div class="weekNum"><div class="k">Z</div><div class="v">${Z}</div></div>
-          <div class="weekNum"><div class="k">X</div><div class="v">${X}</div></div>
-          <div class="weekNum"><div class="k">CC</div><div class="v">${CC}</div></div>
-          <div class="weekNum"><div class="k">C</div><div class="v">${C}</div></div>
-          <div class="weekNum"><div class="k">Date</div><div class="v" style="font-size:13px;">${iso}</div></div>
-        </div>
-      `;
-      weekGrid.appendChild(card);
-    }
-
-    // Totals UI
-    wS.textContent = String(totals.S);
-    wZ.textContent = String(totals.Z);
-    wX.textContent = String(totals.X);
-    wCC.textContent = String(totals.CC);
-    wC.textContent = String(totals.C);
-    wDays.textContent = String(daysCount);
-
-    const aggr = (totals.S >= AGGR_MIN_STOPS && totals.S > 0) ? (totals.Z / totals.S) : null;
-    const close = (totals.Z > 0) ? (totals.X / totals.Z) : 0;
-
-    wAggrEl.textContent = (aggr !== null) ? fmtPct(aggr) : `— (min ${AGGR_MIN_STOPS} S)`;
-    wCloseEl.textContent = fmtPct(close);
-
-    // Empty state
-    weekEmpty.style.display = (daysCount === 0) ? "" : "none";
-  }
-
-  document.getElementById("week_refresh").addEventListener("click", renderWeekly);
 
   // ---------- Metrics interactions (tap and hold repeat) ----------
   function bump(k, d) {
@@ -1122,13 +766,14 @@
     const rep = (startName.value || "").trim();
     const store = (startStore.value || "").trim();
     if (!rep || !store) {
-      alert("Please enter Name and Store.");
+      alert("Por favor ingresa Nombre y Tienda.\nPlease enter Name and Store.");
       return;
     }
     closeModal(modalStart);
     startDay(rep, store);
   });
 
+  // Enter to move/submit
   [startName, startStore].forEach((inp) => {
     inp.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
@@ -1138,13 +783,14 @@
     });
   });
 
+  // Tablet: End day -> show QR + only End button
   document.getElementById("finish_day").addEventListener("click", () => {
     const endTs = Date.now();
     const text = buildReport(endTs);
     reportBox.textContent = text;
 
-    // Tablet: show QR
     showQRForText(text);
+    setReportMode("tablet");
 
     openModal(modalReport);
   });
@@ -1152,14 +798,13 @@
   document.getElementById("report_x").addEventListener("click", () => closeModal(modalReport));
 
   async function doCopyOrShare(kind) {
-    if (!confirm(`Are you sure you want to ${kind === "copy" ? "COPY" : "SHARE"}?\nThis ends the day and resets.`)) return;
+    const confirmMsg =
+      `Are you sure you want to ${kind === "copy" ? "COPY" : "SHARE"}?\n` +
+      `This ends the day and resets.`;
 
-    const endTs = Date.now();
+    if (!confirm(confirmMsg)) return;
+
     const text = reportBox.textContent || "";
-
-    // Save to weekly history ONLY if it was a real active session on this device.
-    const openedFromQR = (location.hash || "").startsWith("#r=");
-    const canSaveDay = (!openedFromQR && state.sessionStart && state.rep && state.store);
 
     try {
       if (kind === "share") {
@@ -1190,40 +835,25 @@
         }
       }
 
-      if (canSaveDay) {
-        const history = loadHistory();
-
-        // Prevent duplicates for same date+rep+store (keep the latest)
-        const sig = `${state.date}|${state.rep}|${state.store}`;
-        const filtered = history.filter(h => `${h.date}|${h.rep}|${h.store}` !== sig);
-
-        filtered.push({
-          date: state.date,
-          rep: state.rep,
-          store: state.store,
-          values: { ...state.values },
-          startTs: state.sessionStart,
-          endTs: endTs
-        });
-
-        saveHistory(filtered);
-      }
-
       finalizeAndReset();
-
-      // Clear hash so reload doesn't reopen modal
       history.replaceState(null, "", location.pathname);
-
-      // Refresh weekly
-      renderWeekly();
-
     } catch (_) {
       alert("Action failed. Day was not ended.");
     }
   }
 
-  document.getElementById("copy_btn").addEventListener("click", () => doCopyOrShare("copy"));
-  document.getElementById("share_btn").addEventListener("click", () => doCopyOrShare("share"));
+  copyBtn.addEventListener("click", () => doCopyOrShare("copy"));
+  shareBtn.addEventListener("click", () => doCopyOrShare("share"));
+
+  // Tablet: End button resets after QR was scanned/sent
+  endBtn.addEventListener("click", () => {
+    const confirmMsg =
+      "¿Seguro que quieres finalizar el día y resetear?\nAre you sure you want to end the day and reset?";
+    if (!confirm(confirmMsg)) return;
+
+    finalizeAndReset();
+    history.replaceState(null, "", location.pathname);
+  });
 
   // ---------- Init ----------
   (function init() {
@@ -1238,8 +868,6 @@
     } else {
       showStartScreen();
     }
-
-    setTab("today");
     saveState();
   })();
 </script>
