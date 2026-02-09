@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -7,8 +7,8 @@
 
   <style>
     :root { --bg1:#1b86c8; --bg2:#0b5a86; }
-    html, body { touch-action: manipulation; }
 
+    html, body { touch-action: manipulation; }
     body{
       margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -16,7 +16,7 @@
       color:#fff;
     }
 
-    .wrap{ width:min(480px, 94vw); padding:22px 14px 26px; }
+    .wrap{ width:min(520px, 94vw); padding:22px 14px 26px; }
 
     .card{
       background: rgba(255,255,255,.10);
@@ -28,10 +28,10 @@
 
     .topbar{
       display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
-      margin-bottom:12px;
+      margin-bottom:10px;
     }
 
-    .title{ font-weight:800; letter-spacing:.02em; font-size:18px; line-height:1.1; }
+    .title{ font-weight:900; letter-spacing:.02em; font-size:18px; line-height:1.1; }
     .subtitle{ opacity:.9; font-size:13px; margin-top:4px; }
 
     .btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
@@ -40,7 +40,7 @@
       border:1px solid rgba(255,255,255,.40);
       background:rgba(255,255,255,.12);
       color:#fff; padding:10px 12px; border-radius:12px;
-      cursor:pointer; font-size:14px; font-weight:700;
+      cursor:pointer; font-size:14px; font-weight:800;
       user-select:none; touch-action: manipulation;
     }
     .btn:active{ transform: scale(.98); }
@@ -48,6 +48,35 @@
     .btn.primary{
       background: rgba(255,255,255,.22);
       border-color: rgba(255,255,255,.55);
+    }
+
+    /* ---------- Tabs ---------- */
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin: 0 0 12px;
+      padding: 6px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.12);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .tab{
+      flex:1;
+      border:1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.08);
+      color:#fff;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight:900;
+      letter-spacing:.02em;
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+    }
+    .tab.active{
+      background: rgba(255,255,255,.22);
+      border-color: rgba(255,255,255,.50);
+      box-shadow: 0 10px 25px rgba(0,0,0,.14);
     }
 
     .center{
@@ -79,7 +108,6 @@
       flex: 1 1 auto;
       min-width:0;
     }
-
     .sessionInfo .left .line1{
       font-weight:900; letter-spacing:.02em;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -98,7 +126,7 @@
 
     .metrics{ margin-top:10px; }
     .row{ text-align:center; margin:16px 0; }
-    .label{ font-weight:800; letter-spacing:.08em; margin-bottom:8px; font-size:20px; }
+    .label{ font-weight:900; letter-spacing:.10em; margin-bottom:8px; font-size:20px; }
 
     .pill{
       margin:0 auto;
@@ -109,14 +137,12 @@
       color:#111;
       touch-action: manipulation;
     }
-
     .pill button, .pill .val{
       flex:1; display:flex; align-items:center; justify-content:center;
       border:0; background:transparent; font-size:26px; cursor:pointer;
       touch-action: manipulation;
     }
-
-    .pill .val{ flex:1.2; font-weight:800; font-size:24px; user-select:none; }
+    .pill .val{ flex:1.2; font-weight:900; font-size:24px; user-select:none; }
     .sep{ width:2px; background:#111; opacity:.8; }
     .pill button:active{ transform: scale(.97); }
 
@@ -132,6 +158,98 @@
     }
     .ind .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
     .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
+
+    /* ---------- Weekly summary ---------- */
+    .weeklyHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin: 6px 0 10px;
+    }
+    .weeklyHeader .h1{
+      font-weight:900;
+      letter-spacing:.02em;
+      font-size:16px;
+      line-height:1.15;
+    }
+    .weeklyHeader .h2{
+      opacity:.9;
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    .weeklyTotals{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .miniGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .mini{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .mini .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
+    .mini .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
+
+    .weekList{
+      margin-top:12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.12);
+      overflow:hidden;
+    }
+    .weekRow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+    .weekRow:first-child{ border-top:0; }
+    .weekRow .left{
+      min-width:0;
+      flex: 1 1 auto;
+    }
+    .weekRow .d1{
+      font-weight:900;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .weekRow .d2{
+      opacity:.9;
+      font-size:12px;
+      margin-top:3px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .weekRow .right{
+      flex:0 0 auto;
+      text-align:right;
+      font-size:12px;
+      opacity:.95;
+      white-space:nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .empty{
+      margin-top:10px;
+      padding: 14px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      border: 1px dashed rgba(255,255,255,.18);
+      text-align:center;
+      opacity:.9;
+      font-size:13px;
+    }
 
     .footer{
       margin-top:10px;
@@ -154,7 +272,7 @@
     .overlay.show{ display:flex; }
 
     .modal{
-      width:min(520px, 96vw);
+      width:min(560px, 96vw);
       background: rgba(255,255,255,.12);
       border: 1px solid rgba(255,255,255,.20);
       border-radius: 18px;
@@ -229,7 +347,7 @@
       word-break: break-word;
     }
 
-    /* ✅ More elegant, centered QR */
+    /* ✅ Elegant QR */
     .qrWrap{
       margin-top:12px;
       border-radius: 16px;
@@ -248,6 +366,7 @@
       letter-spacing:.02em;
       font-size:13px;
       opacity:.95;
+      text-align:center;
     }
     .qrCard{
       background: rgba(255,255,255,.92);
@@ -278,6 +397,7 @@
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
+      .miniGrid{ grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -291,50 +411,102 @@
           <div class="title" id="today_title">KPIs Counter</div>
           <div class="subtitle" id="today_date"></div>
         </div>
-        <div class="btnrow" id="top_actions"></div>
       </div>
 
-      <!-- Start screen -->
-      <div id="start_screen" class="center">
-        <div style="opacity:.9; font-size:13px; max-width: 360px;">
-          Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
-          Tap <b>Start day</b> to enter your name and store.
-        </div>
-        <button class="btn primary" id="start_day">Iniciar día / Start day</button>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" id="tab_today" type="button">Today</button>
+        <button class="tab" id="tab_weekly" type="button">Weekly</button>
       </div>
 
-      <!-- Active session screen -->
-      <div id="session_screen" style="display:none;">
-        <div class="sessionInfo">
-          <div class="left">
-            <div class="line1" id="who_line">—</div>
-            <div class="line2" id="date_line">—</div>
+      <!-- TODAY TAB -->
+      <div id="panel_today">
+
+        <!-- Start screen -->
+        <div id="start_screen" class="center">
+          <div style="opacity:.9; font-size:13px; max-width: 360px;">
+            Tap <b>Start day</b> to enter your name and store.
           </div>
-          <div class="timerBox">
-            <div class="t1">Session</div>
-            <div class="t2" id="timer">00:00:00</div>
+          <button class="btn primary" id="start_day">Start day</button>
+        </div>
+
+        <!-- Active session screen -->
+        <div id="session_screen" style="display:none;">
+          <div class="sessionInfo">
+            <div class="left">
+              <div class="line1" id="who_line">—</div>
+              <div class="line2" id="date_line">—</div>
+            </div>
+            <div class="timerBox">
+              <div class="t1">Session</div>
+              <div class="t2" id="timer">00:00:00</div>
+            </div>
+          </div>
+
+          <div class="metrics" id="list"></div>
+
+          <div class="indicators">
+            <div class="ind">
+              <div class="k">% Aggressiveness (Z/S)</div>
+              <div class="v" id="aggr">—</div>
+            </div>
+            <div class="ind">
+              <div class="k">% Close (X/Z)</div>
+              <div class="v" id="close">0.0%</div>
+            </div>
+          </div>
+
+          <div class="btnrow" style="margin-top:12px; justify-content:center;">
+            <button class="btn primary" id="finish_day">End day</button>
           </div>
         </div>
 
-        <div class="metrics" id="list"></div>
+      </div>
 
-        <div class="indicators">
+      <!-- WEEKLY TAB -->
+      <div id="panel_weekly" style="display:none;">
+
+        <div class="weeklyHeader">
+          <div>
+            <div class="h1">Weekly summary</div>
+            <div class="h2" id="week_range">—</div>
+          </div>
+          <div class="btnrow" style="justify-content:flex-end;">
+            <button class="btn" id="week_refresh" type="button">Refresh</button>
+          </div>
+        </div>
+
+        <!-- Totals cards -->
+        <div class="weeklyTotals">
           <div class="ind">
-            <div class="k">% Agresividad (Z/S)</div>
-            <div class="v" id="aggr">—</div>
+            <div class="k">% Aggressiveness (Z/S)</div>
+            <div class="v" id="w_aggr">—</div>
           </div>
           <div class="ind">
-            <div class="k">% Cierre (X/Z)</div>
-            <div class="v" id="close">0.0%</div>
+            <div class="k">% Close (X/Z)</div>
+            <div class="v" id="w_close">—</div>
           </div>
         </div>
 
-        <div class="btnrow" style="margin-top:12px; justify-content:center;">
-          <button class="btn primary" id="finish_day">Finalizar día / End day</button>
+        <div class="miniGrid">
+          <div class="mini"><div class="k">S total</div><div class="v" id="w_S">0</div></div>
+          <div class="mini"><div class="k">Z total</div><div class="v" id="w_Z">0</div></div>
+          <div class="mini"><div class="k">X total</div><div class="v" id="w_X">0</div></div>
+          <div class="mini"><div class="k">CC total</div><div class="v" id="w_CC">0</div></div>
+          <div class="mini"><div class="k">C total</div><div class="v" id="w_C">0</div></div>
+          <div class="mini"><div class="k">Days</div><div class="v" id="w_days">0</div></div>
         </div>
+
+        <div id="week_empty" class="empty" style="display:none;">
+          No completed days saved yet for this week.<br/>
+          Finish a day (Copy/Share) to see it here.
+        </div>
+
+        <div id="week_list" class="weekList" style="display:none;"></div>
+
       </div>
 
-      <div class="footer">KPIs Counter v4.2 — Designed by Alen Cordero</div>
+      <div class="footer">KPIs Counter v5.0 — Designed by Alen Cordero</div>
     </div>
   </div>
 
@@ -342,27 +514,26 @@
   <div class="overlay" id="modal_start">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Start day">
       <div class="modalHeader">
-        <div class="modalTitle">Iniciar día / Start day</div>
+        <div class="modalTitle">Start day</div>
         <button class="xbtn" id="start_x" aria-label="Close">×</button>
       </div>
       <div class="modalBody">
         <div style="opacity:.9; font-size:13px;">
-          Ingresa tus datos para iniciar.<br/>
           Enter your info to start.
         </div>
         <div class="grid2">
           <div class="field">
-            <label>Nombre / Name</label>
-            <input id="start_name" placeholder="Ej: Alen" autocomplete="name" />
+            <label>Name</label>
+            <input id="start_name" placeholder="e.g., Alen" autocomplete="name" />
           </div>
           <div class="field">
-            <label>Tienda / Store</label>
-            <input id="start_store" placeholder="Ej: El Rancho — Irving" />
+            <label>Store</label>
+            <input id="start_store" placeholder="e.g., El Rancho — Irving" />
           </div>
         </div>
         <div class="modalActions">
-          <button class="btn" id="start_cancel">Cancelar / Cancel</button>
-          <button class="btn primary" id="start_confirm">Comenzar / Start</button>
+          <button class="btn" id="start_cancel">Cancel</button>
+          <button class="btn primary" id="start_confirm">Start</button>
         </div>
       </div>
     </div>
@@ -372,7 +543,7 @@
   <div class="overlay" id="modal_report">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Day summary">
       <div class="modalHeader">
-        <div class="modalTitle">Resumen del día / Day summary</div>
+        <div class="modalTitle">Day summary</div>
         <button class="xbtn" id="report_x" aria-label="Back">×</button>
       </div>
       <div class="modalBody">
@@ -399,13 +570,14 @@
     </div>
   </div>
 
-  <!-- ✅ Libraries -->
+  <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 
 <script>
   const metrics = ["S","Z","CC","C","X"];
-  const STATE_KEY = "kpi_state_v42";
+  const STATE_KEY = "kpi_state_v50";
+  const HISTORY_KEY = "kpi_history_v50"; // ✅ weekly summary source
   const AGGR_MIN_STOPS = 20;
 
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
@@ -437,9 +609,36 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   };
 
+  // Nice date for week range (e.g., Feb 2, 2026)
+  const fmtNiceDate = (yyyyMmDd) => {
+    const [y,m,d] = yyyyMmDd.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
+  };
+
+  // Monday-start week (Mon..Sun)
+  function weekBoundsISO(dateObj = new Date()) {
+    const d = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+    const day = d.getDay(); // 0 Sun .. 6 Sat
+    const diffToMon = (day === 0) ? -6 : (1 - day);
+    const start = new Date(d);
+    start.setDate(d.getDate() + diffToMon);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    const toIso = (x) => {
+      const yyyy = x.getFullYear();
+      const mm = String(x.getMonth()+1).padStart(2,"0");
+      const dd = String(x.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    return { startStr: toIso(start), endStr: toIso(end) };
+  }
+
   document.addEventListener("dblclick", (e) => e.preventDefault(), { passive:false });
 
-  // ---------- Load ----------
+  // ---------- Load state ----------
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
   const state = {
     active: !!saved.active,
@@ -451,8 +650,28 @@
   };
   metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
 
+  // ---------- Load history ----------
+  function loadHistory() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  }
+  function saveHistory(arr) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
+  }
+
   // ---------- DOM ----------
   const todayDateEl = document.getElementById("today_date");
+
+  // Tabs / panels
+  const tabToday = document.getElementById("tab_today");
+  const tabWeekly = document.getElementById("tab_weekly");
+  const panelToday = document.getElementById("panel_today");
+  const panelWeekly = document.getElementById("panel_weekly");
+
   const startScreen = document.getElementById("start_screen");
   const sessionScreen = document.getElementById("session_screen");
   const list = document.getElementById("list");
@@ -461,6 +680,19 @@
   const timerEl = document.getElementById("timer");
   const aggrEl = document.getElementById("aggr");
   const closeEl = document.getElementById("close");
+
+  // Weekly DOM
+  const weekRangeEl = document.getElementById("week_range");
+  const wAggrEl = document.getElementById("w_aggr");
+  const wCloseEl = document.getElementById("w_close");
+  const wS = document.getElementById("w_S");
+  const wZ = document.getElementById("w_Z");
+  const wX = document.getElementById("w_X");
+  const wCC = document.getElementById("w_CC");
+  const wC = document.getElementById("w_C");
+  const wDays = document.getElementById("w_days");
+  const weekEmpty = document.getElementById("week_empty");
+  const weekList = document.getElementById("week_list");
 
   // Modals
   const modalStart = document.getElementById("modal_start");
@@ -473,7 +705,7 @@
   const qrWrap = document.getElementById("qr_wrap");
   const qrBox = document.getElementById("qr_box");
 
-  // ---------- Save ----------
+  // ---------- Save state ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
   function saveState() { try { saveStateNow(); } catch {} }
 
@@ -485,7 +717,7 @@
   // ---------- UI ----------
   const valEls = {};
   function renderHeader() {
-    todayDateEl.textContent = `Date: ${state.date}`;
+    todayDateEl.textContent = `Date: ${isoDateLocal()}`;
   }
 
   function renderSessionInfo() {
@@ -540,6 +772,20 @@
     renderIndicators();
   }
 
+  // ---------- Tabs ----------
+  function setTab(which) {
+    const isToday = which === "today";
+    tabToday.classList.toggle("active", isToday);
+    tabWeekly.classList.toggle("active", !isToday);
+    panelToday.style.display = isToday ? "" : "none";
+    panelWeekly.style.display = isToday ? "none" : "";
+
+    if (!isToday) renderWeekly(); // refresh when opening weekly
+  }
+
+  tabToday.addEventListener("click", () => setTab("today"));
+  tabWeekly.addEventListener("click", () => setTab("weekly"));
+
   // ---------- Timer ----------
   let timerInterval = null;
   function startTimerLoop() {
@@ -583,7 +829,7 @@
     startTimerLoop();
   }
 
-  // ✅ English-only report
+  // English-only report
   function buildReport(endTs) {
     const S = state.values.S, Z = state.values.Z, CC = state.values.CC, C = state.values.C, X = state.values.X;
 
@@ -633,13 +879,12 @@
   }
 
   function showQRForText(text) {
-    // Reset + show
     qrBox.innerHTML = "";
     qrWrap.style.display = "";
 
     const url = makeShareUrlFromReport(text);
 
-    // ✅ Less dense: smaller error correction (L) + a bit bigger size
+    // Less dense QR: low correction + elegant card
     new QRCode(qrBox, {
       text: url,
       width: 176,
@@ -658,8 +903,6 @@
       if (!text) return false;
 
       reportBox.textContent = text;
-
-      // Phone view: no need to show QR
       qrWrap.style.display = "none";
       openModal(modalReport);
       return true;
@@ -667,6 +910,74 @@
       return false;
     }
   }
+
+  // ---------- Weekly summary ----------
+  function renderWeekly() {
+    const { startStr, endStr } = weekBoundsISO(new Date());
+    weekRangeEl.textContent = `${fmtNiceDate(startStr)} → ${fmtNiceDate(endStr)}`;
+
+    const history = loadHistory();
+
+    // Filter current week
+    const weekItems = history
+      .filter(it => it && typeof it.date === "string" && it.date >= startStr && it.date <= endStr)
+      .sort((a,b) => (a.date > b.date ? -1 : 1)); // newest first
+
+    let totals = { S:0, Z:0, CC:0, C:0, X:0 };
+    for (const it of weekItems) {
+      const v = it.values || {};
+      totals.S += Number(v.S||0);
+      totals.Z += Number(v.Z||0);
+      totals.CC += Number(v.CC||0);
+      totals.C += Number(v.C||0);
+      totals.X += Number(v.X||0);
+    }
+
+    wS.textContent = String(totals.S);
+    wZ.textContent = String(totals.Z);
+    wX.textContent = String(totals.X);
+    wCC.textContent = String(totals.CC);
+    wC.textContent = String(totals.C);
+    wDays.textContent = String(weekItems.length);
+
+    const aggr = (totals.S >= AGGR_MIN_STOPS && totals.S > 0) ? (totals.Z / totals.S) : null;
+    const close = (totals.Z > 0) ? (totals.X / totals.Z) : 0;
+
+    wAggrEl.textContent = (aggr !== null) ? fmtPct(aggr) : `— (min ${AGGR_MIN_STOPS} S)`;
+    wCloseEl.textContent = fmtPct(close);
+
+    // List
+    if (!weekItems.length) {
+      weekEmpty.style.display = "";
+      weekList.style.display = "none";
+      weekList.innerHTML = "";
+      return;
+    }
+
+    weekEmpty.style.display = "none";
+    weekList.style.display = "";
+    weekList.innerHTML = "";
+
+    for (const it of weekItems) {
+      const name = it.rep || "-";
+      const store = it.store || "-";
+      const v = it.values || {};
+      const line = `S:${v.S||0} Z:${v.Z||0} CC:${v.CC||0} C:${v.C||0} X:${v.X||0}`;
+
+      const row = document.createElement("div");
+      row.className = "weekRow";
+      row.innerHTML = `
+        <div class="left">
+          <div class="d1">${it.date} • ${name}</div>
+          <div class="d2">${store}</div>
+        </div>
+        <div class="right">${line}</div>
+      `;
+      weekList.appendChild(row);
+    }
+  }
+
+  document.getElementById("week_refresh").addEventListener("click", renderWeekly);
 
   // ---------- Metrics interactions (tap and hold repeat) ----------
   function bump(k, d) {
@@ -723,14 +1034,13 @@
     const rep = (startName.value || "").trim();
     const store = (startStore.value || "").trim();
     if (!rep || !store) {
-      alert("Por favor ingresa Nombre y Tienda.\nPlease enter Name and Store.");
+      alert("Please enter Name and Store.");
       return;
     }
     closeModal(modalStart);
     startDay(rep, store);
   });
 
-  // Enter to move/submit
   [startName, startStore].forEach((inp) => {
     inp.addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
@@ -754,13 +1064,15 @@
   document.getElementById("report_x").addEventListener("click", () => closeModal(modalReport));
 
   async function doCopyOrShare(kind) {
-    const confirmMsg =
-      `Are you sure you want to ${kind === "copy" ? "COPY" : "SHARE"}?\n` +
-      `This ends the day and resets.`;
+    if (!confirm(`Are you sure you want to ${kind === "copy" ? "COPY" : "SHARE"}?\nThis ends the day and resets.`)) return;
 
-    if (!confirm(confirmMsg)) return;
-
+    const endTs = Date.now();
     const text = reportBox.textContent || "";
+
+    // ✅ Save to weekly history ONLY if it was a real active session on this device.
+    // If opened from QR on phone (#r=...), we DON'T duplicate-save.
+    const openedFromQR = (location.hash || "").startsWith("#r=");
+    const canSaveDay = (!openedFromQR && state.sessionStart && state.rep && state.store);
 
     try {
       if (kind === "share") {
@@ -791,8 +1103,33 @@
         }
       }
 
+      if (canSaveDay) {
+        const history = loadHistory();
+
+        // Prevent duplicates for same date+rep+store (optional safety)
+        const sig = `${state.date}|${state.rep}|${state.store}`;
+        const filtered = history.filter(h => `${h.date}|${h.rep}|${h.store}` !== sig);
+
+        filtered.push({
+          date: state.date,
+          rep: state.rep,
+          store: state.store,
+          values: { ...state.values },
+          startTs: state.sessionStart,
+          endTs: endTs
+        });
+
+        saveHistory(filtered);
+      }
+
       finalizeAndReset();
+
+      // Clear hash so reload doesn't reopen modal
       history.replaceState(null, "", location.pathname);
+
+      // If user is on weekly tab, refresh it
+      renderWeekly();
+
     } catch (_) {
       alert("Action failed. Day was not ended.");
     }
@@ -814,6 +1151,10 @@
     } else {
       showStartScreen();
     }
+
+    // Default tab: Today
+    setTab("today");
+
     saveState();
   })();
 </script>
