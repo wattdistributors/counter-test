@@ -16,7 +16,7 @@
       color:#fff;
     }
 
-    .wrap{ width:min(520px, 94vw); padding:22px 14px 26px; }
+    .wrap{ width:min(560px, 94vw); padding:22px 14px 26px; }
 
     .card{
       background: rgba(255,255,255,.10);
@@ -44,7 +44,6 @@
       user-select:none; touch-action: manipulation;
     }
     .btn:active{ transform: scale(.98); }
-
     .btn.primary{
       background: rgba(255,255,255,.22);
       border-color: rgba(255,255,255,.55);
@@ -159,7 +158,7 @@
     .ind .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
     .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
 
-    /* ---------- Weekly summary ---------- */
+    /* ---------- Weekly header ---------- */
     .weeklyHeader{
       display:flex;
       justify-content:space-between;
@@ -179,11 +178,95 @@
       margin-top:4px;
     }
 
-    .weeklyTotals{
+    /* ---------- Weekly visual grid (Mon-Sun) ---------- */
+    .weekGrid{
+      display:grid;
+      grid-template-columns: repeat(7, minmax(140px, 1fr));
+      gap:10px;
+      margin-top: 10px;
+      overflow-x:auto;
+      padding-bottom: 6px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .weekCard{
+      scroll-snap-align: start;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 16px;
+      padding: 10px 10px 12px;
+      min-width: 140px;
+    }
+
+    .weekCard .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:8px;
+      margin-bottom: 8px;
+    }
+
+    .weekCard .dow{
+      font-weight:900;
+      letter-spacing:.02em;
+      font-size:13px;
+    }
+    .weekCard .date{
+      opacity:.85;
+      font-size:11px;
+      margin-top:2px;
+    }
+
+    .weekCard .badge{
+      font-size:11px;
+      font-weight:900;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.12);
+      opacity:.95;
+      white-space:nowrap;
+    }
+
+    .weekNums{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top:10px;
+      gap:8px;
+    }
+
+    .weekNum{
+      background: rgba(0,0,0,.14);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      padding: 8px 8px;
+    }
+
+    .weekNum .k{
+      font-size:11px;
+      opacity:.85;
+      margin-bottom: 4px;
+    }
+    .weekNum .v{
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+
+    .weekCard.muted{
+      opacity:.55;
+    }
+
+    .weekTotalsBlock{
+      margin-top:12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.10);
+      padding: 12px;
+    }
+    .weekTotalsTitle{
+      font-weight:900;
+      letter-spacing:.02em;
+      margin-bottom: 10px;
     }
 
     .miniGrid{
@@ -192,7 +275,6 @@
       gap:10px;
       margin-top:10px;
     }
-
     .mini{
       background: rgba(255,255,255,.10);
       border: 1px solid rgba(255,255,255,.18);
@@ -201,44 +283,6 @@
     }
     .mini .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
     .mini .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
-
-    .weekList{
-      margin-top:12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.12);
-      overflow:hidden;
-    }
-    .weekRow{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      padding: 10px 12px;
-      border-top: 1px solid rgba(255,255,255,.10);
-    }
-    .weekRow:first-child{ border-top:0; }
-    .weekRow .left{
-      min-width:0;
-      flex: 1 1 auto;
-    }
-    .weekRow .d1{
-      font-weight:900;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .weekRow .d2{
-      opacity:.9;
-      font-size:12px;
-      margin-top:3px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .weekRow .right{
-      flex:0 0 auto;
-      text-align:right;
-      font-size:12px;
-      opacity:.95;
-      white-space:nowrap;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
 
     .empty{
       margin-top:10px;
@@ -398,6 +442,7 @@
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
       .miniGrid{ grid-template-columns: 1fr 1fr; }
+      .weekGrid{ grid-template-columns: repeat(7, minmax(150px, 1fr)); }
     }
   </style>
 </head>
@@ -476,25 +521,32 @@
           </div>
         </div>
 
-        <!-- Totals cards -->
-        <div class="weeklyTotals">
-          <div class="ind">
-            <div class="k">% Aggressiveness (Z/S)</div>
-            <div class="v" id="w_aggr">—</div>
-          </div>
-          <div class="ind">
-            <div class="k">% Close (X/Z)</div>
-            <div class="v" id="w_close">—</div>
-          </div>
-        </div>
+        <!-- Visual Mon-Sun cards -->
+        <div id="week_grid" class="weekGrid"></div>
 
-        <div class="miniGrid">
-          <div class="mini"><div class="k">S total</div><div class="v" id="w_S">0</div></div>
-          <div class="mini"><div class="k">Z total</div><div class="v" id="w_Z">0</div></div>
-          <div class="mini"><div class="k">X total</div><div class="v" id="w_X">0</div></div>
-          <div class="mini"><div class="k">CC total</div><div class="v" id="w_CC">0</div></div>
-          <div class="mini"><div class="k">C total</div><div class="v" id="w_C">0</div></div>
-          <div class="mini"><div class="k">Days</div><div class="v" id="w_days">0</div></div>
+        <!-- Totals + percentages -->
+        <div class="weekTotalsBlock">
+          <div class="weekTotalsTitle">Week totals</div>
+
+          <div class="indicators">
+            <div class="ind">
+              <div class="k">% Aggressiveness (Z/S)</div>
+              <div class="v" id="w_aggr">—</div>
+            </div>
+            <div class="ind">
+              <div class="k">% Close (X/Z)</div>
+              <div class="v" id="w_close">—</div>
+            </div>
+          </div>
+
+          <div class="miniGrid" style="margin-top:10px;">
+            <div class="mini"><div class="k">S total</div><div class="v" id="w_S">0</div></div>
+            <div class="mini"><div class="k">Z total</div><div class="v" id="w_Z">0</div></div>
+            <div class="mini"><div class="k">X total</div><div class="v" id="w_X">0</div></div>
+            <div class="mini"><div class="k">CC total</div><div class="v" id="w_CC">0</div></div>
+            <div class="mini"><div class="k">C total</div><div class="v" id="w_C">0</div></div>
+            <div class="mini"><div class="k">Days logged</div><div class="v" id="w_days">0</div></div>
+          </div>
         </div>
 
         <div id="week_empty" class="empty" style="display:none;">
@@ -502,11 +554,9 @@
           Finish a day (Copy/Share) to see it here.
         </div>
 
-        <div id="week_list" class="weekList" style="display:none;"></div>
-
       </div>
 
-      <div class="footer">KPIs Counter v5.0 — Designed by Alen Cordero</div>
+      <div class="footer">KPIs Counter v5.1 — Designed by Alen Cordero</div>
     </div>
   </div>
 
@@ -576,8 +626,8 @@
 
 <script>
   const metrics = ["S","Z","CC","C","X"];
-  const STATE_KEY = "kpi_state_v50";
-  const HISTORY_KEY = "kpi_history_v50"; // ✅ weekly summary source
+  const STATE_KEY = "kpi_state_v51";
+  const HISTORY_KEY = "kpi_history_v51";
   const AGGR_MIN_STOPS = 20;
 
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
@@ -636,6 +686,7 @@
     return { startStr: toIso(start), endStr: toIso(end) };
   }
 
+  // Prevent double-tap zoom (extra guard for iOS Safari)
   document.addEventListener("dblclick", (e) => e.preventDefault(), { passive:false });
 
   // ---------- Load state ----------
@@ -650,7 +701,7 @@
   };
   metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
 
-  // ---------- Load history ----------
+  // ---------- History ----------
   function loadHistory() {
     try {
       const arr = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
@@ -683,6 +734,7 @@
 
   // Weekly DOM
   const weekRangeEl = document.getElementById("week_range");
+  const weekGrid = document.getElementById("week_grid");
   const wAggrEl = document.getElementById("w_aggr");
   const wCloseEl = document.getElementById("w_close");
   const wS = document.getElementById("w_S");
@@ -692,7 +744,6 @@
   const wC = document.getElementById("w_C");
   const wDays = document.getElementById("w_days");
   const weekEmpty = document.getElementById("week_empty");
-  const weekList = document.getElementById("week_list");
 
   // Modals
   const modalStart = document.getElementById("modal_start");
@@ -780,7 +831,7 @@
     panelToday.style.display = isToday ? "" : "none";
     panelWeekly.style.display = isToday ? "none" : "";
 
-    if (!isToday) renderWeekly(); // refresh when opening weekly
+    if (!isToday) renderWeekly();
   }
 
   tabToday.addEventListener("click", () => setTab("today"));
@@ -911,34 +962,98 @@
     }
   }
 
-  // ---------- Weekly summary ----------
+  // ---------- Weekly (visual Mon-Sun) ----------
   function renderWeekly() {
     const { startStr, endStr } = weekBoundsISO(new Date());
     weekRangeEl.textContent = `${fmtNiceDate(startStr)} → ${fmtNiceDate(endStr)}`;
 
     const history = loadHistory();
 
-    // Filter current week
-    const weekItems = history
-      .filter(it => it && typeof it.date === "string" && it.date >= startStr && it.date <= endStr)
-      .sort((a,b) => (a.date > b.date ? -1 : 1)); // newest first
+    // Index by date (keep latest for same date)
+    const byDate = {};
+    for (const it of history) {
+      if (!it || typeof it.date !== "string") continue;
+      if (it.date < startStr || it.date > endStr) continue;
 
-    let totals = { S:0, Z:0, CC:0, C:0, X:0 };
-    for (const it of weekItems) {
-      const v = it.values || {};
-      totals.S += Number(v.S||0);
-      totals.Z += Number(v.Z||0);
-      totals.CC += Number(v.CC||0);
-      totals.C += Number(v.C||0);
-      totals.X += Number(v.X||0);
+      const prev = byDate[it.date];
+      if (!prev) byDate[it.date] = it;
+      else {
+        const a = Number(prev.endTs || 0);
+        const b = Number(it.endTs || 0);
+        if (b >= a) byDate[it.date] = it;
+      }
     }
 
+    // Create 7 dates (Mon..Sun)
+    const [y,m,d] = startStr.split("-").map(Number);
+    const start = new Date(y, m-1, d);
+
+    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+    // Totals
+    let totals = { S:0, Z:0, CC:0, C:0, X:0 };
+    let daysCount = 0;
+
+    weekGrid.innerHTML = "";
+
+    for (let i = 0; i < 7; i++) {
+      const dt = new Date(start);
+      dt.setDate(start.getDate() + i);
+
+      const yyyy = dt.getFullYear();
+      const mm = String(dt.getMonth()+1).padStart(2,"0");
+      const dd = String(dt.getDate()).padStart(2,"0");
+      const iso = `${yyyy}-${mm}-${dd}`;
+
+      const item = byDate[iso];
+      const v = item?.values || {};
+
+      const S = Number(v.S || 0);
+      const Z = Number(v.Z || 0);
+      const CC = Number(v.CC || 0);
+      const C = Number(v.C || 0);
+      const X = Number(v.X || 0);
+
+      const hasData = !!item;
+
+      if (hasData) {
+        totals.S += S; totals.Z += Z; totals.CC += CC; totals.C += C; totals.X += X;
+        daysCount += 1;
+      }
+
+      const name = (item?.rep || "").trim();
+      const badge = hasData ? (name ? name : "Saved") : "—";
+
+      const card = document.createElement("div");
+      card.className = "weekCard" + (hasData ? "" : " muted");
+      card.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="dow">${dayNames[i]}</div>
+            <div class="date">${mm}/${dd}</div>
+          </div>
+          <div class="badge">${badge}</div>
+        </div>
+
+        <div class="weekNums">
+          <div class="weekNum"><div class="k">S</div><div class="v">${S}</div></div>
+          <div class="weekNum"><div class="k">Z</div><div class="v">${Z}</div></div>
+          <div class="weekNum"><div class="k">X</div><div class="v">${X}</div></div>
+          <div class="weekNum"><div class="k">CC</div><div class="v">${CC}</div></div>
+          <div class="weekNum"><div class="k">C</div><div class="v">${C}</div></div>
+          <div class="weekNum"><div class="k">Date</div><div class="v" style="font-size:13px;">${iso}</div></div>
+        </div>
+      `;
+      weekGrid.appendChild(card);
+    }
+
+    // Totals UI
     wS.textContent = String(totals.S);
     wZ.textContent = String(totals.Z);
     wX.textContent = String(totals.X);
     wCC.textContent = String(totals.CC);
     wC.textContent = String(totals.C);
-    wDays.textContent = String(weekItems.length);
+    wDays.textContent = String(daysCount);
 
     const aggr = (totals.S >= AGGR_MIN_STOPS && totals.S > 0) ? (totals.Z / totals.S) : null;
     const close = (totals.Z > 0) ? (totals.X / totals.Z) : 0;
@@ -946,35 +1061,8 @@
     wAggrEl.textContent = (aggr !== null) ? fmtPct(aggr) : `— (min ${AGGR_MIN_STOPS} S)`;
     wCloseEl.textContent = fmtPct(close);
 
-    // List
-    if (!weekItems.length) {
-      weekEmpty.style.display = "";
-      weekList.style.display = "none";
-      weekList.innerHTML = "";
-      return;
-    }
-
-    weekEmpty.style.display = "none";
-    weekList.style.display = "";
-    weekList.innerHTML = "";
-
-    for (const it of weekItems) {
-      const name = it.rep || "-";
-      const store = it.store || "-";
-      const v = it.values || {};
-      const line = `S:${v.S||0} Z:${v.Z||0} CC:${v.CC||0} C:${v.C||0} X:${v.X||0}`;
-
-      const row = document.createElement("div");
-      row.className = "weekRow";
-      row.innerHTML = `
-        <div class="left">
-          <div class="d1">${it.date} • ${name}</div>
-          <div class="d2">${store}</div>
-        </div>
-        <div class="right">${line}</div>
-      `;
-      weekList.appendChild(row);
-    }
+    // Empty state
+    weekEmpty.style.display = (daysCount === 0) ? "" : "none";
   }
 
   document.getElementById("week_refresh").addEventListener("click", renderWeekly);
@@ -1069,8 +1157,7 @@
     const endTs = Date.now();
     const text = reportBox.textContent || "";
 
-    // ✅ Save to weekly history ONLY if it was a real active session on this device.
-    // If opened from QR on phone (#r=...), we DON'T duplicate-save.
+    // Save to weekly history ONLY if it was a real active session on this device.
     const openedFromQR = (location.hash || "").startsWith("#r=");
     const canSaveDay = (!openedFromQR && state.sessionStart && state.rep && state.store);
 
@@ -1106,7 +1193,7 @@
       if (canSaveDay) {
         const history = loadHistory();
 
-        // Prevent duplicates for same date+rep+store (optional safety)
+        // Prevent duplicates for same date+rep+store (keep the latest)
         const sig = `${state.date}|${state.rep}|${state.store}`;
         const filtered = history.filter(h => `${h.date}|${h.rep}|${h.store}` !== sig);
 
@@ -1127,7 +1214,7 @@
       // Clear hash so reload doesn't reopen modal
       history.replaceState(null, "", location.pathname);
 
-      // If user is on weekly tab, refresh it
+      // Refresh weekly
       renderWeekly();
 
     } catch (_) {
@@ -1152,9 +1239,7 @@
       showStartScreen();
     }
 
-    // Default tab: Today
     setTab("today");
-
     saveState();
   })();
 </script>
