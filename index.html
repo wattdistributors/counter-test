@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>KPIs Counter</title>
+
+  <style>
+    :root { --bg1:#1b86c8; --bg2:#0b5a86; }
+    html, body { touch-action: manipulation; }
+
+    body{
+      margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color:#fff;
+    }
+
+    .wrap{ width:min(480px, 94vw); padding:22px 14px 26px; }
+
+    .card{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 18px;
+      padding: 14px;
+      backdrop-filter: blur(6px);
+    }
+
+    .topbar{
+      display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+      margin-bottom:12px;
+    }
+
+    .title{ font-weight:800; letter-spacing:.02em; font-size:18px; line-height:1.1; }
+    .subtitle{ opacity:.9; font-size:13px; margin-top:4px; }
+
+    .btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+
+    .btn{
+      border:1px solid rgba(255,255,255,.40);
+      background:rgba(255,255,255,.12);
+      color:#fff; padding:10px 12px; border-radius:12px;
+      cursor:pointer; font-size:14px; font-weight:700;
+      user-select:none; touch-action: manipulation;
+    }
+    .btn:active{ transform: scale(.98); }
+
+    .btn.primary{
+      background: rgba(255,255,255,.22);
+      border-color: rgba(255,255,255,.55);
+    }
+
+    .center{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      padding:18px 6px 8px;
+      text-align:center;
+    }
+
+    .sessionInfo{
+      width:100%;
+      box-sizing: border-box;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      margin: 8px 0 4px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      overflow:hidden;
+    }
+
+    .sessionInfo .left{
+      flex: 1 1 auto;
+      min-width:0;
+    }
+
+    .sessionInfo .left .line1{
+      font-weight:900; letter-spacing:.02em;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .sessionInfo .left .line2{
+      opacity:.9; font-size:12px; margin-top:3px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
+    .timerBox{
+      flex: 0 0 120px;
+      text-align:center;
+    }
+    .timerBox .t1{ font-size:12px; opacity:.9; }
+    .timerBox .t2{ font-size:18px; font-weight:900; letter-spacing:.02em; margin-top:3px; }
+
+    .metrics{ margin-top:10px; }
+    .row{ text-align:center; margin:16px 0; }
+    .label{ font-weight:800; letter-spacing:.08em; margin-bottom:8px; font-size:20px; }
+
+    .pill{
+      margin:0 auto;
+      width:310px; height:56px;
+      background:#fff; border-radius:999px;
+      display:flex; overflow:hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
+      color:#111;
+      touch-action: manipulation;
+    }
+
+    .pill button, .pill .val{
+      flex:1; display:flex; align-items:center; justify-content:center;
+      border:0; background:transparent; font-size:26px; cursor:pointer;
+      touch-action: manipulation;
+    }
+
+    .pill .val{ flex:1.2; font-weight:800; font-size:24px; user-select:none; }
+    .sep{ width:2px; background:#111; opacity:.8; }
+    .pill button:active{ transform: scale(.97); }
+
+    .indicators{
+      display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+      margin-top:12px;
+    }
+    .ind{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.20);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .ind .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
+    .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
+
+    .footer{
+      margin-top:10px;
+      text-align:center;
+      font-size:10px;
+      opacity:.70;
+      letter-spacing:.03em;
+    }
+
+    /* ---------- Modal ---------- */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 999;
+    }
+    .overlay.show{ display:flex; }
+
+    .modal{
+      width:min(520px, 96vw);
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.20);
+      border-radius: 18px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.30);
+      padding: 14px;
+      position:relative;
+    }
+    .modalHeader{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      margin-bottom: 10px;
+    }
+    .modalTitle{
+      font-weight:900; font-size:16px;
+      letter-spacing:.02em;
+    }
+    .xbtn{
+      border:1px solid rgba(255,255,255,.30);
+      background: rgba(255,255,255,.10);
+      color:#fff;
+      width:34px; height:34px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+    }
+    .xbtn:active{ transform: scale(.98); }
+
+    .modalBody{ margin-top: 6px; }
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top: 10px;
+    }
+    .field label{ display:block; font-size:12px; opacity:.9; margin:0 0 6px 2px; }
+    .field input{
+      width:100%; box-sizing:border-box;
+      border-radius:12px; border:1px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.10);
+      color:#fff; padding:10px 12px; font-size:14px;
+      outline:none; touch-action: manipulation;
+    }
+    .field input::placeholder{ color: rgba(255,255,255,.75); }
+
+    .modalActions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .reportBox{
+      width:100%;
+      box-sizing:border-box;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .qrWrap{
+      margin-top:12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      padding: 12px;
+      text-align:center;
+    }
+    .qrHint{ opacity:.85; font-size:12px; margin-top:8px; }
+
+    @media (max-width: 420px){
+      .pill{ width: 290px; }
+      .grid2{ grid-template-columns: 1fr; }
+      .timerBox{ flex-basis: 112px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <div class="topbar">
+        <div>
+          <div class="title" id="today_title">KPIs Counter</div>
+          <div class="subtitle" id="today_date"></div>
+        </div>
+        <div class="btnrow" id="top_actions"></div>
+      </div>
+
+      <!-- Start screen -->
+      <div id="start_screen" class="center">
+        <div style="opacity:.9; font-size:13px; max-width: 360px;">
+          Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
+          Tap <b>Start day</b> to enter your name and store.
+        </div>
+        <button class="btn primary" id="start_day">Iniciar día / Start day</button>
+      </div>
+
+      <!-- Active session screen -->
+      <div id="session_screen" style="display:none;">
+        <div class="sessionInfo">
+          <div class="left">
+            <div class="line1" id="who_line">—</div>
+            <div class="line2" id="date_line">—</div>
+          </div>
+          <div class="timerBox">
+            <div class="t1">Session</div>
+            <div class="t2" id="timer">00:00:00</div>
+          </div>
+        </div>
+
+        <div class="metrics" id="list"></div>
+
+        <div class="indicators">
+          <div class="ind">
+            <div class="k">% Agresividad (Z/S)</div>
+            <div class="v" id="aggr">—</div>
+          </div>
+          <div class="ind">
+            <div class="k">% Cierre (X/Z)</div>
+            <div class="v" id="close">0.0%</div>
+          </div>
+        </div>
+
+        <div class="btnrow" style="margin-top:12px; justify-content:center;">
+          <button class="btn primary" id="finish_day">Finalizar día / End day</button>
+        </div>
+      </div>
+
+      <div class="footer">KPIs Counter v4.1 — Designed by Alen Cordero</div>
+    </div>
+  </div>
+
+  <!-- Modal: Start day -->
+  <div class="overlay" id="modal_start">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Start day">
+      <div class="modalHeader">
+        <div class="modalTitle">Iniciar día / Start day</div>
+        <button class="xbtn" id="start_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody">
+        <div style="opacity:.9; font-size:13px;">
+          Ingresa tus datos para iniciar.<br/>
+          Enter your info to start.
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label>Nombre / Name</label>
+            <input id="start_name" placeholder="Ej: Alen" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label>Tienda / Store</label>
+            <input id="start_store" placeholder="Ej: El Rancho — Irving" />
+          </div>
+        </div>
+        <div class="modalActions">
+          <button class="btn" id="start_cancel">Cancelar / Cancel</button>
+          <button class="btn primary" id="start_confirm">Comenzar / Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Day summary -->
+  <div class="overlay" id="modal_report">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Day summary">
+      <div class="modalHeader">
+        <div class="modalTitle">Resumen del día / Day summary</div>
+        <button class="xbtn" id="report_x" aria-label="Back">×</button>
+      </div>
+      <div class="modalBody">
+
+        <!-- QR (solo lo mostramos cuando generamos desde tablet) -->
+        <div id="qr_wrap" class="qrWrap" style="display:none;">
+          <div id="qr_box"></div>
+          <div class="qrHint">Escanea con tu teléfono / Scan with your phone</div>
+        </div>
+
+        <div class="reportBox" id="report_box">—</div>
+
+        <div class="modalActions">
+          <button class="btn" id="copy_btn">Copiar / Copy</button>
+          <button class="btn primary" id="share_btn">Compartir / Share</button>
+        </div>
+        <div style="margin-top:10px; opacity:.8; font-size:12px;">
+          Copiar o compartir finaliza el día y resetea.<br/>
+          Copy or share ends the day and resets.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Librerías correctas -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+
+<script>
+  const metrics = ["S","Z","CC","C","X"];
+  const STATE_KEY = "kpi_state_v41";
+  const AGGR_MIN_STOPS = 20;
+
+  const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
+  const pad2 = (n) => String(n).padStart(2,"0");
+
+  const isoDateLocal = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const fmtTime = (ts) => {
+    if (!ts) return "—";
+    const d = new Date(ts);
+    let h = d.getHours();
+    const m = d.getMinutes();
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12; if (h === 0) h = 12;
+    return `${h}:${pad2(m)} ${ampm}`;
+  };
+
+  const fmtDuration = (ms) => {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  };
+
+  // Prevent double-tap zoom (extra guard for iOS Safari)
+  document.addEventListener("dblclick", (e) => e.preventDefault(), { passive:false });
+
+  // ---------- Load ----------
+  const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
+  const state = {
+    active: !!saved.active,
+    date: saved.date || isoDateLocal(),
+    rep: saved.rep || "",
+    store: saved.store || "",
+    values: saved.values || {},
+    sessionStart: saved.sessionStart || null,
+  };
+  metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
+
+  // ---------- DOM ----------
+  const todayDateEl = document.getElementById("today_date");
+  const startScreen = document.getElementById("start_screen");
+  const sessionScreen = document.getElementById("session_screen");
+  const list = document.getElementById("list");
+  const whoLine = document.getElementById("who_line");
+  const dateLine = document.getElementById("date_line");
+  const timerEl = document.getElementById("timer");
+  const aggrEl = document.getElementById("aggr");
+  const closeEl = document.getElementById("close");
+
+  // Modals
+  const modalStart = document.getElementById("modal_start");
+  const modalReport = document.getElementById("modal_report");
+  const startName = document.getElementById("start_name");
+  const startStore = document.getElementById("start_store");
+  const reportBox = document.getElementById("report_box");
+
+  // QR
+  const qrWrap = document.getElementById("qr_wrap");
+  const qrBox = document.getElementById("qr_box");
+
+  // ---------- Save ----------
+  function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+  function saveState() { try { saveStateNow(); } catch {} }
+
+  window.addEventListener("pagehide", () => { try { saveStateNow(); } catch {} });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") { try { saveStateNow(); } catch {} }
+  });
+
+  // ---------- UI ----------
+  const valEls = {};
+  function renderHeader() {
+    todayDateEl.textContent = `Fecha / Date: ${state.date}`;
+  }
+
+  function renderSessionInfo() {
+    whoLine.textContent = `${state.rep || "—"} • ${state.store || "—"}`;
+    dateLine.textContent = `Día: ${state.date} • Inicio: ${fmtTime(state.sessionStart)}`;
+  }
+
+  function renderMetrics() {
+    list.innerHTML = "";
+    metrics.forEach(k => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div class="label">${k}</div>
+        <div class="pill">
+          <button aria-label="menos ${k}" data-k="${k}" data-d="-1">−</button>
+          <div class="sep"></div>
+          <div class="val" id="v_${k}">${state.values[k]}</div>
+          <div class="sep"></div>
+          <button aria-label="más ${k}" data-k="${k}" data-d="1">+</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+    metrics.forEach(k => { valEls[k] = document.getElementById("v_" + k); });
+  }
+
+  function renderIndicators() {
+    const S = state.values.S;
+    const Z = state.values.Z;
+    const X = state.values.X;
+
+    if (S >= AGGR_MIN_STOPS) aggrEl.textContent = fmtPct(S > 0 ? (Z / S) : 0);
+    else aggrEl.textContent = `— (min ${AGGR_MIN_STOPS} S)`;
+
+    closeEl.textContent = fmtPct(Z > 0 ? (X / Z) : 0);
+  }
+
+  function showStartScreen() {
+    state.active = false;
+    startScreen.style.display = "";
+    sessionScreen.style.display = "none";
+    renderHeader();
+  }
+
+  function showSessionScreen() {
+    startScreen.style.display = "none";
+    sessionScreen.style.display = "";
+    renderHeader();
+    renderSessionInfo();
+    renderMetrics();
+    renderIndicators();
+  }
+
+  // ---------- Timer ----------
+  let timerInterval = null;
+  function startTimerLoop() {
+    stopTimerLoop();
+    timerInterval = setInterval(() => {
+      if (!state.active || !state.sessionStart) return;
+      timerEl.textContent = fmtDuration(Date.now() - state.sessionStart);
+    }, 1000);
+
+    if (state.active && state.sessionStart) timerEl.textContent = fmtDuration(Date.now() - state.sessionStart);
+    else timerEl.textContent = "00:00:00";
+  }
+  function stopTimerLoop() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  // ---------- Modals helpers ----------
+  function openModal(el) { el.classList.add("show"); }
+  function closeModal(el) { el.classList.remove("show"); }
+
+  function clickOutsideToClose(overlayEl, allow) {
+    overlayEl.addEventListener("click", (e) => {
+      if (!allow) return;
+      if (e.target === overlayEl) closeModal(overlayEl);
+    });
+  }
+  clickOutsideToClose(modalStart, true);
+  clickOutsideToClose(modalReport, false);
+
+  // ---------- Session logic ----------
+  function startDay(rep, store) {
+    state.date = isoDateLocal();
+    state.rep = rep;
+    state.store = store;
+    metrics.forEach(k => state.values[k] = 0);
+    state.sessionStart = Date.now();
+    state.active = true;
+    saveStateNow();
+    showSessionScreen();
+    startTimerLoop();
+  }
+
+  function buildReport(endTs) {
+    const S = state.values.S, Z = state.values.Z, CC = state.values.CC, C = state.values.C, X = state.values.X;
+
+    const aggr = (S >= AGGR_MIN_STOPS && S > 0) ? (Z / S) : null;
+    const close = (Z > 0) ? (X / Z) : 0;
+
+    const startTs = state.sessionStart || endTs;
+    const duration = fmtDuration(endTs - startTs);
+
+    const aggrLine = (aggr !== null)
+      ? `% Agresividad / Aggressiveness (Z/S): ${fmtPct(aggr)}`
+      : `% Agresividad / Aggressiveness (Z/S): — (min ${AGGR_MIN_STOPS} S)`;
+
+    return [
+      `Nombre / Name: ${state.rep || "-"}`,
+      `Tienda / Store: ${state.store || "-"}`,
+      `Fecha / Date: ${state.date}`,
+      ``,
+      `Inicio / Start: ${fmtTime(startTs)}`,
+      `Fin / End: ${fmtTime(endTs)}`,
+      `Duración / Duration: ${duration}`,
+      ``,
+      `S: ${S} | Z: ${Z} | CC: ${CC} | C: ${C} | X: ${X}`,
+      aggrLine,
+      `% Cierre / Close (X/Z): ${fmtPct(close)}`
+    ].join("\n");
+  }
+
+  function finalizeAndReset() {
+    state.active = false;
+    state.rep = "";
+    state.store = "";
+    state.sessionStart = null;
+    state.date = isoDateLocal();
+    metrics.forEach(k => state.values[k] = 0);
+    saveStateNow();
+    stopTimerLoop();
+    timerEl.textContent = "00:00:00";
+    closeModal(modalReport);
+    showStartScreen();
+  }
+
+  // ---------- QR (link with compressed report) ----------
+  function makeShareUrlFromReport(text) {
+    const payload = LZString.compressToEncodedURIComponent(text);
+    return `${location.origin}${location.pathname}#r=${payload}`;
+  }
+
+  function showQRForText(text) {
+    // limpia y genera
+    qrBox.innerHTML = "";
+    qrWrap.style.display = "";
+
+    const url = makeShareUrlFromReport(text);
+
+    new QRCode(qrBox, {
+      text: url,
+      width: 190,
+      height: 190,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  function tryLoadReportFromHash() {
+    const h = location.hash || "";
+    if (!h.startsWith("#r=")) return false;
+
+    try {
+      const payload = h.slice(3);
+      const text = LZString.decompressFromEncodedURIComponent(payload);
+      if (!text) return false;
+
+      // En teléfono: mostramos el reporte, pero ocultamos QR (no es necesario)
+      reportBox.textContent = text;
+      qrWrap.style.display = "none";
+      openModal(modalReport);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // ---------- Metrics interactions (tap and hold repeat) ----------
+  function bump(k, d) {
+    const prev = state.values[k];
+    const next = Math.max(0, prev + d);
+    if (next === prev) return;
+    state.values[k] = next;
+    valEls[k].textContent = next;
+    renderIndicators();
+    saveState();
+  }
+
+  let holdTimer = null;
+  let holdInterval = null;
+  function startHold(k, d) {
+    bump(k, d);
+    holdTimer = setTimeout(() => {
+      holdInterval = setInterval(() => bump(k, d), 90);
+    }, 250);
+  }
+  function stopHold() {
+    clearTimeout(holdTimer); holdTimer = null;
+    clearInterval(holdInterval); holdInterval = null;
+  }
+
+  document.addEventListener("pointerdown", (e) => {
+    if (!state.active) return;
+    const b = e.target.closest("button[data-k]");
+    if (!b) return;
+    e.preventDefault();
+    startHold(b.dataset.k, Number(b.dataset.d));
+  }, { passive:false });
+
+  document.addEventListener("pointerup", stopHold);
+  document.addEventListener("pointercancel", stopHold);
+  document.addEventListener("pointerleave", stopHold);
+  window.addEventListener("blur", stopHold);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") stopHold();
+  });
+
+  // ---------- Buttons ----------
+  document.getElementById("start_day").addEventListener("click", () => {
+    startName.value = state.rep || "";
+    startStore.value = state.store || "";
+    openModal(modalStart);
+    setTimeout(() => startName.focus(), 50);
+  });
+
+  document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
+  document.getElementById("start_cancel").addEventListener("click", () => closeModal(modalStart));
+
+  document.getElementById("start_confirm").addEventListener("click", () => {
+    const rep = (startName.value || "").trim();
+    const store = (startStore.value || "").trim();
+    if (!rep || !store) {
+      alert("Por favor ingresa Nombre y Tienda.\nPlease enter Name and Store.");
+      return;
+    }
+    closeModal(modalStart);
+    startDay(rep, store);
+  });
+
+  // Enter to move/submit
+  [startName, startStore].forEach((inp) => {
+    inp.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      if (inp === startName) startStore.focus();
+      else document.getElementById("start_confirm").click();
+    });
+  });
+
+  document.getElementById("finish_day").addEventListener("click", () => {
+    const endTs = Date.now();
+    const text = buildReport(endTs);
+    reportBox.textContent = text;
+
+    // En tablet: mostramos QR para abrir en teléfono
+    showQRForText(text);
+
+    openModal(modalReport);
+  });
+
+  document.getElementById("report_x").addEventListener("click", () => closeModal(modalReport));
+
+  async function doCopyOrShare(kind) {
+    const confirmMsg =
+      `¿Seguro que quieres ${kind === "copy" ? "COPIAR" : "COMPARTIR"}?\n` +
+      `Esto finaliza el día y resetea.\n\n` +
+      `Are you sure you want to ${kind === "copy" ? "COPY" : "SHARE"}?\n` +
+      `This ends the day and resets.`;
+
+    if (!confirm(confirmMsg)) return;
+
+    // IMPORTANTE:
+    // Si estás en el teléfono (abierto desde QR), el reporte está en reportBox.
+    // Si estás en tablet, también.
+    const text = reportBox.textContent || "";
+
+    try {
+      if (kind === "share") {
+        if (navigator.share) {
+          await navigator.share({ title: "KPI Report", text });
+        } else if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          alert("No hay Share nativo aquí. Se copió al portapapeles.\nNo native Share here. Copied to clipboard.");
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          alert("No hay Share nativo aquí. Se copió al portapapeles.\nNo native Share here. Copied to clipboard.");
+        }
+      } else {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        }
+      }
+
+      // Si estás en tablet y estabas en sesión activa, resetea.
+      // Si estás en teléfono desde QR, igual puedes resetear para dejar limpio.
+      // (Si quieres que en teléfono NO resetee, dímelo y lo condiciono.)
+      finalizeAndReset();
+
+      // Limpia el hash para que si recargas no vuelva a abrir el modal
+      history.replaceState(null, "", location.pathname);
+
+    } catch (_) {
+      alert("No se pudo completar la acción. No se finalizó el día.\nAction failed. Day was not ended.");
+    }
+  }
+
+  document.getElementById("copy_btn").addEventListener("click", () => doCopyOrShare("copy"));
+  document.getElementById("share_btn").addEventListener("click", () => doCopyOrShare("share"));
+
+  // ---------- Init ----------
+  (function init() {
+    renderHeader();
+
+    // Si vienes desde QR (teléfono), abre el reporte
+    tryLoadReportFromHash();
+
+    if (state.active && state.sessionStart && state.rep && state.store) {
+      showSessionScreen();
+      startTimerLoop();
+    } else {
+      showStartScreen();
+    }
+    saveState();
+  })();
+</script>
+</body>
+</html>
