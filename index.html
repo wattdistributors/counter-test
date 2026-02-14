@@ -7,8 +7,8 @@
 
   <style>
     :root{
-      --bg1:#1a6ea1;
-      --bg2:#12547d;
+      --bg1:#145c8c;
+      --bg2:#0e466b;
 
       /* Calendar (blue / celeste + transparency) */
       --calPanel: rgba(20, 92, 145, .24);
@@ -27,7 +27,7 @@
     body{
       margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(130% 120% at 15% 0%, rgba(165,220,248,.30), transparent 62%), linear-gradient(150deg, var(--bg1), var(--bg2));
+      background: radial-gradient(130% 120% at 15% 0%, rgba(150,210,242,.24), transparent 62%), linear-gradient(150deg, var(--bg1), var(--bg2));
       color:#fff;
       overflow-x:hidden; /* avoid sideways scroll */
     }
@@ -35,7 +35,7 @@
     .wrap{ width:min(620px, 99vw); padding:22px 4px 26px; }
 
     .card{
-      background: rgba(255,255,255,.11);
+      background: rgba(255,255,255,.12);
       border: 1px solid rgba(255,255,255,.14);
       border-radius: 20px;
       padding: 14px;
@@ -189,7 +189,7 @@
 
     /* ---------- Calendar (blue translucent style) ---------- */
     .calSurface{
-      background: rgba(255,255,255,.10);
+      background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.14);
       border-radius: 12px;
       padding: 6px 6px 6px;
@@ -242,8 +242,8 @@
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap:1px;
       overflow:hidden;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
       border-radius: 10px;
       padding: 1px;
     }
@@ -266,8 +266,8 @@
     .dayCell{
       position:relative;
       border-radius: 0;
-      border: 1px solid rgba(255,255,255,.24);
-      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.07);
       cursor:pointer;
       user-select:none;
       min-width:0;              /* key for grid overflow */
@@ -281,12 +281,12 @@
 
     .dayCell.muted{
       opacity:1;
-      background: rgba(255,255,255,.04);
-      border-color: rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      border-color: rgba(255,255,255,.10);
       box-shadow: none !important;
     }
     .dayCell.muted .dayNum,
-    .dayCell.muted .miniClean{ opacity:.4; }
+    .dayCell.muted .miniClean{ opacity:.45; }
 
     .dayCell.today{
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
@@ -298,7 +298,7 @@
 
     .dayCell.selected{
       background: rgba(255,255,255,.16);
-      border-color: rgba(255,255,255,.24);
+      border-color: rgba(255,255,255,.28);
       box-shadow: none;
     }
     .dayCell.muted.selected{
@@ -383,8 +383,8 @@
       gap:10px;
     }
     .statCard{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
       border-radius: 10px;
       padding: 10px 10px;
       color: var(--calInk);
@@ -448,8 +448,8 @@
     /* ---------- Summary ---------- */
     .sumWrap{ display:grid; gap:10px; }
     .sumCard{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
       border-radius: 10px;
       padding: 10px;
     }
