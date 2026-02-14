@@ -198,73 +198,110 @@
     }
     .iconBtn:active{ transform: scale(.98); }
 
+    /* ---------- Calendar (clean v2) ---------- */
     .calGrid{
       display:grid;
       grid-template-columns: repeat(7, 1fr);
-      gap:8px;
+      gap:10px;
     }
+
     .dow{
       text-align:center;
       font-size:11px;
       opacity:.85;
-      letter-spacing:.08em;
-      font-weight:800;
+      letter-spacing:.10em;
+      font-weight:900;
       padding:4px 0;
     }
+
+    /* square day */
     .dayCell{
-      border-radius: 14px;
+      border-radius: 16px;
       border: 1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.06);
-      padding: 8px 8px 9px;
-      min-height: 72px;
+      padding: 10px;
       overflow:hidden;
+      cursor:pointer;
+      user-select:none;
+
+      aspect-ratio: 1 / 1;
+
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+
+      transition: transform .08s ease, background .12s ease, border-color .12s ease;
+      touch-action: manipulation;
     }
+    .dayCell:hover{
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.22);
+    }
+    .dayCell:active{ transform: scale(.98); }
+
     .dayCell.muted{
-      opacity:.45;
+      opacity:.40;
       background: rgba(255,255,255,.03);
     }
+
     .dayTop{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:6px;
-      margin-bottom: 6px;
+      gap:8px;
     }
+
     .dayNum{
-      font-weight:900;
+      font-weight:1000;
       font-size:12px;
       letter-spacing:.02em;
     }
+
     .badge{
       font-size:10px;
-      font-weight:900;
+      font-weight:1000;
       letter-spacing:.02em;
-      padding: 3px 7px;
+      padding: 3px 8px;
       border-radius: 999px;
       background: rgba(255,255,255,.14);
       border: 1px solid rgba(255,255,255,.20);
       opacity:.95;
+      white-space:nowrap;
     }
-    .mini{
+
+    /* Mini KPIs: only S Z X */
+    .miniClean{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:4px 8px;
-      font-size:10px;
-      line-height:1.25;
-      opacity:.95;
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+      margin-top: 10px;
     }
-    .mini b{
-      font-weight:900;
+
+    .kpiMini{
+      background: rgba(0,0,0,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align:center;
+    }
+
+    .kpiMini .k{
+      font-size:10px;
+      opacity:.80;
+      font-weight:1000;
+      letter-spacing:.12em;
+      margin-bottom: 4px;
+    }
+
+    .kpiMini .v{
+      font-size:14px;
+      font-weight:1000;
       letter-spacing:.02em;
     }
-    .mini .x{
-      grid-column: 1 / span 2;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding-top: 2px;
-      border-top: 1px solid rgba(255,255,255,.14);
-      margin-top: 2px;
+
+    .dayCell.hasData{
+      border-color: rgba(255,255,255,.24);
+      background: rgba(255,255,255,.075);
     }
 
     .statsPanel{
@@ -443,6 +480,7 @@
       align-items:center;
       justify-content:center;
       user-select:none;
+      touch-action: manipulation;
     }
     .xbtn:active{ transform: scale(.98); }
 
@@ -538,6 +576,11 @@
       .timerBox{ flex-basis: 112px; }
       .statGrid{ grid-template-columns: repeat(5, 1fr); }
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
+      .calGrid{ gap:8px; }
+      .dayCell{ padding: 9px; border-radius: 14px; }
+      .miniClean{ gap:6px; }
+      .kpiMini{ border-radius: 11px; padding: 7px 6px; }
+      .kpiMini .v{ font-size:13px; }
     }
   </style>
 </head>
@@ -627,7 +670,7 @@
         <div class="sumWrap" id="sum_wrap"></div>
       </div>
 
-      <div class="footer">KPIs Counter v4.3 — Designed by Alen Cordero</div>
+      <div class="footer">KPIs Counter v4.4 — Designed by Alen Cordero</div>
     </div>
   </div>
 
@@ -696,13 +739,36 @@
     </div>
   </div>
 
+  <!-- Modal: Day details (calendar click) -->
+  <div class="overlay" id="modal_day">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Day details">
+      <div class="modalHeader">
+        <div class="modalTitle" id="day_modal_title">Day details</div>
+        <button class="xbtn" id="day_x" aria-label="Close">×</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="statCard" style="margin:0; background: rgba(0,0,0,.12);" id="day_modal_meta"></div>
+
+        <div style="margin-top:10px;">
+          <div class="reportBox" id="day_modal_report">—</div>
+        </div>
+
+        <div class="modalActions">
+          <button class="btn" id="day_copy">Copy</button>
+          <button class="btn primary" id="day_share">Share</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 
 <script>
   const metrics = ["S","Z","CC","C","X"];
-  const STATE_KEY = "kpi_state_v43";
+  const STATE_KEY = "kpi_state_v44";
   const HISTORY_KEY = "kpi_history_v1"; // completed days
   const AGGR_MIN_STOPS = 20;
   const MONEY_PER_X = 100;
@@ -871,6 +937,15 @@
   const copyBtn = document.getElementById("copy_btn");
   const shareBtn = document.getElementById("share_btn");
 
+  // Day details modal (calendar click)
+  const modalDay = document.getElementById("modal_day");
+  const dayX = document.getElementById("day_x");
+  const dayModalTitle = document.getElementById("day_modal_title");
+  const dayModalMeta = document.getElementById("day_modal_meta");
+  const dayModalReport = document.getElementById("day_modal_report");
+  const dayCopyBtn = document.getElementById("day_copy");
+  const dayShareBtn = document.getElementById("day_share");
+
   // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
   function saveState() { try { saveStateNow(); } catch {} }
@@ -967,6 +1042,8 @@
   }
   clickOutsideToClose(modalStart, true);
   clickOutsideToClose(modalReport, false);
+  clickOutsideToClose(modalDay, true);
+  dayX.addEventListener("click", () => closeModal(modalDay));
 
   // ---------- Session logic ----------
   function startDay(rep, store) {
@@ -1094,6 +1171,125 @@
     }
   }
 
+  // ---------- Day details modal logic ----------
+  function buildFullReportFromRecord(rec){
+    if (!rec) return "No data for this day.";
+    if (rec.reportText) return rec.reportText;
+
+    const S = rec.values?.S ?? 0;
+    const Z = rec.values?.Z ?? 0;
+    const CC = rec.values?.CC ?? 0;
+    const C = rec.values?.C ?? 0;
+    const X = rec.values?.X ?? 0;
+
+    const aggr = (S >= AGGR_MIN_STOPS && S > 0) ? (Z / S) : null;
+    const close = (Z > 0) ? (X / Z) : 0;
+
+    const aggrLine = (aggr !== null)
+      ? `% Aggressiveness (Z/S): ${fmtPct(aggr)}`
+      : `% Aggressiveness (Z/S): — (min ${AGGR_MIN_STOPS} S)`;
+
+    return [
+      `Name: ${rec.rep || "-"}`,
+      `Store: ${rec.store || "-"}`,
+      `Date: ${rec.date || "-"}`,
+      ``,
+      `Start: ${fmtTime(rec.startTs)}`,
+      `End: ${fmtTime(rec.endTs)}`,
+      `Duration: ${fmtDuration(rec.durationMs || 0)}`,
+      ``,
+      `S: ${S} | Z: ${Z} | CC: ${CC} | C: ${C} | X: ${X}`,
+      aggrLine,
+      `% Close (X/Z): ${fmtPct(close)}`
+    ].join("\n");
+  }
+
+  function openDayModal(iso){
+    const hist = loadHistory();
+    const rec = hist[iso];
+
+    dayModalTitle.textContent = rec
+      ? `Detalle del día • ${iso}`
+      : `Sin datos • ${iso}`;
+
+    if (!rec){
+      dayModalMeta.innerHTML = `
+        <div class="statHead">
+          <div class="h">No hay un día finalizado guardado.</div>
+          <div class="p">Tip: finaliza el día para que aparezca aquí.</div>
+        </div>
+      `;
+      dayModalReport.textContent = "—";
+      dayCopyBtn.style.display = "none";
+      dayShareBtn.style.display = "none";
+      openModal(modalDay);
+      return;
+    }
+
+    const X = rec.values?.X ?? 0;
+    const money = (X * MONEY_PER_X);
+
+    dayModalMeta.innerHTML = `
+      <div class="statHead">
+        <div>
+          <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
+          <div class="p">Start: ${fmtTime(rec.startTs)} • End: ${fmtTime(rec.endTs)} • Dur: ${fmtDuration(rec.durationMs || 0)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
+          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:900; margin-top:2px;">EARNED</div>
+        </div>
+      </div>
+
+      <div class="statGrid">
+        ${["S","Z","CC","C","X"].map(k => `
+          <div class="statItem">
+            <div class="k">${k}</div>
+            <div class="v">${rec.values?.[k] ?? 0}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    const fullText = buildFullReportFromRecord(rec);
+    dayModalReport.textContent = fullText;
+
+    dayCopyBtn.style.display = "";
+    dayShareBtn.style.display = "";
+    openModal(modalDay);
+  }
+
+  async function copyOrShareText(text, kind){
+    if (!text) return;
+
+    if (kind === "share") {
+      if (navigator.share) {
+        await navigator.share({ title: "KPI Day", text });
+        return;
+      }
+    }
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      alert(kind === "share" ? "No native Share here. Copied to clipboard." : "Copied.");
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      alert("Copied.");
+    }
+  }
+
+  dayCopyBtn.addEventListener("click", async () => {
+    try { await copyOrShareText(dayModalReport.textContent, "copy"); } catch {}
+  });
+  dayShareBtn.addEventListener("click", async () => {
+    try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {}
+  });
+
   // ---------- Metrics interactions ----------
   function bump(k, d) {
     const prev = state.values[k];
@@ -1168,6 +1364,15 @@
     renderCalendar();
   });
 
+  // open modal on day click (delegated)
+  calGrid.addEventListener("click", (e) => {
+    const cell = e.target.closest(".dayCell");
+    if (!cell) return;
+    const iso = cell.dataset.iso;
+    if (!iso) return;
+    openDayModal(iso);
+  });
+
   function renderCalendar() {
     const y = calCursor.y, m = calCursor.m;
     calTitle.textContent = monthName(y, m);
@@ -1200,29 +1405,41 @@
       const rec = hist[iso];
 
       const cell = document.createElement("div");
-      cell.className = "dayCell" + (inMonth ? "" : " muted");
 
       const dayNum = day.getDate();
-      const badgeText = (iso === todayISO) ? "TODAY" : (rec ? "$" + ((rec.values?.X||0) * MONEY_PER_X) : "");
-      const badgeHtml = badgeText ? `<div class="badge">${badgeText}</div>` : "";
 
       const S = rec?.values?.S ?? 0;
       const Z = rec?.values?.Z ?? 0;
-      const CC = rec?.values?.CC ?? 0;
-      const C = rec?.values?.C ?? 0;
       const X = rec?.values?.X ?? 0;
+
+      cell.className = "dayCell" + (inMonth ? "" : " muted") + (rec ? " hasData" : "");
+      cell.dataset.iso = iso;
+
+      const badgeText =
+        (iso === todayISO) ? "TODAY" :
+        (rec ? "$" + (X * MONEY_PER_X) : "");
+
+      const badgeHtml = badgeText ? `<div class="badge">${badgeText}</div>` : "";
 
       cell.innerHTML = `
         <div class="dayTop">
           <div class="dayNum">${dayNum}</div>
           ${badgeHtml}
         </div>
-        <div class="mini">
-          <div><b>S</b> ${S}</div>
-          <div><b>Z</b> ${Z}</div>
-          <div><b>CC</b> ${CC}</div>
-          <div><b>C</b> ${C}</div>
-          <div class="x"><div><b>X</b> ${X}</div><div><b>$</b> ${X * MONEY_PER_X}</div></div>
+
+        <div class="miniClean">
+          <div class="kpiMini">
+            <div class="k">S</div>
+            <div class="v">${S}</div>
+          </div>
+          <div class="kpiMini">
+            <div class="k">Z</div>
+            <div class="v">${Z}</div>
+          </div>
+          <div class="kpiMini">
+            <div class="k">X</div>
+            <div class="v">${X}</div>
+          </div>
         </div>
       `;
       calGrid.appendChild(cell);
