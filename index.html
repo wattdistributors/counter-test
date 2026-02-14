@@ -6,9 +6,24 @@
   <title>KPIs Counter</title>
 
   <style>
-    :root { --bg1:#1b86c8; --bg2:#0b5a86; }
-    html, body { touch-action: manipulation; }
+    :root{
+      --bg1:#1b86c8; --bg2:#0b5a86;
 
+      /* Calendar "clean sheet" theme */
+      --cal-bg:#ffffff;
+      --cal-text:#0f172a;
+      --cal-muted:#64748b;
+      --cal-border:#e6e9ef;
+      --cal-border-2:#dde2ea;
+      --cal-soft:#f6f7fb;
+      --cal-soft-2:#f1f3f9;
+      --cal-shadow: 0 18px 50px rgba(2, 8, 23, .18);
+      --cal-shadow-2: 0 10px 30px rgba(2, 8, 23, .10);
+      --cal-accent:#0ea5e9; /* subtle */
+      --cal-accent-2:#2563eb;
+    }
+
+    html, body { touch-action: manipulation; }
     body{
       margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -167,38 +182,53 @@
       letter-spacing:.03em;
     }
 
-    /* ---------- Calendar ---------- */
+    /* ---------- CALENDAR (Elegant Sheet) ---------- */
+    #tab_calendar.calendarTheme{
+      color: var(--cal-text);
+    }
+
+    .calSheet{
+      background: var(--cal-bg);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 18px;
+      box-shadow: var(--cal-shadow);
+      padding: 12px;
+    }
+
     .calHeader{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin: 8px 0 10px;
+      margin: 4px 0 10px;
     }
+
     .calTitle{
-      font-weight:900;
-      letter-spacing:.02em;
+      font-weight:1000;
+      letter-spacing:.01em;
       font-size:14px;
-      opacity:.95;
       text-align:center;
       flex:1;
+      color: var(--cal-text);
     }
+
     .iconBtn{
       width:38px; height:38px;
       border-radius: 14px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.08);
+      border:1px solid var(--cal-border);
+      background: var(--cal-soft);
       display:flex;
       align-items:center;
       justify-content:center;
       cursor:pointer;
       user-select:none;
-      font-weight:900;
+      font-weight:1000;
+      color: var(--cal-text);
+      box-shadow: var(--cal-shadow-2);
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
 
-    /* ---------- Calendar (clean v2) ---------- */
     .calGrid{
       display:grid;
       grid-template-columns: repeat(7, 1fr);
@@ -208,17 +238,17 @@
     .dow{
       text-align:center;
       font-size:11px;
-      opacity:.85;
-      letter-spacing:.10em;
-      font-weight:900;
-      padding:4px 0;
+      letter-spacing:.12em;
+      font-weight:1000;
+      padding:6px 0 4px;
+      color: var(--cal-muted);
+      user-select:none;
     }
 
-    /* square day */
     .dayCell{
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
+      border-radius: 14px;
+      border: 1px solid var(--cal-border);
+      background: #fff;
       padding: 10px;
       overflow:hidden;
       cursor:pointer;
@@ -230,18 +260,32 @@
       flex-direction:column;
       justify-content:space-between;
 
-      transition: transform .08s ease, background .12s ease, border-color .12s ease;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+      box-shadow: 0 6px 16px rgba(2, 8, 23, .06);
       touch-action: manipulation;
     }
+
     .dayCell:hover{
-      background: rgba(255,255,255,.09);
-      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 10px 24px rgba(2, 8, 23, .10);
+      border-color: var(--cal-border-2);
     }
-    .dayCell:active{ transform: scale(.98); }
+    .dayCell:active{ transform: scale(.985); }
 
     .dayCell.muted{
-      opacity:.40;
-      background: rgba(255,255,255,.03);
+      opacity:.45;
+      background: var(--cal-soft);
+      border-color: var(--cal-border);
+      box-shadow: none;
+    }
+
+    .dayCell.hasData{
+      border-color: rgba(14,165,233,.35);
+      box-shadow: 0 10px 26px rgba(14,165,233,.10);
+    }
+
+    .dayCell.today{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 12px 30px rgba(37,99,235,.16);
     }
 
     .dayTop{
@@ -253,23 +297,37 @@
 
     .dayNum{
       font-weight:1000;
-      font-size:12px;
-      letter-spacing:.02em;
+      font-size:14px;
+      letter-spacing:.01em;
+      color: var(--cal-text);
     }
 
     .badge{
       font-size:10px;
       font-weight:1000;
-      letter-spacing:.02em;
-      padding: 3px 8px;
+      letter-spacing:.06em;
+      padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(255,255,255,.14);
-      border: 1px solid rgba(255,255,255,.20);
-      opacity:.95;
+      background: var(--cal-soft-2);
+      border: 1px solid var(--cal-border);
+      color: var(--cal-muted);
       white-space:nowrap;
+      user-select:none;
     }
 
-    /* Mini KPIs: only S Z X */
+    .badge.money{
+      color: #0b1220;
+      border-color: rgba(14,165,233,.35);
+      background: rgba(14,165,233,.10);
+    }
+
+    .badge.today{
+      color: #0b1220;
+      border-color: rgba(37,99,235,.40);
+      background: rgba(37,99,235,.10);
+    }
+
+    /* Mini KPIs: only S Z X — super clean */
     .miniClean{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
@@ -278,30 +336,27 @@
     }
 
     .kpiMini{
-      background: rgba(0,0,0,.10);
-      border: 1px solid rgba(255,255,255,.14);
+      background: var(--cal-soft);
+      border: 1px solid var(--cal-border);
       border-radius: 12px;
       padding: 8px 6px;
       text-align:center;
+      color: var(--cal-text);
     }
 
     .kpiMini .k{
       font-size:10px;
-      opacity:.80;
       font-weight:1000;
-      letter-spacing:.12em;
+      letter-spacing:.16em;
       margin-bottom: 4px;
+      color: var(--cal-muted);
     }
 
     .kpiMini .v{
       font-size:14px;
       font-weight:1000;
       letter-spacing:.02em;
-    }
-
-    .dayCell.hasData{
-      border-color: rgba(255,255,255,.24);
-      background: rgba(255,255,255,.075);
+      color: var(--cal-text);
     }
 
     .statsPanel{
@@ -310,67 +365,73 @@
       grid-template-columns: 1fr;
       gap:10px;
     }
-    .statCard{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
+
+    /* Stats cards inside calendar: white + clean */
+    #tab_calendar .statCard{
+      background: #fff;
+      border: 1px solid var(--cal-border);
       border-radius: 14px;
-      padding: 10px 12px;
+      padding: 12px;
+      box-shadow: 0 10px 28px rgba(2, 8, 23, .08);
+      color: var(--cal-text);
     }
-    .statHead{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom: 8px;
-    }
-    .statHead .h{
-      font-weight:900;
-      letter-spacing:.02em;
+    #tab_calendar .statHead .h{
+      font-weight:1000;
+      letter-spacing:.01em;
       font-size:13px;
-      opacity:.95;
+      opacity: 1;
+      color: var(--cal-text);
     }
-    .statHead .p{
+    #tab_calendar .statHead .p{
       font-size:12px;
-      opacity:.85;
+      color: var(--cal-muted);
+      opacity: 1;
       white-space:nowrap;
     }
-    .statGrid{
+    #tab_calendar .statGrid{
       display:grid;
       grid-template-columns: repeat(5, 1fr);
       gap:8px;
     }
-    .statItem{
-      background: rgba(0,0,0,.10);
-      border: 1px solid rgba(255,255,255,.14);
+    #tab_calendar .statItem{
+      background: var(--cal-soft);
+      border: 1px solid var(--cal-border);
       border-radius: 12px;
-      padding: 8px 8px;
+      padding: 9px 8px;
       text-align:center;
+      color: var(--cal-text);
     }
-    .statItem .k{
-      font-size:10px; opacity:.85; letter-spacing:.08em; font-weight:900;
+    #tab_calendar .statItem .k{
+      font-size:10px;
+      letter-spacing:.10em;
+      font-weight:1000;
       margin-bottom: 4px;
+      color: var(--cal-muted);
+      opacity: 1;
     }
-    .statItem .v{
-      font-size:14px; font-weight:900; letter-spacing:.02em;
+    #tab_calendar .statItem .v{
+      font-size:14px;
+      font-weight:1000;
+      letter-spacing:.02em;
+      color: var(--cal-text);
     }
-    .moneyLine{
-      margin-top: 8px;
+    #tab_calendar .moneyLine{
+      margin-top: 10px;
       display:flex;
       justify-content:space-between;
       gap:10px;
       font-size:12px;
-      opacity:.9;
+      color: var(--cal-muted);
+      opacity: 1;
     }
-    .moneyLine b{
-      font-weight:900;
-      letter-spacing:.02em;
+    #tab_calendar .moneyLine b{
+      font-weight:1000;
+      letter-spacing:.01em;
+      color: var(--cal-text);
     }
 
     /* ---------- Summary ---------- */
-    .sumWrap{
-      display:grid;
-      gap:10px;
-    }
+    .sumWrap{ display:grid; gap:10px; }
     .sumCard{
       background: rgba(255,255,255,.10);
       border: 1px solid rgba(255,255,255,.18);
@@ -384,17 +445,8 @@
       gap:10px;
       margin-bottom: 10px;
     }
-    .sumTitle{
-      font-weight:900;
-      letter-spacing:.02em;
-      font-size:14px;
-      opacity:.95;
-    }
-    .sumSub{
-      font-size:12px;
-      opacity:.85;
-      margin-top: 4px;
-    }
+    .sumTitle{ font-weight:900; letter-spacing:.02em; font-size:14px; opacity:.95; }
+    .sumSub{ font-size:12px; opacity:.85; margin-top: 4px; }
     .sumMoney{
       text-align:right;
       font-weight:900;
@@ -455,6 +507,7 @@
       box-shadow: 0 18px 55px rgba(0,0,0,.30);
       padding: 14px;
       position:relative;
+      color:#fff;
     }
     .modalHeader{
       display:flex;
@@ -521,6 +574,7 @@
       line-height: 1.45;
       white-space: pre-wrap;
       word-break: break-word;
+      color:#fff;
     }
 
     /* QR */
@@ -553,15 +607,8 @@
       align-items:center;
       justify-content:center;
     }
-    #qr_box{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    #qr_box img, #qr_box canvas{
-      display:block;
-      border-radius: 10px;
-    }
+    #qr_box{ display:flex; align-items:center; justify-content:center; }
+    #qr_box img, #qr_box canvas{ display:block; border-radius: 10px; }
     .qrNote{
       opacity:.90;
       font-size:12px;
@@ -574,13 +621,15 @@
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
-      .statGrid{ grid-template-columns: repeat(5, 1fr); }
+      #tab_calendar .statGrid{ grid-template-columns: repeat(5, 1fr); }
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
+
       .calGrid{ gap:8px; }
-      .dayCell{ padding: 9px; border-radius: 14px; }
+      .dayCell{ padding: 9px; border-radius: 13px; }
       .miniClean{ gap:6px; }
       .kpiMini{ border-radius: 11px; padding: 7px 6px; }
       .kpiMini .v{ font-size:13px; }
+      .calSheet{ padding: 10px; }
     }
   </style>
 </head>
@@ -648,20 +697,22 @@
       </div>
 
       <!-- ============ TAB: CALENDAR ============ -->
-      <div id="tab_calendar" style="display:none;">
-        <div class="calHeader">
-          <div class="iconBtn" id="cal_prev" aria-label="Previous month">‹</div>
-          <div class="calTitle" id="cal_title">—</div>
-          <div class="iconBtn" id="cal_next" aria-label="Next month">›</div>
-        </div>
+      <div id="tab_calendar" class="calendarTheme" style="display:none;">
+        <div class="calSheet">
+          <div class="calHeader">
+            <div class="iconBtn" id="cal_prev" aria-label="Previous month">‹</div>
+            <div class="calTitle" id="cal_title">—</div>
+            <div class="iconBtn" id="cal_next" aria-label="Next month">›</div>
+          </div>
 
-        <div class="calGrid" id="cal_grid">
-          <!-- filled by JS -->
-        </div>
+          <div class="calGrid" id="cal_grid">
+            <!-- filled by JS -->
+          </div>
 
-        <div class="statsPanel">
-          <div class="statCard" id="week_stats"></div>
-          <div class="statCard" id="month_stats"></div>
+          <div class="statsPanel">
+            <div class="statCard" id="week_stats"></div>
+            <div class="statCard" id="month_stats"></div>
+          </div>
         </div>
       </div>
 
@@ -784,7 +835,6 @@
   };
 
   const parseISO = (iso) => {
-    // iso = YYYY-MM-DD (local)
     const [y,m,d] = iso.split("-").map(Number);
     return new Date(y, (m-1), d);
   };
@@ -859,7 +909,6 @@
   }
 
   function recordsInRange(startDate, endDate) {
-    // startDate/endDate are Date objects inclusive
     const hist = loadHistory();
     const out = [];
     const startISO = isoDateLocal(startDate);
@@ -869,7 +918,6 @@
       if (iso >= startISO && iso <= endISO) out.push(hist[iso]);
     });
 
-    // sort by date asc
     out.sort((a,b) => (a.date || "").localeCompare(b.date || ""));
     return out;
   }
@@ -1116,7 +1164,6 @@
     closeModal(modalReport);
     showStartScreen();
 
-    // refresh other tabs
     renderCalendar();
     renderSummary();
   }
@@ -1377,7 +1424,6 @@
     const y = calCursor.y, m = calCursor.m;
     calTitle.textContent = monthName(y, m);
 
-    // Build DOW headers + 6 weeks grid
     calGrid.innerHTML = "";
     const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     dows.forEach(s => {
@@ -1389,8 +1435,7 @@
 
     const first = new Date(y, m, 1);
     const firstDow = first.getDay(); // 0 Sun..6 Sat
-    // convert to Monday-based offset
-    const offset = (firstDow === 0) ? 6 : (firstDow - 1); // 0 means Mon
+    const offset = (firstDow === 0) ? 6 : (firstDow - 1);
     const gridStart = new Date(y, m, 1);
     gridStart.setDate(gridStart.getDate() - offset);
 
@@ -1405,21 +1450,30 @@
       const rec = hist[iso];
 
       const cell = document.createElement("div");
-
       const dayNum = day.getDate();
 
       const S = rec?.values?.S ?? 0;
       const Z = rec?.values?.Z ?? 0;
       const X = rec?.values?.X ?? 0;
 
-      cell.className = "dayCell" + (inMonth ? "" : " muted") + (rec ? " hasData" : "");
-      cell.dataset.iso = iso;
-
+      const isToday = (iso === todayISO);
       const badgeText =
-        (iso === todayISO) ? "TODAY" :
+        isToday ? "TODAY" :
         (rec ? "$" + (X * MONEY_PER_X) : "");
 
-      const badgeHtml = badgeText ? `<div class="badge">${badgeText}</div>` : "";
+      const badgeClass =
+        isToday ? "badge today" :
+        (rec ? "badge money" : "badge");
+
+      const badgeHtml = badgeText ? `<div class="${badgeClass}">${badgeText}</div>` : "";
+
+      cell.className =
+        "dayCell" +
+        (inMonth ? "" : " muted") +
+        (rec ? " hasData" : "") +
+        (isToday ? " today" : "");
+
+      cell.dataset.iso = iso;
 
       cell.innerHTML = `
         <div class="dayTop">
@@ -1457,8 +1511,8 @@
           <div class="p">${periodLabel}</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-weight:900; letter-spacing:.02em;">$${money}</div>
-          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:800; margin-top:2px;">EARNED</div>
+          <div style="font-weight:1000; letter-spacing:.02em; color:#0f172a;">$${money}</div>
+          <div style="font-size:11px; letter-spacing:.10em; font-weight:1000; margin-top:2px; color:#64748b;">EARNED</div>
         </div>
       </div>
 
@@ -1680,7 +1734,6 @@
         }
       }
 
-      // ✅ Save completed day before resetting
       persistCompletedDay(endTs, text);
 
       finalizeAndReset();
@@ -1721,7 +1774,6 @@
       showStartScreen();
     }
 
-    // initial renders
     renderCalendar();
     renderSummary();
 
