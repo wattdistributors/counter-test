@@ -35,11 +35,13 @@
     .wrap{ width:min(620px, 99vw); padding:22px 4px 26px; }
 
     .card{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 18px;
+      background: linear-gradient(160deg, rgba(17,92,144,.26), rgba(10,61,102,.22));
+      border: 1px solid rgba(184,230,255,.24);
+      border-radius: 20px;
       padding: 14px;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(12px) saturate(130%);
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      box-shadow: 0 14px 36px rgba(3,22,40,.24);
     }
 
     .topbar{
@@ -69,27 +71,33 @@
     /* ---------- Tabs ---------- */
     .tabs{
       display:flex;
-      gap:10px;
+      gap:0;
       margin: 6px 0 12px;
+      padding:3px;
+      border:1px solid rgba(183,229,252,.20);
+      background: rgba(75,149,198,.18);
+      border-radius: 14px;
     }
     .tab{
       flex:1;
       text-align:center;
-      padding:10px 10px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.08);
+      padding:9px 8px;
+      border-radius: 10px;
+      border:0;
+      background: transparent;
       font-weight:900;
       letter-spacing:.02em;
       cursor:pointer;
       user-select:none;
       touch-action: manipulation;
+      color: rgba(227,246,255,.86);
     }
     .tab:active{ transform: scale(.99); }
     .tab.active{
-      background: rgba(255,255,255,.22);
-      border-color: rgba(255,255,255,.55);
-      box-shadow: 0 10px 26px rgba(0,0,0,.12);
+      background: rgba(166,225,252,.22);
+      border:1px solid rgba(216,244,255,.34);
+      color:#fff;
+      box-shadow:none;
     }
 
     .center{
@@ -110,10 +118,12 @@
       gap:12px;
       align-items:center;
       margin: 8px 0 4px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
+      padding: 10px 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid rgba(192,232,252,.16);
+      border-bottom: 1px solid rgba(192,232,252,.16);
       overflow:hidden;
     }
 
@@ -161,10 +171,10 @@
       margin-top:12px;
     }
     .ind{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.20);
-      border-radius: 14px;
-      padding: 10px 12px;
+      background: transparent;
+      border: 1px solid rgba(184,230,255,.16);
+      border-radius: 10px;
+      padding: 8px 8px;
     }
     .ind .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
     .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
@@ -179,14 +189,14 @@
 
     /* ---------- Calendar (blue translucent style) ---------- */
     .calSurface{
-      background: linear-gradient(165deg, var(--calPanel), var(--calPanel2));
-      border: 1px solid var(--calLine);
-      border-radius: 18px;
-      padding: 10px 4px 12px;
-      box-shadow: var(--calShadow);
-      backdrop-filter: blur(12px) saturate(130%);
-      -webkit-backdrop-filter: blur(12px) saturate(130%);
-      overflow:hidden; /* prevents sideways overflow */
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 4px 0 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      overflow:hidden;
     }
 
     .calHeader{
@@ -194,7 +204,7 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin: 2px 0 12px;
+      margin: 2px 0 10px; padding-bottom:8px; border-bottom:1px solid rgba(184,230,255,.16);
     }
 
     .calTitle{
@@ -208,10 +218,10 @@
     }
 
     .iconBtn{
-      width:40px; height:40px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.10);
+      width:34px; height:34px;
+      border-radius: 10px;
+      border:1px solid rgba(187,232,255,.22);
+      background: rgba(77,150,198,.16);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -219,7 +229,7 @@
       user-select:none;
       font-weight:1000;
       color: var(--calInk);
-      box-shadow: 0 12px 26px rgba(0,0,0,.14);
+      box-shadow:none;
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
@@ -233,8 +243,8 @@
       gap:1px;
       overflow:hidden;
       background: rgba(176, 226, 250, .22);
-      border: 1px solid rgba(153, 214, 245, .26);
-      border-radius: 12px;
+      border: 1px solid rgba(170,223,248,.20);
+      border-radius: 10px;
       padding: 1px;
     }
 
@@ -249,7 +259,7 @@
       min-width:0;
       border: 0;
       border-radius: 0;
-      background: rgba(64,134,182,.20);
+      background: rgba(64,134,182,.14);
     }
 
     /* Square day WITHOUT aspect-ratio (avoids Safari grid overflow bugs) */
@@ -257,17 +267,17 @@
       position:relative;
       border-radius: 0;
       border: 0;
-      background: linear-gradient(165deg, rgba(36,112,165,.20), rgba(14,66,110,.16));
+      background: rgba(24,97,145,.14);
       cursor:pointer;
       user-select:none;
       min-width:0;              /* key for grid overflow */
       overflow:hidden;           /* clip anything inside */
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+      box-shadow:none;
       transition: transform .08s ease, background .12s ease, border-color .12s ease;
       touch-action: manipulation;
     }
     .dayCell:active{ transform: scale(.985); }
-    .dayCell:hover{ background: rgba(50,129,181,.24); }
+    .dayCell:hover{ background: rgba(68,149,198,.18); }
 
     .dayCell.muted{
       opacity:.65;
@@ -358,13 +368,13 @@
       gap:10px;
     }
     .statCard{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 14px;
-      padding: 10px 12px;
+      background: transparent;
+      border: 1px solid rgba(184,230,255,.14);
+      border-radius: 10px;
+      padding: 10px 10px;
       color: var(--calInk);
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
-      backdrop-filter: blur(6px);
+      box-shadow: none;
+      backdrop-filter: none;
       overflow:hidden;
     }
     .statHead{
@@ -391,12 +401,12 @@
       gap:8px;
     }
     .statItem{
-      border-radius: 12px;
-      padding: 8px 8px;
+      border-radius: 8px;
+      padding: 7px 6px;
       text-align:center;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.12);
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      border: 1px solid rgba(184,230,255,.10);
+      background: rgba(34,108,156,.10);
+      box-shadow: none;
       min-width:0;
     }
     .statItem .k{
@@ -423,10 +433,10 @@
     /* ---------- Summary ---------- */
     .sumWrap{ display:grid; gap:10px; }
     .sumCard{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 14px;
-      padding: 12px;
+      background: transparent;
+      border: 1px solid rgba(184,230,255,.14);
+      border-radius: 10px;
+      padding: 10px;
     }
     .sumTop{
       display:flex;
@@ -448,10 +458,10 @@
     }
     .sumStats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
     .sumPill{
-      background: rgba(0,0,0,.10);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 12px;
-      padding: 10px 8px;
+      background: rgba(37,112,160,.10);
+      border: 1px solid rgba(184,230,255,.10);
+      border-radius: 8px;
+      padding: 8px 6px;
       text-align:center;
     }
     .sumPill .k{
@@ -485,7 +495,7 @@
       border: 1px solid rgba(255,255,255,.20);
       border-radius: 18px;
       backdrop-filter: blur(8px);
-      box-shadow: 0 18px 55px rgba(0,0,0,.30);
+      box-shadow: 0 10px 24px rgba(3,22,40,.22);
       padding: 14px;
       position:relative;
     }
@@ -544,8 +554,8 @@
       width:100%;
       box-sizing:border-box;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(184,230,255,.14);
+      background: rgba(20,79,122,.16);
       padding: 10px 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12px;
@@ -558,7 +568,7 @@
     .qrWrap{
       margin-top:12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1px solid rgba(184,230,255,.14);
       background: rgba(255,255,255,.08);
       padding: 12px;
       display:flex;
@@ -775,7 +785,7 @@
       </div>
 
       <div class="modalBody">
-        <div class="statCard" id="day_modal_meta" style="margin:0; background: rgba(88,163,221,.14); border-color: rgba(153,218,251,.24);"></div>
+        <div class="statCard" id="day_modal_meta" style="margin:0; background: rgba(56,132,180,.14); border-color: rgba(174,226,252,.22);"></div>
 
         <div style="margin-top:10px;">
           <div class="reportBox" id="day_modal_report">—</div>
