@@ -45,16 +45,17 @@
       display:flex;
       flex-direction:column;
       height:min(920px, 94vh);
+      overflow:hidden;
     }
 
     .appHeader{
       position:sticky;
       top:0;
       z-index:5;
-      background: rgba(255,255,255,.02);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding-bottom:8px;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 6px 0 4px;
       flex:0 0 auto;
     }
 
@@ -64,15 +65,17 @@
       overflow-y:auto;
       overflow-x:hidden;
       padding-right:2px;
+      display:flex;
+      flex-direction:column;
     }
 
     .topbar{
       display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
-      margin-bottom:12px;
+      margin-bottom:6px;
     }
 
     .title{ font-weight:700; letter-spacing:.015em; font-size:19px; line-height:1.1; }
-    .subtitle{ opacity:.75; font-size:13px; margin-top:4px; }
+    .subtitle{ opacity:.75; font-size:13px; margin-top:2px; }
 
     .btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
@@ -94,7 +97,7 @@
     .tabs{
       display:flex;
       gap:0;
-      margin: 6px 0 12px;
+      margin: 4px 0 0;
       padding:3px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.08);
@@ -129,6 +132,16 @@
       align-items:center;
       justify-content:center;
       padding:18px 6px 8px;
+      text-align:center;
+    }
+
+    .centerIntro{
+      min-height: 100%;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
       text-align:center;
     }
 
@@ -202,11 +215,14 @@
     .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
 
     .footer{
-      margin-top:10px;
+      margin-top:auto;
+      padding-top:8px;
       text-align:center;
       font-size:8px;
       opacity:.70;
       letter-spacing:.03em;
+      border-top:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
     }
 
     /* ---------- Calendar (blue translucent style) ---------- */
@@ -655,6 +671,7 @@
     @media (max-width: 520px){
       .wrap{ width:100vw; padding:12px 2px 20px; }
       .card{ padding:10px; height:min(920px,95vh); }
+      .appHeader{ padding:4px 0 4px; }
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
@@ -696,7 +713,7 @@
       <div class="appMain">
       <!-- ============ TAB: COUNTER ============ -->
       <div id="tab_counter">
-        <div id="start_screen" class="center">
+        <div id="start_screen" class="center centerIntro">
           <div style="opacity:.9; font-size:13px; max-width: 360px;">
             Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
             Tap <b>Start day</b> to enter your name and store.
@@ -758,8 +775,8 @@
         <div class="sumWrap" id="sum_wrap"></div>
       </div>
 
-      <div class="footer">KPIs Counter v4.4 — Designed by Alen Cordero</div>
       </div>
+      <div class="footer">KPIs Counter v4.4 — Designed by Alen Cordero</div>
     </div>
   </div>
 
