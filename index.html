@@ -177,14 +177,13 @@
       letter-spacing:.03em;
     }
 
-    /* ---------- Calendar (Neo dark style) ---------- */
+    /* ---------- Calendar (blue translucent style) ---------- */
     .calSurface{
-      background:
-        linear-gradient(180deg, rgba(8,16,32,.88), rgba(3,8,20,.92));
-      border: 1px solid rgba(77, 148, 255, .24);
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.08));
+      border: 1px solid rgba(255,255,255,.20);
       border-radius: 18px;
       padding: 12px;
-      box-shadow: 0 20px 56px rgba(0,0,0,.35);
+      box-shadow: var(--calShadow);
       backdrop-filter: blur(8px);
       overflow:hidden; /* prevents sideways overflow */
     }
@@ -198,23 +197,23 @@
 
     .calMiniStat{
       border-radius: 12px;
-      border: 1px solid rgba(85, 173, 255, .26);
-      background: linear-gradient(180deg, rgba(10,20,42,.78), rgba(5,11,24,.78));
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.10);
       padding: 8px 10px;
     }
     .calMiniStat .k{
       font-size:10px;
       letter-spacing:.1em;
       font-weight:900;
-      color: rgba(186,220,255,.8);
+      color: rgba(255,255,255,.82);
       margin-bottom: 5px;
       text-transform: uppercase;
     }
     .calMiniStat .v{
       font-size:18px;
       font-weight:1000;
-      color: #9be8ff;
-      text-shadow: 0 0 12px rgba(98,214,255,.28);
+      color: var(--calInk);
+      text-shadow: none;
     }
 
     .calHeader{
@@ -238,8 +237,8 @@
     .iconBtn{
       width:40px; height:40px;
       border-radius: 14px;
-      border:1px solid rgba(85, 173, 255, .30);
-      background: linear-gradient(180deg, rgba(12,26,56,.8), rgba(6,14,32,.8));
+      border:1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.10);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -247,7 +246,7 @@
       user-select:none;
       font-weight:1000;
       color: var(--calInk);
-      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+      box-shadow: 0 12px 26px rgba(0,0,0,.14);
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
@@ -260,10 +259,10 @@
     }
     .calActionBtn{
       border-radius: 10px;
-      border:1px solid rgba(86, 170, 255, .28);
-      background: linear-gradient(180deg, rgba(9,20,42,.84), rgba(4,12,24,.84));
-      color: #cfeeff;
-      font-size:12px;
+      border:1px solid rgba(255,255,255,.24);
+      background: rgba(255,255,255,.10);
+      color: var(--calInk);
+      font-size:13px;
       font-weight:900;
       letter-spacing:.08em;
       text-transform: uppercase;
@@ -272,9 +271,9 @@
       cursor:pointer;
     }
     .calActionBtn.primary{
-      border-color: rgba(62, 225, 148, .45);
-      color: #7effc0;
-      text-shadow: 0 0 10px rgba(66,223,155,.28);
+      border-color: rgba(255,255,255,.46);
+      color: #fff;
+      text-shadow: none;
     }
 
     /* IMPORTANT: prevent horizontal scroll + force fit */
@@ -283,7 +282,7 @@
       box-sizing:border-box;
       display:grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap:6px;
+      gap:8px;
       overflow:hidden;
     }
 
@@ -293,44 +292,44 @@
       letter-spacing:.14em;
       font-weight:1000;
       padding:6px 0;
-      color: rgba(189,222,255,.85);
+      color: var(--calMuted);
       user-select:none;
       min-width:0;
-      border: 1px solid rgba(77, 148, 255, .2);
+      border: 1px solid rgba(255,255,255,.16);
       border-radius: 8px;
-      background: rgba(10,18,34,.62);
+      background: rgba(255,255,255,.06);
     }
 
     /* Square day WITHOUT aspect-ratio (avoids Safari grid overflow bugs) */
     .dayCell{
       position:relative;
-      border-radius: 8px;
-      border: 1px solid rgba(72, 144, 236, .24);
-      background: rgba(3,8,20,.86);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
       cursor:pointer;
       user-select:none;
       min-width:0;              /* key for grid overflow */
       overflow:hidden;           /* clip anything inside */
-      box-shadow: inset 0 0 0 1px rgba(20,64,120,.15);
+      box-shadow: 0 12px 28px rgba(0,0,0,.14);
       transition: transform .08s ease, background .12s ease, border-color .12s ease;
       touch-action: manipulation;
     }
     .dayCell:active{ transform: scale(.985); }
-    .dayCell:hover{ background: rgba(10,26,52,.9); border-color: rgba(107,181,255,.45); }
+    .dayCell:hover{ background: rgba(255,255,255,.10); border-color: var(--calLine2); }
 
     .dayCell.muted{
-      opacity:.55;
-      background: rgba(3,8,16,.65);
-      box-shadow: none;
+      opacity:.5;
+      background: rgba(255,255,255,.03);
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
     }
 
     .dayCell.today{
-      border-color: rgba(70, 197, 255, .65);
-      box-shadow: 0 0 0 1px rgba(70,197,255,.45), inset 0 0 20px rgba(20,89,160,.35);
+      border-color: rgba(255,255,255,.40);
+      box-shadow: 0 14px 34px rgba(0,0,0,.18);
     }
 
     .dayCell.hasData{
-      border-color: rgba(90, 255, 176, .35);
+      border-color: rgba(255,255,255,.30);
     }
 
     /* Square sizing helper */
@@ -341,7 +340,7 @@
     }
     .dayContent{
       position:absolute;
-      inset:7px;
+      inset:8px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -365,49 +364,49 @@
     }
 
     .badge{
-      font-size:9px;
+      font-size:10px;
       font-weight:1000;
       letter-spacing:.04em;
       padding: 2px 6px;
       border-radius: 999px;
-      background: rgba(70, 197, 255, .18);
-      border: 1px solid rgba(70, 197, 255, .35);
-      color: #c3f6ff;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      color: var(--calInk);
       white-space:nowrap;
       max-width: 72px;
       overflow:hidden;
       text-overflow:ellipsis;
     }
     .badge.today{
-      background: rgba(70, 197, 255, .24);
-      border-color: rgba(70, 197, 255, .48);
+      background: rgba(255,255,255,.18);
+      border-color: rgba(255,255,255,.28);
     }
 
     .miniClean{
       display:grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:4px;
-      margin-top: 10px;
+      gap:6px;
+      margin-top: 8px;
       min-width:0;
     }
 
     .kpiMini{
-      border-radius: 6px;
-      padding: 4px 4px;
+      border-radius: 9px;
+      padding: 6px 4px;
       text-align:center;
-      border: 1px solid rgba(62,124,205,.26);
-      background: rgba(10,20,40,.55);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
       min-width:0;
     }
     .kpiMini .k{
-      font-size:8px;
+      font-size:9px;
       letter-spacing:.18em;
       font-weight:1000;
-      color: rgba(171, 206, 244, .82);
+      color: rgba(255,255,255,.78);
       margin-bottom: 4px;
     }
     .kpiMini .v{
-      font-size:12px;
+      font-size:13px;
       font-weight:1000;
       letter-spacing:.02em;
       color: var(--calInk);
@@ -421,12 +420,12 @@
       gap:10px;
     }
     .statCard{
-      background: rgba(6,12,28,.82);
-      border: 1px solid rgba(85, 173, 255, .24);
-      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 14px;
       padding: 10px 12px;
       color: var(--calInk);
-      box-shadow: none;
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
       backdrop-filter: blur(6px);
       overflow:hidden;
     }
@@ -444,7 +443,7 @@
       color: var(--calInk);
     }
     .statHead .p{
-      font-size:12px;
+      font-size:13px;
       color: rgba(255,255,255,.75);
       white-space:nowrap;
     }
@@ -459,7 +458,7 @@
       text-align:center;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.12);
-      box-shadow: none;
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
       min-width:0;
     }
     .statItem .k{
@@ -478,7 +477,7 @@
       display:flex;
       justify-content:space-between;
       gap:10px;
-      font-size:12px;
+      font-size:13px;
       color: rgba(255,255,255,.75);
     }
     .moneyLine b{ font-weight:1000; color: var(--calInk); }
@@ -650,7 +649,7 @@
     #qr_box img, #qr_box canvas{ display:block; border-radius: 10px; }
     .qrNote{
       opacity:.90;
-      font-size:12px;
+      font-size:13px;
       text-align:center;
       line-height:1.25;
       max-width: 420px;
@@ -666,7 +665,7 @@
       .calStatsTop, .statsPanel{ grid-template-columns: 1fr; }
       .calGrid{ gap:5px; }
       .dayContent{ inset:8px; }
-      .dayCell{ border-radius: 7px; }
+      .dayCell{ border-radius: 9px; }
       .miniClean{ gap:6px; }
       .kpiMini{ border-radius: 11px; padding: 7px 6px; }
       .kpiMini .v{ font-size:13px; }
