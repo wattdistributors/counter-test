@@ -177,15 +177,44 @@
       letter-spacing:.03em;
     }
 
-    /* ---------- Calendar (PRO blue translucent) ---------- */
+    /* ---------- Calendar (Neo dark style) ---------- */
     .calSurface{
-      background: linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.07));
-      border: 1px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(180deg, rgba(8,16,32,.88), rgba(3,8,20,.92));
+      border: 1px solid rgba(77, 148, 255, .24);
       border-radius: 18px;
       padding: 12px;
-      box-shadow: var(--calShadow);
+      box-shadow: 0 20px 56px rgba(0,0,0,.35);
       backdrop-filter: blur(8px);
       overflow:hidden; /* prevents sideways overflow */
+    }
+
+    .calStatsTop{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-bottom: 12px;
+    }
+
+    .calMiniStat{
+      border-radius: 12px;
+      border: 1px solid rgba(85, 173, 255, .26);
+      background: linear-gradient(180deg, rgba(10,20,42,.78), rgba(5,11,24,.78));
+      padding: 8px 10px;
+    }
+    .calMiniStat .k{
+      font-size:10px;
+      letter-spacing:.1em;
+      font-weight:900;
+      color: rgba(186,220,255,.8);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+    .calMiniStat .v{
+      font-size:18px;
+      font-weight:1000;
+      color: #9be8ff;
+      text-shadow: 0 0 12px rgba(98,214,255,.28);
     }
 
     .calHeader{
@@ -209,8 +238,8 @@
     .iconBtn{
       width:40px; height:40px;
       border-radius: 14px;
-      border:1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.10);
+      border:1px solid rgba(85, 173, 255, .30);
+      background: linear-gradient(180deg, rgba(12,26,56,.8), rgba(6,14,32,.8));
       display:flex;
       align-items:center;
       justify-content:center;
@@ -218,10 +247,35 @@
       user-select:none;
       font-weight:1000;
       color: var(--calInk);
-      box-shadow: 0 14px 35px rgba(0,0,0,.14);
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
+
+    .calActions{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:8px;
+      margin: 0 0 10px;
+    }
+    .calActionBtn{
+      border-radius: 10px;
+      border:1px solid rgba(86, 170, 255, .28);
+      background: linear-gradient(180deg, rgba(9,20,42,.84), rgba(4,12,24,.84));
+      color: #cfeeff;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform: uppercase;
+      padding: 9px 10px;
+      text-align:center;
+      cursor:pointer;
+    }
+    .calActionBtn.primary{
+      border-color: rgba(62, 225, 148, .45);
+      color: #7effc0;
+      text-shadow: 0 0 10px rgba(66,223,155,.28);
+    }
 
     /* IMPORTANT: prevent horizontal scroll + force fit */
     .calGrid{
@@ -229,51 +283,54 @@
       box-sizing:border-box;
       display:grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap:10px;
+      gap:6px;
       overflow:hidden;
     }
 
     .dow{
       text-align:center;
-      font-size:10px;
+      font-size:11px;
       letter-spacing:.14em;
       font-weight:1000;
-      padding:2px 0 6px;
-      color: var(--calMuted);
+      padding:6px 0;
+      color: rgba(189,222,255,.85);
       user-select:none;
       min-width:0;
+      border: 1px solid rgba(77, 148, 255, .2);
+      border-radius: 8px;
+      background: rgba(10,18,34,.62);
     }
 
     /* Square day WITHOUT aspect-ratio (avoids Safari grid overflow bugs) */
     .dayCell{
       position:relative;
-      border-radius: 14px;
-      border: 1px solid var(--calLine);
-      background: rgba(255,255,255,.07);
+      border-radius: 8px;
+      border: 1px solid rgba(72, 144, 236, .24);
+      background: rgba(3,8,20,.86);
       cursor:pointer;
       user-select:none;
       min-width:0;              /* key for grid overflow */
       overflow:hidden;           /* clip anything inside */
-      box-shadow: 0 14px 35px rgba(0,0,0,.14);
+      box-shadow: inset 0 0 0 1px rgba(20,64,120,.15);
       transition: transform .08s ease, background .12s ease, border-color .12s ease;
       touch-action: manipulation;
     }
     .dayCell:active{ transform: scale(.985); }
-    .dayCell:hover{ background: rgba(255,255,255,.09); border-color: var(--calLine2); }
+    .dayCell:hover{ background: rgba(10,26,52,.9); border-color: rgba(107,181,255,.45); }
 
     .dayCell.muted{
-      opacity:.45;
-      background: rgba(255,255,255,.04);
+      opacity:.55;
+      background: rgba(3,8,16,.65);
       box-shadow: none;
     }
 
     .dayCell.today{
-      border-color: rgba(255,255,255,.38);
-      box-shadow: 0 18px 45px rgba(0,0,0,.18);
+      border-color: rgba(70, 197, 255, .65);
+      box-shadow: 0 0 0 1px rgba(70,197,255,.45), inset 0 0 20px rgba(20,89,160,.35);
     }
 
     .dayCell.hasData{
-      border-color: rgba(255,255,255,.28);
+      border-color: rgba(90, 255, 176, .35);
     }
 
     /* Square sizing helper */
@@ -284,7 +341,7 @@
     }
     .dayContent{
       position:absolute;
-      inset:10px;
+      inset:7px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -301,56 +358,56 @@
 
     .dayNum{
       font-weight:1000;
-      font-size:12px;
+      font-size:13px;
       letter-spacing:.01em;
       color: var(--calInk);
       min-width:0;
     }
 
     .badge{
-      font-size:10px;
+      font-size:9px;
       font-weight:1000;
       letter-spacing:.04em;
-      padding: 3px 8px;
+      padding: 2px 6px;
       border-radius: 999px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.18);
-      color: var(--calInk);
+      background: rgba(70, 197, 255, .18);
+      border: 1px solid rgba(70, 197, 255, .35);
+      color: #c3f6ff;
       white-space:nowrap;
       max-width: 72px;
       overflow:hidden;
       text-overflow:ellipsis;
     }
     .badge.today{
-      background: rgba(255,255,255,.16);
-      border-color: rgba(255,255,255,.24);
+      background: rgba(70, 197, 255, .24);
+      border-color: rgba(70, 197, 255, .48);
     }
 
     .miniClean{
       display:grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:8px;
+      gap:4px;
       margin-top: 10px;
       min-width:0;
     }
 
     .kpiMini{
-      border-radius: 12px;
-      padding: 8px 6px;
+      border-radius: 6px;
+      padding: 4px 4px;
       text-align:center;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.10);
+      border: 1px solid rgba(62,124,205,.26);
+      background: rgba(10,20,40,.55);
       min-width:0;
     }
     .kpiMini .k{
-      font-size:9px;
+      font-size:8px;
       letter-spacing:.18em;
       font-weight:1000;
-      color: rgba(255,255,255,.78);
+      color: rgba(171, 206, 244, .82);
       margin-bottom: 4px;
     }
     .kpiMini .v{
-      font-size:14px;
+      font-size:12px;
       font-weight:1000;
       letter-spacing:.02em;
       color: var(--calInk);
@@ -360,16 +417,16 @@
     .statsPanel{
       margin-top:12px;
       display:grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap:10px;
     }
     .statCard{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 16px;
+      background: rgba(6,12,28,.82);
+      border: 1px solid rgba(85, 173, 255, .24);
+      border-radius: 12px;
       padding: 10px 12px;
       color: var(--calInk);
-      box-shadow: 0 14px 35px rgba(0,0,0,.14);
+      box-shadow: none;
       backdrop-filter: blur(6px);
       overflow:hidden;
     }
@@ -606,9 +663,10 @@
 
       /* tighter calendar on small screens so it NEVER overflows */
       .calSurface{ padding:10px; }
-      .calGrid{ gap:8px; }
+      .calStatsTop, .statsPanel{ grid-template-columns: 1fr; }
+      .calGrid{ gap:5px; }
       .dayContent{ inset:8px; }
-      .dayCell{ border-radius: 13px; }
+      .dayCell{ border-radius: 7px; }
       .miniClean{ gap:6px; }
       .kpiMini{ border-radius: 11px; padding: 7px 6px; }
       .kpiMini .v{ font-size:13px; }
@@ -682,10 +740,17 @@
       <!-- ============ TAB: CALENDAR ============ -->
       <div id="tab_calendar" style="display:none;">
         <div class="calSurface">
+          <div class="calStatsTop" id="cal_stats_top"></div>
+
           <div class="calHeader">
             <div class="iconBtn" id="cal_prev" aria-label="Previous month">‹</div>
             <div class="calTitle" id="cal_title">—</div>
             <div class="iconBtn" id="cal_next" aria-label="Next month">›</div>
+          </div>
+
+          <div class="calActions">
+            <button class="calActionBtn primary" id="cal_today">Hoy</button>
+            <button class="calActionBtn" id="cal_month_total">Mes actual</button>
           </div>
 
           <div class="calGrid" id="cal_grid"></div>
@@ -938,6 +1003,7 @@
   // Calendar
   const calTitle = document.getElementById("cal_title");
   const calGrid = document.getElementById("cal_grid");
+  const calStatsTop = document.getElementById("cal_stats_top");
   const weekStatsEl = document.getElementById("week_stats");
   const monthStatsEl = document.getElementById("month_stats");
 
@@ -1359,6 +1425,15 @@
     if (calCursor.m > 11) { calCursor.m = 0; calCursor.y += 1; }
     renderCalendar();
   });
+  document.getElementById("cal_today").addEventListener("click", () => {
+    const d = new Date();
+    calCursor = { y: d.getFullYear(), m: d.getMonth() };
+    renderCalendar();
+  });
+  document.getElementById("cal_month_total").addEventListener("click", () => {
+    const totals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
+    alert(`Mes ${monthName(calCursor.y, calCursor.m)}\nVentas (X): ${totals.X || 0}\nCitas (Z): ${totals.Z || 0}\nGanancia: $${(totals.X || 0) * MONEY_PER_X}`);
+  });
 
   calGrid.addEventListener("click", (e) => {
     const cell = e.target.closest(".dayCell");
@@ -1371,6 +1446,7 @@
   function renderCalendar() {
     const y = calCursor.y, m = calCursor.m;
     calTitle.textContent = monthName(y, m);
+    renderCalendarTopStats(y, m);
 
     calGrid.innerHTML = "";
     const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -1432,6 +1508,32 @@
     }
 
     renderCalendarStats();
+  }
+
+
+  function renderCalendarTopStats(y, m) {
+    const totals = sumRecords(recordsInMonth(y, m));
+    const closeRate = (totals.Z || 0) ? (((totals.X || 0) / (totals.Z || 0)) * 100).toFixed(1) : "0.0";
+    const money = (totals.X || 0) * MONEY_PER_X;
+
+    calStatsTop.innerHTML = `
+      <div class="calMiniStat">
+        <div class="k">Total de ventas</div>
+        <div class="v">${totals.X || 0}</div>
+      </div>
+      <div class="calMiniStat">
+        <div class="k">Total de citas</div>
+        <div class="v">${totals.Z || 0}</div>
+      </div>
+      <div class="calMiniStat">
+        <div class="k">Conversión</div>
+        <div class="v">${closeRate}%</div>
+      </div>
+      <div class="calMiniStat">
+        <div class="k">Ganancia del mes</div>
+        <div class="v">$${money}</div>
+      </div>
+    `;
   }
 
   function renderStatCard(container, title, periodLabel, totals) {
@@ -1664,21 +1766,6 @@
     history.replaceState(null, "", location.pathname);
   });
 
-  // ---------- Tabs ----------
-  function setActiveTab(tabName) {
-    tabEls.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
-    tabCounter.style.display = (tabName === "counter") ? "" : "none";
-    tabCalendar.style.display = (tabName === "calendar") ? "" : "none";
-    tabSummary.style.display = (tabName === "summary") ? "" : "none";
-    if (tabName === "calendar") renderCalendar();
-    if (tabName === "summary") renderSummary();
-  }
-  document.getElementById("tabs").addEventListener("click", (e) => {
-    const t = e.target.closest(".tab");
-    if (!t) return;
-    setActiveTab(t.dataset.tab);
-  });
-
   // ---------- Start/End modals ----------
   function openModal(el) { el.classList.add("show"); }
   function closeModal(el) { el.classList.remove("show"); }
@@ -1697,30 +1784,8 @@
   document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
   document.getElementById("start_cancel").addEventListener("click", () => closeModal(modalStart));
 
-  // ---------- Buttons: calendar month nav ----------
-  let calCursor = (() => {
-    const d = new Date();
-    return { y: d.getFullYear(), m: d.getMonth() };
-  })();
-
-  document.getElementById("cal_prev").addEventListener("click", () => {
-    calCursor.m -= 1;
-    if (calCursor.m < 0) { calCursor.m = 11; calCursor.y -= 1; }
-    renderCalendar();
-  });
-  document.getElementById("cal_next").addEventListener("click", () => {
-    calCursor.m += 1;
-    if (calCursor.m > 11) { calCursor.m = 0; calCursor.y += 1; }
-    renderCalendar();
-  });
-
   // ---------- Modals close buttons ----------
   document.getElementById("day_x").addEventListener("click", () => closeModal(modalDay));
-
-  // ---------- Render counter ----------
-  function renderHeader() {
-    todayDateEl.textContent = `Date: ${state.date}`;
-  }
 
   // ---------- Init ----------
   (function init() {
