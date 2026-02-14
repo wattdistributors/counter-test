@@ -818,9 +818,20 @@
           <div class="reportBox" id="day_modal_report">—</div>
         </div>
 
+        <div class="grid2" id="day_edit_grid" style="display:none; margin-top:10px;">
+          <div class="field"><label>S</label><input id="day_edit_s" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>Z</label><input id="day_edit_z" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>CC</label><input id="day_edit_cc" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>C</label><input id="day_edit_c" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>X</label><input id="day_edit_x" type="number" min="0" inputmode="numeric" /></div>
+        </div>
+
         <div class="modalActions">
           <button class="btn" id="day_copy">Copy</button>
-          <button class="btn primary" id="day_share">Share</button>
+          <button class="btn" id="day_share">Share</button>
+          <button class="btn" id="day_edit">Editar día</button>
+          <button class="btn" id="day_delete">Borrar día</button>
+          <button class="btn primary" id="day_save" style="display:none;">Guardar cambios</button>
         </div>
       </div>
     </div>
@@ -1003,6 +1014,15 @@
   const dayModalReport = document.getElementById("day_modal_report");
   const dayCopyBtn = document.getElementById("day_copy");
   const dayShareBtn = document.getElementById("day_share");
+  const dayEditBtn = document.getElementById("day_edit");
+  const dayDeleteBtn = document.getElementById("day_delete");
+  const daySaveBtn = document.getElementById("day_save");
+  const dayEditGrid = document.getElementById("day_edit_grid");
+  const dayEditS = document.getElementById("day_edit_s");
+  const dayEditZ = document.getElementById("day_edit_z");
+  const dayEditCC = document.getElementById("day_edit_cc");
+  const dayEditC = document.getElementById("day_edit_c");
+  const dayEditX = document.getElementById("day_edit_x");
 
   // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
@@ -1252,8 +1272,12 @@
   function openDayModal(iso){
     const hist = loadHistory();
     const rec = hist[iso];
+    activeDayISO = iso;
 
     dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Sin datos • ${iso}`;
+    dayEditGrid.style.display = "none";
+    daySaveBtn.style.display = "none";
+    dayEditBtn.textContent = "Editar día";
 
     if (!rec){
       dayModalMeta.innerHTML = `
@@ -1265,6 +1289,8 @@
       dayModalReport.textContent = "—";
       dayCopyBtn.style.display = "none";
       dayShareBtn.style.display = "none";
+      dayEditBtn.style.display = "none";
+      dayDeleteBtn.style.display = "none";
       openModal(modalDay);
       return;
     }
@@ -1294,9 +1320,17 @@
       </div>
     `;
 
+    dayEditS.value = rec.values?.S ?? 0;
+    dayEditZ.value = rec.values?.Z ?? 0;
+    dayEditCC.value = rec.values?.CC ?? 0;
+    dayEditC.value = rec.values?.C ?? 0;
+    dayEditX.value = rec.values?.X ?? 0;
+
     dayModalReport.textContent = buildFullReportFromRecord(rec);
     dayCopyBtn.style.display = "";
     dayShareBtn.style.display = "";
+    dayEditBtn.style.display = "";
+    dayDeleteBtn.style.display = "";
     openModal(modalDay);
   }
 
@@ -1324,6 +1358,52 @@
 
   dayCopyBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "copy"); } catch {} });
   dayShareBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {} });
+
+  dayEditBtn.addEventListener("click", () => {
+    if (dayEditGrid.style.display === "none") {
+      dayEditGrid.style.display = "grid";
+      daySaveBtn.style.display = "";
+      dayEditBtn.textContent = "Cancelar edición";
+    } else {
+      dayEditGrid.style.display = "none";
+      daySaveBtn.style.display = "none";
+      dayEditBtn.textContent = "Editar día";
+    }
+  });
+
+  daySaveBtn.addEventListener("click", () => {
+    if (!activeDayISO) return;
+    const hist = loadHistory();
+    const rec = hist[activeDayISO];
+    if (!rec) return;
+    const n = (v) => Math.max(0, parseInt(v || 0, 10) || 0);
+    rec.values = {
+      ...rec.values,
+      S: n(dayEditS.value),
+      Z: n(dayEditZ.value),
+      CC: n(dayEditCC.value),
+      C: n(dayEditC.value),
+      X: n(dayEditX.value),
+    };
+    rec.money = (rec.values.X || 0) * MONEY_PER_X;
+    upsertDayInHistory(activeDayISO, rec);
+    renderCalendar();
+    renderCalendarStats();
+    renderSummary();
+    openDayModal(activeDayISO);
+  });
+
+  dayDeleteBtn.addEventListener("click", () => {
+    if (!activeDayISO) return;
+    if (!confirm(`¿Borrar el día ${activeDayISO}?`)) return;
+    const hist = loadHistory();
+    delete hist[activeDayISO];
+    saveHistory(hist);
+    closeModal(modalDay);
+    renderCalendar();
+    renderCalendarStats();
+    renderSummary();
+  });
 
   // ---------- Metrics interactions ----------
   function bump(k, d) {
@@ -1379,6 +1459,7 @@
 
   // ---------- Calendar rendering ----------
   let selectedDayISO = null;
+  let activeDayISO = null;
 
   let calCursor = (() => {
     const d = new Date();
