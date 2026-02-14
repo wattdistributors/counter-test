@@ -42,6 +42,28 @@
       backdrop-filter: blur(12px) saturate(130%);
       -webkit-backdrop-filter: blur(12px) saturate(130%);
       box-shadow: 0 10px 24px rgba(4,28,46,.20);
+      display:flex;
+      flex-direction:column;
+      height:min(920px, 94vh);
+    }
+
+    .appHeader{
+      position:sticky;
+      top:0;
+      z-index:5;
+      background: rgba(255,255,255,.02);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding-bottom:8px;
+      flex:0 0 auto;
+    }
+
+    .appMain{
+      flex:1 1 auto;
+      min-height:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding-right:2px;
     }
 
     .topbar{
@@ -632,7 +654,7 @@
 
     @media (max-width: 520px){
       .wrap{ width:100vw; padding:12px 2px 20px; }
-      .card{ padding:10px; }
+      .card{ padding:10px; height:min(920px,95vh); }
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
@@ -654,7 +676,7 @@
 <body>
   <div class="wrap">
     <div class="card">
-
+      <div class="appHeader">
       <div class="topbar">
         <div>
           <div class="title" id="today_title">KPIs Counter</div>
@@ -669,7 +691,9 @@
         <div class="tab" data-tab="calendar">Calendario</div>
         <div class="tab" data-tab="summary">Resumen</div>
       </div>
+      </div>
 
+      <div class="appMain">
       <!-- ============ TAB: COUNTER ============ -->
       <div id="tab_counter">
         <div id="start_screen" class="center">
@@ -735,6 +759,7 @@
       </div>
 
       <div class="footer">KPIs Counter v4.4 — Designed by Alen Cordero</div>
+      </div>
     </div>
   </div>
 
