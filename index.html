@@ -167,25 +167,13 @@
       letter-spacing:.03em;
     }
 
-    /* ==========================================================
-       CALENDAR (WHITE THEME)
-       ========================================================== */
-    /* container card for calendar area */
-    .calWhite{
-      background: rgba(255,255,255,.92);
-      border: 1px solid rgba(255,255,255,.55);
-      border-radius: 18px;
-      padding: 12px;
-      color:#111;
-      box-shadow: 0 18px 50px rgba(0,0,0,.18);
-    }
-
+    /* ---------- Calendar ---------- */
     .calHeader{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin: 0 0 10px;
+      margin: 8px 0 10px;
     }
     .calTitle{
       font-weight:900;
@@ -194,21 +182,18 @@
       opacity:.95;
       text-align:center;
       flex:1;
-      text-transform: capitalize;
-      color:#111;
     }
     .iconBtn{
       width:38px; height:38px;
       border-radius: 14px;
-      border:1px solid rgba(0,0,0,.12);
-      background: rgba(0,0,0,.04);
+      border:1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.08);
       display:flex;
       align-items:center;
       justify-content:center;
       cursor:pointer;
       user-select:none;
       font-weight:900;
-      color:#111;
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
@@ -220,30 +205,24 @@
     }
     .dow{
       text-align:center;
-      font-size:10px;
-      letter-spacing:.10em;
-      font-weight:900;
+      font-size:11px;
+      opacity:.85;
+      letter-spacing:.08em;
+      font-weight:800;
       padding:4px 0;
-      color: rgba(0,0,0,.55);
     }
-
     .dayCell{
       border-radius: 14px;
-      border: 1px solid rgba(0,0,0,.08);
-      background: rgba(0,0,0,.02);
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
       padding: 8px 8px 9px;
-      min-height: 74px;
+      min-height: 72px;
       overflow:hidden;
-      transition: transform .08s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
-      color:#111;
     }
-    .dayCell:active{ transform: scale(.995); }
-
     .dayCell.muted{
       opacity:.45;
-      background: rgba(0,0,0,.015);
+      background: rgba(255,255,255,.03);
     }
-
     .dayTop{
       display:flex;
       align-items:center;
@@ -255,32 +234,28 @@
       font-weight:900;
       font-size:12px;
       letter-spacing:.02em;
-      color:#111;
     }
     .badge{
       font-size:10px;
       font-weight:900;
       letter-spacing:.02em;
       padding: 3px 7px;
-      border-radius:999px;
-      background: rgba(0,0,0,.05);
-      border: 1px solid rgba(0,0,0,.10);
-      color:#111;
-      white-space:nowrap;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.20);
+      opacity:.95;
     }
-
     .mini{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:4px 8px;
       font-size:10px;
       line-height:1.25;
-      color: rgba(0,0,0,.80);
+      opacity:.95;
     }
     .mini b{
       font-weight:900;
       letter-spacing:.02em;
-      color:#111;
     }
     .mini .x{
       grid-column: 1 / span 2;
@@ -288,22 +263,8 @@
       justify-content:space-between;
       align-items:center;
       padding-top: 2px;
-      border-top: 1px solid rgba(0,0,0,.08);
+      border-top: 1px solid rgba(255,255,255,.14);
       margin-top: 2px;
-    }
-
-    /* ✅ Pro highlight when X>0 (white theme) */
-    .dayCell.hit{
-      background: rgba(27,134,200,.06);
-      border-color: rgba(27,134,200,.24);
-      box-shadow:
-        0 10px 30px rgba(0,0,0,.10),
-        0 0 0 1px rgba(27,134,200,.08) inset,
-        0 0 22px rgba(27,134,200,.12);
-    }
-    .dayCell.hit .badge{
-      background: rgba(27,134,200,.10);
-      border-color: rgba(27,134,200,.18);
     }
 
     .statsPanel{
@@ -313,12 +274,10 @@
       gap:10px;
     }
     .statCard{
-      background: rgba(255,255,255,.92);
-      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
       border-radius: 14px;
       padding: 10px 12px;
-      color:#111;
-      box-shadow: 0 14px 36px rgba(0,0,0,.10);
     }
     .statHead{
       display:flex;
@@ -335,7 +294,7 @@
     }
     .statHead .p{
       font-size:12px;
-      opacity:.70;
+      opacity:.85;
       white-space:nowrap;
     }
     .statGrid{
@@ -344,15 +303,14 @@
       gap:8px;
     }
     .statItem{
-      background: rgba(0,0,0,.02);
-      border: 1px solid rgba(0,0,0,.07);
+      background: rgba(0,0,0,.10);
+      border: 1px solid rgba(255,255,255,.14);
       border-radius: 12px;
       padding: 8px 8px;
       text-align:center;
-      color:#111;
     }
     .statItem .k{
-      font-size:10px; opacity:.65; letter-spacing:.08em; font-weight:900;
+      font-size:10px; opacity:.85; letter-spacing:.08em; font-weight:900;
       margin-bottom: 4px;
     }
     .statItem .v{
@@ -364,13 +322,11 @@
       justify-content:space-between;
       gap:10px;
       font-size:12px;
-      opacity:.80;
+      opacity:.9;
     }
     .moneyLine b{
       font-weight:900;
       letter-spacing:.02em;
-      color:#111;
-      opacity:1;
     }
 
     /* ---------- Summary ---------- */
@@ -598,14 +554,16 @@
         <div class="btnrow" id="top_actions"></div>
       </div>
 
+      <!-- Tabs -->
       <div class="tabs" id="tabs">
         <div class="tab active" data-tab="counter">Contador</div>
         <div class="tab" data-tab="calendar">Calendario</div>
         <div class="tab" data-tab="summary">Resumen</div>
       </div>
 
-      <!-- TAB: COUNTER -->
+      <!-- ============ TAB: COUNTER ============ -->
       <div id="tab_counter">
+        <!-- Start screen -->
         <div id="start_screen" class="center">
           <div style="opacity:.9; font-size:13px; max-width: 360px;">
             Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
@@ -614,6 +572,7 @@
           <button class="btn primary" id="start_day">Iniciar día / Start day</button>
         </div>
 
+        <!-- Active session screen -->
         <div id="session_screen" style="display:none;">
           <div class="sessionInfo">
             <div class="left">
@@ -645,17 +604,16 @@
         </div>
       </div>
 
-      <!-- TAB: CALENDAR -->
+      <!-- ============ TAB: CALENDAR ============ -->
       <div id="tab_calendar" style="display:none;">
-        <!-- white calendar block -->
-        <div class="calWhite">
-          <div class="calHeader">
-            <div class="iconBtn" id="cal_prev" aria-label="Previous month">‹</div>
-            <div class="calTitle" id="cal_title">—</div>
-            <div class="iconBtn" id="cal_next" aria-label="Next month">›</div>
-          </div>
+        <div class="calHeader">
+          <div class="iconBtn" id="cal_prev" aria-label="Previous month">‹</div>
+          <div class="calTitle" id="cal_title">—</div>
+          <div class="iconBtn" id="cal_next" aria-label="Next month">›</div>
+        </div>
 
-          <div class="calGrid" id="cal_grid"></div>
+        <div class="calGrid" id="cal_grid">
+          <!-- filled by JS -->
         </div>
 
         <div class="statsPanel">
@@ -664,7 +622,7 @@
         </div>
       </div>
 
-      <!-- TAB: SUMMARY -->
+      <!-- ============ TAB: SUMMARY ============ -->
       <div id="tab_summary" style="display:none;">
         <div class="sumWrap" id="sum_wrap"></div>
       </div>
@@ -738,13 +696,14 @@
     </div>
   </div>
 
+  <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 
 <script>
   const metrics = ["S","Z","CC","C","X"];
   const STATE_KEY = "kpi_state_v43";
-  const HISTORY_KEY = "kpi_history_v1";
+  const HISTORY_KEY = "kpi_history_v1"; // completed days
   const AGGR_MIN_STOPS = 20;
   const MONEY_PER_X = 100;
 
@@ -756,6 +715,12 @@
     const mm = String(d.getMonth()+1).padStart(2,"0");
     const dd = String(d.getDate()).padStart(2,"0");
     return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const parseISO = (iso) => {
+    // iso = YYYY-MM-DD (local)
+    const [y,m,d] = iso.split("-").map(Number);
+    return new Date(y, (m-1), d);
   };
 
   const fmtTime = (ts) => {
@@ -783,8 +748,8 @@
 
   const startOfWeekMon = (d) => {
     const out = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const day = out.getDay();
-    const diff = (day === 0) ? -6 : (1 - day);
+    const day = out.getDay(); // 0 Sun ... 6 Sat
+    const diff = (day === 0) ? -6 : (1 - day); // Monday start
     out.setDate(out.getDate() + diff);
     out.setHours(0,0,0,0);
     return out;
@@ -800,6 +765,7 @@
 
   document.addEventListener("dblclick", (e) => e.preventDefault(), { passive:false });
 
+  // ---------- History ----------
   function loadHistory() {
     try {
       const h = JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}");
@@ -808,7 +774,9 @@
       return {};
     }
   }
-  function saveHistory(hist) { try { localStorage.setItem(HISTORY_KEY, JSON.stringify(hist)); } catch {} }
+  function saveHistory(hist) {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(hist)); } catch {}
+  }
   function upsertDayInHistory(dayISO, payload) {
     const hist = loadHistory();
     hist[dayISO] = payload;
@@ -825,6 +793,7 @@
   }
 
   function recordsInRange(startDate, endDate) {
+    // startDate/endDate are Date objects inclusive
     const hist = loadHistory();
     const out = [];
     const startISO = isoDateLocal(startDate);
@@ -834,6 +803,7 @@
       if (iso >= startISO && iso <= endISO) out.push(hist[iso]);
     });
 
+    // sort by date asc
     out.sort((a,b) => (a.date || "").localeCompare(b.date || ""));
     return out;
   }
@@ -844,7 +814,7 @@
     return recordsInRange(start, end);
   }
 
-  // ---- session state
+  // ---------- Load session state ----------
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
   const state = {
     active: !!saved.active,
@@ -856,14 +826,16 @@
   };
   metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
 
-  // ---- DOM
+  // ---------- DOM ----------
   const todayDateEl = document.getElementById("today_date");
 
+  // Tabs
   const tabEls = Array.from(document.querySelectorAll(".tab"));
   const tabCounter = document.getElementById("tab_counter");
   const tabCalendar = document.getElementById("tab_calendar");
   const tabSummary = document.getElementById("tab_summary");
 
+  // Counter
   const startScreen = document.getElementById("start_screen");
   const sessionScreen = document.getElementById("session_screen");
   const list = document.getElementById("list");
@@ -873,27 +845,33 @@
   const aggrEl = document.getElementById("aggr");
   const closeEl = document.getElementById("close");
 
+  // Calendar
   const calTitle = document.getElementById("cal_title");
   const calGrid = document.getElementById("cal_grid");
   const weekStatsEl = document.getElementById("week_stats");
   const monthStatsEl = document.getElementById("month_stats");
 
+  // Summary
   const sumWrap = document.getElementById("sum_wrap");
 
+  // Modals
   const modalStart = document.getElementById("modal_start");
   const modalReport = document.getElementById("modal_report");
   const startName = document.getElementById("start_name");
   const startStore = document.getElementById("start_store");
   const reportBox = document.getElementById("report_box");
 
+  // QR
   const qrWrap = document.getElementById("qr_wrap");
   const qrBox = document.getElementById("qr_box");
 
+  // Report actions
   const reportHint = document.getElementById("report_hint");
   const endBtn = document.getElementById("end_btn");
   const copyBtn = document.getElementById("copy_btn");
   const shareBtn = document.getElementById("share_btn");
 
+  // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
   function saveState() { try { saveStateNow(); } catch {} }
 
@@ -902,8 +880,11 @@
     if (document.visibilityState === "hidden") { try { saveStateNow(); } catch {} }
   });
 
+  // ---------- UI ----------
   const valEls = {};
-  function renderHeader() { todayDateEl.textContent = `Date: ${state.date}`; }
+  function renderHeader() {
+    todayDateEl.textContent = `Date: ${state.date}`;
+  }
 
   function renderSessionInfo() {
     whoLine.textContent = `${state.rep || "—"} • ${state.store || "—"}`;
@@ -957,6 +938,7 @@
     renderIndicators();
   }
 
+  // ---------- Timer ----------
   let timerInterval = null;
   function startTimerLoop() {
     stopTimerLoop();
@@ -973,6 +955,7 @@
     timerInterval = null;
   }
 
+  // ---------- Modals helpers ----------
   function openModal(el) { el.classList.add("show"); }
   function closeModal(el) { el.classList.remove("show"); }
 
@@ -985,6 +968,7 @@
   clickOutsideToClose(modalStart, true);
   clickOutsideToClose(modalReport, false);
 
+  // ---------- Session logic ----------
   function startDay(rep, store) {
     state.date = isoDateLocal();
     state.rep = rep;
@@ -997,10 +981,13 @@
     startTimerLoop();
   }
 
+  // English-only report
   function buildReport(endTs) {
     const S = state.values.S, Z = state.values.Z, CC = state.values.CC, C = state.values.C, X = state.values.X;
+
     const aggr = (S >= AGGR_MIN_STOPS && S > 0) ? (Z / S) : null;
     const close = (Z > 0) ? (X / Z) : 0;
+
     const startTs = state.sessionStart || endTs;
     const duration = fmtDuration(endTs - startTs);
 
@@ -1051,10 +1038,13 @@
     timerEl.textContent = "00:00:00";
     closeModal(modalReport);
     showStartScreen();
+
+    // refresh other tabs
     renderCalendar();
     renderSummary();
   }
 
+  // ---------- Report mode ----------
   function setReportMode(mode) {
     const isPhone = mode === "phone";
     copyBtn.style.display = isPhone ? "" : "none";
@@ -1063,6 +1053,7 @@
     endBtn.style.display = isPhone ? "none" : "";
   }
 
+  // ---------- QR ----------
   function makeShareUrlFromReport(text) {
     const payload = LZString.compressToEncodedURIComponent(text);
     return `${location.origin}${location.pathname}#r=${payload}`;
@@ -1071,6 +1062,7 @@
   function showQRForText(text) {
     qrBox.innerHTML = "";
     qrWrap.style.display = "";
+
     const url = makeShareUrlFromReport(text);
 
     new QRCode(qrBox, {
@@ -1091,8 +1083,10 @@
       if (!text) return false;
 
       reportBox.textContent = text;
+
       qrWrap.style.display = "none";
       setReportMode("phone");
+
       openModal(modalReport);
       return true;
     } catch {
@@ -1100,6 +1094,7 @@
     }
   }
 
+  // ---------- Metrics interactions ----------
   function bump(k, d) {
     const prev = state.values[k];
     const next = Math.max(0, prev + d);
@@ -1139,6 +1134,7 @@
     if (document.visibilityState === "hidden") stopHold();
   });
 
+  // ---------- Tabs logic ----------
   function setActiveTab(tabName) {
     tabEls.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
     tabCounter.style.display = (tabName === "counter") ? "" : "none";
@@ -1155,6 +1151,7 @@
     setActiveTab(t.dataset.tab);
   });
 
+  // ---------- Calendar rendering ----------
   let calCursor = (() => {
     const d = new Date();
     return { y: d.getFullYear(), m: d.getMonth() };
@@ -1171,19 +1168,11 @@
     renderCalendar();
   });
 
-  // ✅ Glow proportional to X (0..10+)
-  function glowForX(x) {
-    const t = Math.max(0, Math.min(10, x)) / 10;
-    const halo = 10 + (26 * t);
-    const border = 0.16 + (0.18 * t);
-    const bg = 0.04 + (0.06 * t);
-    return { t, halo, border, bg };
-  }
-
   function renderCalendar() {
     const y = calCursor.y, m = calCursor.m;
     calTitle.textContent = monthName(y, m);
 
+    // Build DOW headers + 6 weeks grid
     calGrid.innerHTML = "";
     const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     dows.forEach(s => {
@@ -1194,8 +1183,9 @@
     });
 
     const first = new Date(y, m, 1);
-    const firstDow = first.getDay();
-    const offset = (firstDow === 0) ? 6 : (firstDow - 1);
+    const firstDow = first.getDay(); // 0 Sun..6 Sat
+    // convert to Monday-based offset
+    const offset = (firstDow === 0) ? 6 : (firstDow - 1); // 0 means Mon
     const gridStart = new Date(y, m, 1);
     gridStart.setDate(gridStart.getDate() - offset);
 
@@ -1209,33 +1199,18 @@
       const inMonth = (day.getMonth() === m);
       const rec = hist[iso];
 
+      const cell = document.createElement("div");
+      cell.className = "dayCell" + (inMonth ? "" : " muted");
+
+      const dayNum = day.getDate();
+      const badgeText = (iso === todayISO) ? "TODAY" : (rec ? "$" + ((rec.values?.X||0) * MONEY_PER_X) : "");
+      const badgeHtml = badgeText ? `<div class="badge">${badgeText}</div>` : "";
+
       const S = rec?.values?.S ?? 0;
       const Z = rec?.values?.Z ?? 0;
       const CC = rec?.values?.CC ?? 0;
       const C = rec?.values?.C ?? 0;
       const X = rec?.values?.X ?? 0;
-
-      const cell = document.createElement("div");
-      const hit = X > 0;
-      cell.className = "dayCell" + (inMonth ? "" : " muted") + (hit ? " hit" : "");
-
-      if (hit) {
-        const g = glowForX(X);
-        // premium glow on white, proportional to X
-        cell.style.boxShadow =
-          `0 10px 28px rgba(0,0,0,.10), ` +
-          `0 0 0 1px rgba(27,134,200,.10) inset, ` +
-          `0 0 ${g.halo}px rgba(27,134,200,.14)`;
-        cell.style.borderColor = `rgba(27,134,200,${g.border.toFixed(3)})`;
-        cell.style.background = `rgba(27,134,200,${g.bg.toFixed(3)})`;
-      }
-
-      const dayNum = day.getDate();
-
-      let badgeText = "";
-      if (iso === todayISO) badgeText = "TODAY";
-      else if (hit) badgeText = `X ${X} • $${X * MONEY_PER_X}`;
-      const badgeHtml = badgeText ? `<div class="badge">${badgeText}</div>` : "";
 
       cell.innerHTML = `
         <div class="dayTop">
@@ -1266,7 +1241,7 @@
         </div>
         <div style="text-align:right;">
           <div style="font-weight:900; letter-spacing:.02em;">$${money}</div>
-          <div style="font-size:11px; opacity:.70; letter-spacing:.08em; font-weight:800; margin-top:2px;">EARNED</div>
+          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:800; margin-top:2px;">EARNED</div>
         </div>
       </div>
 
@@ -1290,9 +1265,11 @@
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
-    const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
+    const weekRecs = recordsInRange(weekStart, weekEnd);
+    const weekTotals = sumRecords(weekRecs);
 
-    const monthTotals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
+    const monthRecs = recordsInMonth(calCursor.y, calCursor.m);
+    const monthTotals = sumRecords(monthRecs);
 
     const wLabel = `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`;
     const mLabel = `${calCursor.y}-${String(calCursor.m+1).padStart(2,"0")}`;
@@ -1301,11 +1278,13 @@
     renderStatCard(monthStatsEl, "Stats del mes", mLabel, monthTotals);
   }
 
+  // ---------- Summary rendering ----------
   function renderSummary() {
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
     const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
+
     const monthTotals = sumRecords(recordsInMonth(now.getFullYear(), now.getMonth()));
 
     const hist = loadHistory();
@@ -1339,14 +1318,29 @@
             <div class="sumMoney">$${money}<span>EARNED</span></div>
           </div>
           <div class="sumStats">
-            <div class="sumPill"><div class="k">X</div><div class="v">${totals.X||0}</div></div>
-            <div class="sumPill"><div class="k">Avg X/Día</div><div class="v">${avgX}</div></div>
-            <div class="sumPill"><div class="k">Días</div><div class="v">${days}</div></div>
+            <div class="sumPill">
+              <div class="k">X</div>
+              <div class="v">${totals.X||0}</div>
+            </div>
+            <div class="sumPill">
+              <div class="k">Avg X/Día</div>
+              <div class="v">${avgX}</div>
+            </div>
+            <div class="sumPill">
+              <div class="k">Días</div>
+              <div class="v">${days}</div>
+            </div>
           </div>
 
           <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-            <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${aggr}</div></div>
-            <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${close}</div></div>
+            <div class="sumPill">
+              <div class="k">% Agg (Z/S)</div>
+              <div class="v">${aggr}</div>
+            </div>
+            <div class="sumPill">
+              <div class="k">% Close (X/Z)</div>
+              <div class="v">${close}</div>
+            </div>
           </div>
         </div>
       `;
@@ -1385,7 +1379,7 @@
     `;
   }
 
-  // -------- Buttons
+  // ---------- Buttons ----------
   document.getElementById("start_day").addEventListener("click", () => {
     startName.value = state.rep || "";
     startStore.value = state.store || "";
@@ -1416,6 +1410,7 @@
     });
   });
 
+  // Tablet: End day -> show QR + only End button
   document.getElementById("finish_day").addEventListener("click", () => {
     const endTs = Date.now();
     const text = buildReport(endTs);
@@ -1423,6 +1418,7 @@
 
     showQRForText(text);
     setReportMode("tablet");
+
     openModal(modalReport);
   });
 
@@ -1467,7 +1463,9 @@
         }
       }
 
+      // ✅ Save completed day before resetting
       persistCompletedDay(endTs, text);
+
       finalizeAndReset();
       history.replaceState(null, "", location.pathname);
     } catch (_) {
@@ -1478,6 +1476,7 @@
   copyBtn.addEventListener("click", () => doCopyOrShare("copy"));
   shareBtn.addEventListener("click", () => doCopyOrShare("share"));
 
+  // Tablet: End button resets after QR was scanned/sent
   endBtn.addEventListener("click", () => {
     const confirmMsg =
       "¿Seguro que quieres finalizar el día y resetear?\nAre you sure you want to end the day and reset?";
@@ -1491,9 +1490,11 @@
     history.replaceState(null, "", location.pathname);
   });
 
-  // -------- Init
+  // ---------- Init ----------
   (function init() {
     renderHeader();
+
+    // If opened from QR (phone), open report
     tryLoadReportFromHash();
 
     if (state.active && state.sessionStart && state.rep && state.store) {
@@ -1503,6 +1504,7 @@
       showStartScreen();
     }
 
+    // initial renders
     renderCalendar();
     renderSummary();
 
