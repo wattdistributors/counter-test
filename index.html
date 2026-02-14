@@ -7,18 +7,18 @@
 
   <style>
     :root{
-      --bg1:#1b86c8;
-      --bg2:#0b5a86;
+      --bg1:#1a6ea1;
+      --bg2:#12547d;
 
       /* Calendar (blue / celeste + transparency) */
-      --calPanel: rgba(185, 233, 255, .26);
-      --calPanel2: rgba(122, 199, 241, .18);
-      --calLine: rgba(210, 244, 255, .45);
-      --calLine2: rgba(232, 249, 255, .70);
-      --calInk: rgba(248,253,255,.98);
-      --calMuted: rgba(224,242,252,.88);
-      --calChip: rgba(170, 223, 249, .24);
-      --calChipLine: rgba(223, 246, 255, .40);
+      --calPanel: rgba(20, 92, 145, .24);
+      --calPanel2: rgba(10, 62, 104, .22);
+      --calLine: rgba(142, 211, 245, .28);
+      --calLine2: rgba(187, 232, 255, .54);
+      --calInk: rgba(236,248,255,.97);
+      --calMuted: rgba(193,224,241,.84);
+      --calChip: rgba(91, 169, 216, .18);
+      --calChipLine: rgba(173, 224, 250, .30);
       --calShadow: 0 18px 55px rgba(0,0,0,.22);
     }
 
@@ -27,19 +27,21 @@
     body{
       margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      background: radial-gradient(130% 120% at 15% 0%, rgba(165,220,248,.30), transparent 62%), linear-gradient(150deg, var(--bg1), var(--bg2));
       color:#fff;
       overflow-x:hidden; /* avoid sideways scroll */
     }
 
-    .wrap{ width:min(620px, 96vw); padding:22px 12px 26px; }
+    .wrap{ width:min(620px, 99vw); padding:22px 4px 26px; }
 
     .card{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 18px;
+      background: rgba(255,255,255,.11);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 20px;
       padding: 14px;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(12px) saturate(130%);
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      box-shadow: 0 10px 24px rgba(4,28,46,.20);
     }
 
     .topbar{
@@ -47,14 +49,14 @@
       margin-bottom:12px;
     }
 
-    .title{ font-weight:800; letter-spacing:.02em; font-size:18px; line-height:1.1; }
-    .subtitle{ opacity:.9; font-size:13px; margin-top:4px; }
+    .title{ font-weight:700; letter-spacing:.015em; font-size:19px; line-height:1.1; }
+    .subtitle{ opacity:.75; font-size:13px; margin-top:4px; }
 
     .btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
     .btn{
-      border:1px solid rgba(255,255,255,.40);
-      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);
       color:#fff; padding:10px 12px; border-radius:12px;
       cursor:pointer; font-size:14px; font-weight:700;
       user-select:none; touch-action: manipulation;
@@ -69,27 +71,33 @@
     /* ---------- Tabs ---------- */
     .tabs{
       display:flex;
-      gap:10px;
+      gap:0;
       margin: 6px 0 12px;
+      padding:3px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      border-radius: 14px;
     }
     .tab{
       flex:1;
       text-align:center;
-      padding:10px 10px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.08);
+      padding:9px 8px;
+      border-radius: 10px;
+      border:0;
+      background: transparent;
       font-weight:900;
       letter-spacing:.02em;
       cursor:pointer;
       user-select:none;
       touch-action: manipulation;
+      color: rgba(227,246,255,.86);
     }
     .tab:active{ transform: scale(.99); }
     .tab.active{
-      background: rgba(255,255,255,.22);
-      border-color: rgba(255,255,255,.55);
-      box-shadow: 0 10px 26px rgba(0,0,0,.12);
+      background: rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      color:#fff;
+      box-shadow:none;
     }
 
     .center{
@@ -110,10 +118,12 @@
       gap:12px;
       align-items:center;
       margin: 8px 0 4px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
+      padding: 10px 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid rgba(255,255,255,.12);
+      border-bottom: 1px solid rgba(255,255,255,.12);
       overflow:hidden;
     }
 
@@ -124,7 +134,7 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .sessionInfo .left .line2{
-      opacity:.9; font-size:12px; margin-top:3px;
+      opacity:.75; font-size:12px; margin-top:3px;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
@@ -161,32 +171,32 @@
       margin-top:12px;
     }
     .ind{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.20);
-      border-radius: 14px;
-      padding: 10px 12px;
+      background: transparent;
+      border: 1px solid rgba(184,230,255,.16);
+      border-radius: 10px;
+      padding: 8px 8px;
     }
-    .ind .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
+    .ind .k{ font-size:12px; opacity:.75; margin-bottom:6px; }
     .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
 
     .footer{
       margin-top:10px;
       text-align:center;
-      font-size:10px;
+      font-size:8px;
       opacity:.70;
       letter-spacing:.03em;
     }
 
     /* ---------- Calendar (blue translucent style) ---------- */
     .calSurface{
-      background: linear-gradient(165deg, var(--calPanel), var(--calPanel2));
-      border: 1px solid var(--calLine);
-      border-radius: 18px;
-      padding: 13px 8px 12px;
-      box-shadow: var(--calShadow);
-      backdrop-filter: blur(12px) saturate(130%);
-      -webkit-backdrop-filter: blur(12px) saturate(130%);
-      overflow:hidden; /* prevents sideways overflow */
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 6px 6px 6px;
+      box-shadow: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow:hidden;
     }
 
     .calHeader{
@@ -194,11 +204,11 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin: 2px 0 12px;
+      margin: 2px 0 10px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.14);
     }
 
     .calTitle{
-      font-weight:1000;
+      font-weight:700;
       letter-spacing:.02em;
       font-size:14px;
       text-align:center;
@@ -208,10 +218,10 @@
     }
 
     .iconBtn{
-      width:40px; height:40px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.10);
+      width:34px; height:34px;
+      border-radius: 10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -219,7 +229,7 @@
       user-select:none;
       font-weight:1000;
       color: var(--calInk);
-      box-shadow: 0 12px 26px rgba(0,0,0,.14);
+      box-shadow:none;
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
@@ -230,65 +240,83 @@
       box-sizing:border-box;
       display:grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap:0;
+      gap:1px;
       overflow:hidden;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 10px;
+      padding: 1px;
     }
 
     .dow{
       text-align:center;
       font-size:10px;
-      letter-spacing:.14em;
-      font-weight:1000;
-      padding:6px 0;
+      letter-spacing:.12em;
+      font-weight:900;
+      padding:7px 0;
       color: var(--calMuted);
       user-select:none;
       min-width:0;
-      border: 1px solid rgba(210,244,255,.40);
+      border: 0;
       border-radius: 0;
-      background: rgba(159,220,248,.16);
+      background: rgba(255,255,255,.05);
     }
 
     /* Square day WITHOUT aspect-ratio (avoids Safari grid overflow bugs) */
     .dayCell{
       position:relative;
       border-radius: 0;
-      border: 1px solid rgba(216,245,255,.34);
-      background: linear-gradient(165deg, rgba(188,233,255,.18), rgba(132,206,245,.14));
+      border: 1px solid rgba(255,255,255,.24);
+      background: rgba(255,255,255,.08);
       cursor:pointer;
       user-select:none;
       min-width:0;              /* key for grid overflow */
       overflow:hidden;           /* clip anything inside */
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.28);
+      box-shadow:none;
       transition: transform .08s ease, background .12s ease, border-color .12s ease;
       touch-action: manipulation;
     }
     .dayCell:active{ transform: scale(.985); }
-    .dayCell:hover{ background: rgba(201,239,255,.28); border-color: var(--calLine2); }
+    .dayCell:hover{ background: rgba(255,255,255,.10); }
 
     .dayCell.muted{
-      opacity:.55;
-      background: rgba(122, 189, 222, .12);
-      box-shadow: none;
+      opacity:1;
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: none !important;
     }
+    .dayCell.muted .dayNum,
+    .dayCell.muted .miniClean{ opacity:.4; }
 
     .dayCell.today{
-      border-color: rgba(242,252,255,.90);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
     }
 
     .dayCell.hasData{
-      border-color: rgba(255,255,255,.30);
+      box-shadow: none;
     }
+
+    .dayCell.selected{
+      background: rgba(255,255,255,.16);
+      border-color: rgba(255,255,255,.24);
+      box-shadow: none;
+    }
+    .dayCell.muted.selected{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: none;
+    }
+
 
     /* Square sizing helper */
     .dayCell::before{
       content:"";
       display:block;
-      padding-top:112%;
+      padding-top:134%;
     }
     .dayContent{
       position:absolute;
-      inset:5px;
+      inset:3px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -297,31 +325,33 @@
 
     .dayTop{
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:4px;
+      align-items:flex-start;
+      justify-content:flex-start;
+      gap:2px;
       min-width:0;
+      min-height: 9px;
     }
 
     .dayNum{
       font-weight:900;
-      font-size:11px;
+      font-size:10px;
       letter-spacing:.01em;
       color: var(--calInk);
       min-width:0;
     }
 
     .badge{
+      display:none;
       font-size:8px;
       font-weight:900;
       letter-spacing:.04em;
-      padding: 1px 4px;
+      padding: 1px 3px;
       border-radius: 999px;
       background: rgba(255,255,255,.14);
       border: 1px solid rgba(255,255,255,.22);
       color: var(--calInk);
       white-space:nowrap;
-      max-width: 44px;
+      max-width: 38px;
       overflow:hidden;
       text-overflow:ellipsis;
     }
@@ -331,40 +361,19 @@
     }
 
     .miniClean{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:2px;
-      margin-top: 4px;
+      margin-top: 1px;
       min-width:0;
-    }
-
-    .kpiMini{
-      border-radius: 6px;
-      padding: 5px 2px;
-      text-align:center;
-      border: 1px solid rgba(145,221,255,.19);
-      background: rgba(217,242,255,.20);
-      min-width:0;
-    }
-    .kpiMini .k{
-      font-size:8px;
-      letter-spacing:.08em;
-      font-weight:1000;
-      color: rgba(255,255,255,.78);
-      margin-bottom: 4px;
-    }
-    .kpiMini .v{
-      font-size:12px;
-      font-weight:1000;
-      letter-spacing:.02em;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:1px;
+      font-size:10px;
+      line-height:1.15;
       color: var(--calInk);
+      font-weight:500;
+      letter-spacing:.01em;
     }
-
-    .calGrid .dow,
-    .calGrid .dayCell{
-      margin-left:-1px;
-      margin-top:-1px;
-    }
+    .miniClean .kpiInline{ min-width:0; opacity:.95; }
 
     /* Stats under calendar */
     .statsPanel{
@@ -375,12 +384,12 @@
     }
     .statCard{
       background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 14px;
-      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      padding: 10px 10px;
       color: var(--calInk);
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
-      backdrop-filter: blur(6px);
+      box-shadow: none;
+      backdrop-filter: none;
       overflow:hidden;
     }
     .statHead{
@@ -391,7 +400,7 @@
       margin-bottom: 8px;
     }
     .statHead .h{
-      font-weight:1000;
+      font-weight:700;
       letter-spacing:.01em;
       font-size:13px;
       color: var(--calInk);
@@ -407,12 +416,12 @@
       gap:8px;
     }
     .statItem{
-      border-radius: 12px;
-      padding: 8px 8px;
+      border-radius: 8px;
+      padding: 7px 6px;
       text-align:center;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.12);
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      box-shadow: none;
       min-width:0;
     }
     .statItem .k{
@@ -439,10 +448,10 @@
     /* ---------- Summary ---------- */
     .sumWrap{ display:grid; gap:10px; }
     .sumCard{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 14px;
-      padding: 12px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      padding: 10px;
     }
     .sumTop{
       display:flex;
@@ -451,7 +460,7 @@
       gap:10px;
       margin-bottom: 10px;
     }
-    .sumTitle{ font-weight:900; letter-spacing:.02em; font-size:14px; opacity:.95; }
+    .sumTitle{ font-weight:700; letter-spacing:.02em; font-size:14px; opacity:.95; }
     .sumSub{ font-size:12px; opacity:.85; margin-top: 4px; }
     .sumMoney{ text-align:right; font-weight:900; letter-spacing:.02em; font-size:14px; }
     .sumMoney span{
@@ -464,10 +473,10 @@
     }
     .sumStats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
     .sumPill{
-      background: rgba(0,0,0,.10);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 12px;
-      padding: 10px 8px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 8px 6px;
       text-align:center;
     }
     .sumPill .k{
@@ -501,7 +510,7 @@
       border: 1px solid rgba(255,255,255,.20);
       border-radius: 18px;
       backdrop-filter: blur(8px);
-      box-shadow: 0 18px 55px rgba(0,0,0,.30);
+      box-shadow: 0 10px 24px rgba(3,22,40,.22);
       padding: 14px;
       position:relative;
     }
@@ -560,8 +569,8 @@
       width:100%;
       box-sizing:border-box;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
       padding: 10px 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12px;
@@ -574,7 +583,7 @@
     .qrWrap{
       margin-top:12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.08);
       padding: 12px;
       display:flex;
@@ -610,19 +619,19 @@
     }
 
     @media (max-width: 520px){
+      .wrap{ width:100vw; padding:12px 2px 20px; }
+      .card{ padding:10px; }
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
 
       /* tighter calendar on small screens so it NEVER overflows */
-      .calSurface{ padding:10px 6px; }
+      .calSurface{ padding:8px 4px 8px; }
       .statsPanel{ grid-template-columns: 1fr; }
-      .calGrid{ gap:0; }
-      .dayContent{ inset:5px; }
+      .calGrid{ gap:1px; }
+      .dayContent{ inset:3px; }
       .dayCell{ border-radius: 0; }
-      .miniClean{ gap:2px; }
-      .kpiMini{ border-radius: 6px; padding: 5px 2px; }
-      .kpiMini .v{ font-size:11px; }
+      .miniClean{ gap:1px; font-size:9px; }
 
       .statGrid{ grid-template-columns: repeat(5, minmax(0,1fr)); }
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
@@ -791,7 +800,7 @@
       </div>
 
       <div class="modalBody">
-        <div class="statCard" style="margin:0; background: rgba(0,0,0,.12);" id="day_modal_meta"></div>
+        <div class="statCard" id="day_modal_meta" style="margin:0; background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.14);"></div>
 
         <div style="margin-top:10px;">
           <div class="reportBox" id="day_modal_report">—</div>
@@ -818,6 +827,7 @@
 
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
   const pad2 = (n) => String(n).padStart(2,"0");
+  const fmtHours = (ms) => ((ms || 0) / 3600000).toFixed(1) + "h";
 
   const isoDateLocal = (d = new Date()) => {
     const yyyy = d.getFullYear();
@@ -887,10 +897,11 @@
   }
 
   function sumRecords(records) {
-    const totals = { S:0, Z:0, CC:0, C:0, X:0, days:0 };
+    const totals = { S:0, Z:0, CC:0, C:0, X:0, days:0, durationMs:0 };
     records.forEach(r => {
       totals.days += 1;
       metrics.forEach(k => totals[k] += (r.values?.[k] || 0));
+      totals.durationMs += (r.durationMs || 0);
     });
     return totals;
   }
@@ -1355,6 +1366,8 @@
   });
 
   // ---------- Calendar rendering ----------
+  let selectedDayISO = null;
+
   let calCursor = (() => {
     const d = new Date();
     return { y: d.getFullYear(), m: d.getMonth() };
@@ -1375,6 +1388,8 @@
     if (!cell) return;
     const iso = cell.dataset.iso;
     if (!iso) return;
+    selectedDayISO = iso;
+    renderCalendar();
     openDayModal(iso);
   });
 
@@ -1412,7 +1427,7 @@
       const X = rec?.values?.X ?? 0;
 
       const isToday = (iso === todayISO);
-      const badgeText = isToday ? "TODAY" : (rec ? "$" + (X * MONEY_PER_X) : "");
+      const badgeText = isToday ? "HOY" : "";
       const badgeHtml = badgeText ? `<div class="badge ${isToday ? "today" : ""}">${badgeText}</div>` : "";
 
       const cell = document.createElement("div");
@@ -1420,7 +1435,8 @@
         "dayCell" +
         (inMonth ? "" : " muted") +
         (rec ? " hasData" : "") +
-        (isToday ? " today" : "");
+        (isToday ? " today" : "") +
+        (selectedDayISO === iso ? " selected" : "");
 
       cell.dataset.iso = iso;
 
@@ -1432,9 +1448,9 @@
           </div>
 
           <div class="miniClean">
-            <div class="kpiMini"><div class="k">S</div><div class="v">${S}</div></div>
-            <div class="kpiMini"><div class="k">Z</div><div class="v">${Z}</div></div>
-            <div class="kpiMini"><div class="k">X</div><div class="v">${X}</div></div>
+            <span class="kpiInline">S ${S}</span>
+            <span class="kpiInline">Z ${Z}</span>
+            <span class="kpiInline">X ${X}</span>
           </div>
         </div>
       `;
@@ -1445,7 +1461,7 @@
   }
 
 
-  function renderStatCard(container, title, periodLabel, totals, avgLabel = "Promedio X/día") {
+  function renderStatCard(container, title, periodLabel, totals, avgLabel = "Promedio S/día") {
     const money = (totals.X || 0) * MONEY_PER_X;
     container.innerHTML = `
       <div class="statHead">
@@ -1470,7 +1486,11 @@
 
       <div class="moneyLine">
         <div><b>Días trabajados:</b> ${totals.days || 0}</div>
-        <div><b>${avgLabel}:</b> ${totals.days ? ((totals.X||0)/totals.days).toFixed(1) : "0.0"}</div>
+        <div><b>${avgLabel}:</b> ${totals.days ? ((totals.S||0)/totals.days).toFixed(1) : "0.0"}</div>
+      </div>
+      <div class="moneyLine" style="margin-top:6px;">
+        <div><b>Horas trabajadas:</b> ${fmtHours(totals.durationMs || 0)}</div>
+        <div></div>
       </div>
     `;
   }
@@ -1486,7 +1506,7 @@
     const wLabel = `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`;
     const mLabel = `${calCursor.y}-${String(calCursor.m+1).padStart(2,"0")}`;
 
-    renderStatCard(weekStatsEl, "Stats de la semana", wLabel, weekTotals, "Promedio");
+    renderStatCard(weekStatsEl, "Stats de la semana", wLabel, weekTotals, "Promedio S/día");
     renderStatCard(monthStatsEl, "Stats del mes", mLabel, monthTotals);
   }
 
