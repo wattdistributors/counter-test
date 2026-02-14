@@ -7,28 +7,29 @@
 
   <style>
     :root{
-      --bg1:#1b86c8; --bg2:#0b5a86;
+      --bg1:#1b86c8;
+      --bg2:#0b5a86;
 
-      /* Calendar "clean sheet" theme */
-      --cal-bg:#ffffff;
-      --cal-text:#0f172a;
-      --cal-muted:#64748b;
-      --cal-border:#e6e9ef;
-      --cal-border-2:#dde2ea;
-      --cal-soft:#f6f7fb;
-      --cal-soft-2:#f1f3f9;
-      --cal-shadow: 0 18px 50px rgba(2, 8, 23, .18);
-      --cal-shadow-2: 0 10px 30px rgba(2, 8, 23, .10);
-      --cal-accent:#0ea5e9; /* subtle */
-      --cal-accent-2:#2563eb;
+      /* Calendar (blue / celeste + transparency) */
+      --calPanel: rgba(255,255,255,.10);
+      --calPanel2: rgba(255,255,255,.08);
+      --calLine: rgba(255,255,255,.18);
+      --calLine2: rgba(255,255,255,.26);
+      --calInk: rgba(255,255,255,.94);
+      --calMuted: rgba(255,255,255,.70);
+      --calChip: rgba(255,255,255,.12);
+      --calChipLine: rgba(255,255,255,.18);
+      --calShadow: 0 18px 55px rgba(0,0,0,.22);
     }
 
     html, body { touch-action: manipulation; }
+
     body{
       margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background: linear-gradient(135deg, var(--bg1), var(--bg2));
       color:#fff;
+      overflow-x:hidden; /* avoid sideways scroll */
     }
 
     .wrap{ width:min(520px, 94vw); padding:22px 14px 26px; }
@@ -116,10 +117,7 @@
       overflow:hidden;
     }
 
-    .sessionInfo .left{
-      flex: 1 1 auto;
-      min-width:0;
-    }
+    .sessionInfo .left{ flex: 1 1 auto; min-width:0; }
 
     .sessionInfo .left .line1{
       font-weight:900; letter-spacing:.02em;
@@ -130,10 +128,7 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
-    .timerBox{
-      flex: 0 0 120px;
-      text-align:center;
-    }
+    .timerBox{ flex: 0 0 120px; text-align:center; }
     .timerBox .t1{ font-size:12px; opacity:.9; }
     .timerBox .t2{ font-size:18px; font-weight:900; letter-spacing:.02em; margin-top:3px; }
 
@@ -182,17 +177,43 @@
       letter-spacing:.03em;
     }
 
-    /* ---------- CALENDAR (Elegant Sheet) ---------- */
-    #tab_calendar.calendarTheme{
-      color: var(--cal-text);
+    /* ---------- Calendar (blue translucent style) ---------- */
+    .calSurface{
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.08));
+      border: 1px solid rgba(255,255,255,.20);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: var(--calShadow);
+      backdrop-filter: blur(8px);
+      overflow:hidden; /* prevents sideways overflow */
     }
 
-    .calSheet{
-      background: var(--cal-bg);
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 18px;
-      box-shadow: var(--cal-shadow);
-      padding: 12px;
+    .calStatsTop{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-bottom: 12px;
+    }
+
+    .calMiniStat{
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.10);
+      padding: 8px 10px;
+    }
+    .calMiniStat .k{
+      font-size:10px;
+      letter-spacing:.1em;
+      font-weight:900;
+      color: rgba(255,255,255,.82);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+    .calMiniStat .v{
+      font-size:18px;
+      font-weight:1000;
+      color: var(--calInk);
+      text-shadow: none;
     }
 
     .calHeader{
@@ -200,92 +221,130 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin: 4px 0 10px;
+      margin: 2px 0 10px;
     }
 
     .calTitle{
       font-weight:1000;
-      letter-spacing:.01em;
+      letter-spacing:.02em;
       font-size:14px;
       text-align:center;
       flex:1;
-      color: var(--cal-text);
+      color: var(--calInk);
+      opacity:.95;
     }
 
     .iconBtn{
-      width:38px; height:38px;
+      width:40px; height:40px;
       border-radius: 14px;
-      border:1px solid var(--cal-border);
-      background: var(--cal-soft);
+      border:1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.10);
       display:flex;
       align-items:center;
       justify-content:center;
       cursor:pointer;
       user-select:none;
       font-weight:1000;
-      color: var(--cal-text);
-      box-shadow: var(--cal-shadow-2);
+      color: var(--calInk);
+      box-shadow: 0 12px 26px rgba(0,0,0,.14);
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
 
-    .calGrid{
+    .calActions{
       display:grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap:10px;
+      grid-template-columns: 1fr 1fr;
+      gap:8px;
+      margin: 0 0 10px;
+    }
+    .calActionBtn{
+      border-radius: 10px;
+      border:1px solid rgba(255,255,255,.24);
+      background: rgba(255,255,255,.10);
+      color: var(--calInk);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform: uppercase;
+      padding: 9px 10px;
+      text-align:center;
+      cursor:pointer;
+    }
+    .calActionBtn.primary{
+      border-color: rgba(255,255,255,.46);
+      color: #fff;
+      text-shadow: none;
+    }
+
+    /* IMPORTANT: prevent horizontal scroll + force fit */
+    .calGrid{
+      width:100%;
+      box-sizing:border-box;
+      display:grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap:8px;
+      overflow:hidden;
     }
 
     .dow{
       text-align:center;
       font-size:11px;
-      letter-spacing:.12em;
+      letter-spacing:.14em;
       font-weight:1000;
-      padding:6px 0 4px;
-      color: var(--cal-muted);
+      padding:6px 0;
+      color: var(--calMuted);
       user-select:none;
+      min-width:0;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 8px;
+      background: rgba(255,255,255,.06);
     }
 
+    /* Square day WITHOUT aspect-ratio (avoids Safari grid overflow bugs) */
     .dayCell{
-      border-radius: 14px;
-      border: 1px solid var(--cal-border);
-      background: #fff;
-      padding: 10px;
-      overflow:hidden;
+      position:relative;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
       cursor:pointer;
       user-select:none;
-
-      aspect-ratio: 1 / 1;
-
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-
-      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
-      box-shadow: 0 6px 16px rgba(2, 8, 23, .06);
+      min-width:0;              /* key for grid overflow */
+      overflow:hidden;           /* clip anything inside */
+      box-shadow: 0 12px 28px rgba(0,0,0,.14);
+      transition: transform .08s ease, background .12s ease, border-color .12s ease;
       touch-action: manipulation;
     }
-
-    .dayCell:hover{
-      box-shadow: 0 10px 24px rgba(2, 8, 23, .10);
-      border-color: var(--cal-border-2);
-    }
     .dayCell:active{ transform: scale(.985); }
+    .dayCell:hover{ background: rgba(255,255,255,.10); border-color: var(--calLine2); }
 
     .dayCell.muted{
-      opacity:.45;
-      background: var(--cal-soft);
-      border-color: var(--cal-border);
-      box-shadow: none;
-    }
-
-    .dayCell.hasData{
-      border-color: rgba(14,165,233,.35);
-      box-shadow: 0 10px 26px rgba(14,165,233,.10);
+      opacity:.5;
+      background: rgba(255,255,255,.03);
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
     }
 
     .dayCell.today{
-      border-color: rgba(37,99,235,.55);
-      box-shadow: 0 12px 30px rgba(37,99,235,.16);
+      border-color: rgba(255,255,255,.40);
+      box-shadow: 0 14px 34px rgba(0,0,0,.18);
+    }
+
+    .dayCell.hasData{
+      border-color: rgba(255,255,255,.30);
+    }
+
+    /* Square sizing helper */
+    .dayCell::before{
+      content:"";
+      display:block;
+      padding-top:100%;
+    }
+    .dayContent{
+      position:absolute;
+      inset:8px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-width:0;
     }
 
     .dayTop{
@@ -293,142 +352,135 @@
       align-items:center;
       justify-content:space-between;
       gap:8px;
+      min-width:0;
     }
 
     .dayNum{
       font-weight:1000;
-      font-size:14px;
+      font-size:13px;
       letter-spacing:.01em;
-      color: var(--cal-text);
+      color: var(--calInk);
+      min-width:0;
     }
 
     .badge{
       font-size:10px;
       font-weight:1000;
-      letter-spacing:.06em;
-      padding: 4px 8px;
+      letter-spacing:.04em;
+      padding: 2px 6px;
       border-radius: 999px;
-      background: var(--cal-soft-2);
-      border: 1px solid var(--cal-border);
-      color: var(--cal-muted);
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      color: var(--calInk);
       white-space:nowrap;
-      user-select:none;
+      max-width: 72px;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-
-    .badge.money{
-      color: #0b1220;
-      border-color: rgba(14,165,233,.35);
-      background: rgba(14,165,233,.10);
-    }
-
     .badge.today{
-      color: #0b1220;
-      border-color: rgba(37,99,235,.40);
-      background: rgba(37,99,235,.10);
+      background: rgba(255,255,255,.18);
+      border-color: rgba(255,255,255,.28);
     }
 
-    /* Mini KPIs: only S Z X — super clean */
     .miniClean{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:8px;
-      margin-top: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:6px;
+      margin-top: 8px;
+      min-width:0;
     }
 
     .kpiMini{
-      background: var(--cal-soft);
-      border: 1px solid var(--cal-border);
-      border-radius: 12px;
-      padding: 8px 6px;
+      border-radius: 9px;
+      padding: 6px 4px;
       text-align:center;
-      color: var(--cal-text);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      min-width:0;
     }
-
     .kpiMini .k{
-      font-size:10px;
+      font-size:9px;
+      letter-spacing:.18em;
       font-weight:1000;
-      letter-spacing:.16em;
+      color: rgba(255,255,255,.78);
       margin-bottom: 4px;
-      color: var(--cal-muted);
     }
-
     .kpiMini .v{
-      font-size:14px;
+      font-size:13px;
       font-weight:1000;
       letter-spacing:.02em;
-      color: var(--cal-text);
+      color: var(--calInk);
     }
 
+    /* Stats under calendar */
     .statsPanel{
       margin-top:12px;
       display:grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap:10px;
     }
-
-    /* Stats cards inside calendar: white + clean */
-    #tab_calendar .statCard{
-      background: #fff;
-      border: 1px solid var(--cal-border);
+    .statCard{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
       border-radius: 14px;
-      padding: 12px;
-      box-shadow: 0 10px 28px rgba(2, 8, 23, .08);
-      color: var(--cal-text);
+      padding: 10px 12px;
+      color: var(--calInk);
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      backdrop-filter: blur(6px);
+      overflow:hidden;
     }
-    #tab_calendar .statHead .h{
+    .statHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 8px;
+    }
+    .statHead .h{
       font-weight:1000;
       letter-spacing:.01em;
       font-size:13px;
-      opacity: 1;
-      color: var(--cal-text);
+      color: var(--calInk);
     }
-    #tab_calendar .statHead .p{
-      font-size:12px;
-      color: var(--cal-muted);
-      opacity: 1;
+    .statHead .p{
+      font-size:13px;
+      color: rgba(255,255,255,.75);
       white-space:nowrap;
     }
-    #tab_calendar .statGrid{
+    .statGrid{
       display:grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0,1fr));
       gap:8px;
     }
-    #tab_calendar .statItem{
-      background: var(--cal-soft);
-      border: 1px solid var(--cal-border);
+    .statItem{
       border-radius: 12px;
-      padding: 9px 8px;
+      padding: 8px 8px;
       text-align:center;
-      color: var(--cal-text);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      min-width:0;
     }
-    #tab_calendar .statItem .k{
-      font-size:10px;
-      letter-spacing:.10em;
-      font-weight:1000;
+    .statItem .k{
+      font-size:10px; letter-spacing:.10em; font-weight:1000;
+      color: rgba(255,255,255,.78);
       margin-bottom: 4px;
-      color: var(--cal-muted);
-      opacity: 1;
+      white-space:nowrap;
     }
-    #tab_calendar .statItem .v{
-      font-size:14px;
-      font-weight:1000;
-      letter-spacing:.02em;
-      color: var(--cal-text);
+    .statItem .v{
+      font-size:14px; font-weight:1000; letter-spacing:.02em;
+      color: var(--calInk);
+      white-space:nowrap;
     }
-    #tab_calendar .moneyLine{
-      margin-top: 10px;
+    .moneyLine{
+      margin-top: 8px;
       display:flex;
       justify-content:space-between;
       gap:10px;
-      font-size:12px;
-      color: var(--cal-muted);
-      opacity: 1;
+      font-size:13px;
+      color: rgba(255,255,255,.75);
     }
-    #tab_calendar .moneyLine b{
-      font-weight:1000;
-      letter-spacing:.01em;
-      color: var(--cal-text);
-    }
+    .moneyLine b{ font-weight:1000; color: var(--calInk); }
 
     /* ---------- Summary ---------- */
     .sumWrap{ display:grid; gap:10px; }
@@ -447,12 +499,7 @@
     }
     .sumTitle{ font-weight:900; letter-spacing:.02em; font-size:14px; opacity:.95; }
     .sumSub{ font-size:12px; opacity:.85; margin-top: 4px; }
-    .sumMoney{
-      text-align:right;
-      font-weight:900;
-      letter-spacing:.02em;
-      font-size:14px;
-    }
+    .sumMoney{ text-align:right; font-weight:900; letter-spacing:.02em; font-size:14px; }
     .sumMoney span{
       display:block;
       font-size:11px;
@@ -461,11 +508,7 @@
       letter-spacing:.08em;
       margin-top: 2px;
     }
-    .sumStats{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:8px;
-    }
+    .sumStats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
     .sumPill{
       background: rgba(0,0,0,.10);
       border: 1px solid rgba(255,255,255,.14);
@@ -507,7 +550,6 @@
       box-shadow: 0 18px 55px rgba(0,0,0,.30);
       padding: 14px;
       position:relative;
-      color:#fff;
     }
     .modalHeader{
       display:flex;
@@ -516,10 +558,8 @@
       align-items:flex-start;
       margin-bottom: 10px;
     }
-    .modalTitle{
-      font-weight:900; font-size:16px;
-      letter-spacing:.02em;
-    }
+    .modalTitle{ font-weight:900; font-size:16px; letter-spacing:.02em; }
+
     .xbtn{
       border:1px solid rgba(255,255,255,.30);
       background: rgba(255,255,255,.10);
@@ -574,7 +614,6 @@
       line-height: 1.45;
       white-space: pre-wrap;
       word-break: break-word;
-      color:#fff;
     }
 
     /* QR */
@@ -584,7 +623,6 @@
       border: 1px solid rgba(255,255,255,.18);
       background: rgba(255,255,255,.08);
       padding: 12px;
-
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -611,7 +649,7 @@
     #qr_box img, #qr_box canvas{ display:block; border-radius: 10px; }
     .qrNote{
       opacity:.90;
-      font-size:12px;
+      font-size:13px;
       text-align:center;
       line-height:1.25;
       max-width: 420px;
@@ -621,15 +659,19 @@
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
-      #tab_calendar .statGrid{ grid-template-columns: repeat(5, 1fr); }
-      .sumStats{ grid-template-columns: repeat(3, 1fr); }
 
-      .calGrid{ gap:8px; }
-      .dayCell{ padding: 9px; border-radius: 13px; }
+      /* tighter calendar on small screens so it NEVER overflows */
+      .calSurface{ padding:10px; }
+      .calStatsTop, .statsPanel{ grid-template-columns: 1fr; }
+      .calGrid{ gap:5px; }
+      .dayContent{ inset:8px; }
+      .dayCell{ border-radius: 9px; }
       .miniClean{ gap:6px; }
       .kpiMini{ border-radius: 11px; padding: 7px 6px; }
       .kpiMini .v{ font-size:13px; }
-      .calSheet{ padding: 10px; }
+
+      .statGrid{ grid-template-columns: repeat(5, minmax(0,1fr)); }
+      .sumStats{ grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
@@ -655,7 +697,6 @@
 
       <!-- ============ TAB: COUNTER ============ -->
       <div id="tab_counter">
-        <!-- Start screen -->
         <div id="start_screen" class="center">
           <div style="opacity:.9; font-size:13px; max-width: 360px;">
             Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
@@ -664,7 +705,6 @@
           <button class="btn primary" id="start_day">Iniciar día / Start day</button>
         </div>
 
-        <!-- Active session screen -->
         <div id="session_screen" style="display:none;">
           <div class="sessionInfo">
             <div class="left">
@@ -697,17 +737,22 @@
       </div>
 
       <!-- ============ TAB: CALENDAR ============ -->
-      <div id="tab_calendar" class="calendarTheme" style="display:none;">
-        <div class="calSheet">
+      <div id="tab_calendar" style="display:none;">
+        <div class="calSurface">
+          <div class="calStatsTop" id="cal_stats_top"></div>
+
           <div class="calHeader">
             <div class="iconBtn" id="cal_prev" aria-label="Previous month">‹</div>
             <div class="calTitle" id="cal_title">—</div>
             <div class="iconBtn" id="cal_next" aria-label="Next month">›</div>
           </div>
 
-          <div class="calGrid" id="cal_grid">
-            <!-- filled by JS -->
+          <div class="calActions">
+            <button class="calActionBtn primary" id="cal_today">Hoy</button>
+            <button class="calActionBtn" id="cal_month_total">Mes actual</button>
           </div>
+
+          <div class="calGrid" id="cal_grid"></div>
 
           <div class="statsPanel">
             <div class="statCard" id="week_stats"></div>
@@ -820,7 +865,7 @@
 <script>
   const metrics = ["S","Z","CC","C","X"];
   const STATE_KEY = "kpi_state_v44";
-  const HISTORY_KEY = "kpi_history_v1"; // completed days
+  const HISTORY_KEY = "kpi_history_v1";
   const AGGR_MIN_STOPS = 20;
   const MONEY_PER_X = 100;
 
@@ -832,11 +877,6 @@
     const mm = String(d.getMonth()+1).padStart(2,"0");
     const dd = String(d.getDate()).padStart(2,"0");
     return `${yyyy}-${mm}-${dd}`;
-  };
-
-  const parseISO = (iso) => {
-    const [y,m,d] = iso.split("-").map(Number);
-    return new Date(y, (m-1), d);
   };
 
   const fmtTime = (ts) => {
@@ -864,8 +904,8 @@
 
   const startOfWeekMon = (d) => {
     const out = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const day = out.getDay(); // 0 Sun ... 6 Sat
-    const diff = (day === 0) ? -6 : (1 - day); // Monday start
+    const day = out.getDay();
+    const diff = (day === 0) ? -6 : (1 - day);
     out.setDate(out.getDate() + diff);
     out.setHours(0,0,0,0);
     return out;
@@ -962,6 +1002,7 @@
   // Calendar
   const calTitle = document.getElementById("cal_title");
   const calGrid = document.getElementById("cal_grid");
+  const calStatsTop = document.getElementById("cal_stats_top");
   const weekStatsEl = document.getElementById("week_stats");
   const monthStatsEl = document.getElementById("month_stats");
 
@@ -985,7 +1026,7 @@
   const copyBtn = document.getElementById("copy_btn");
   const shareBtn = document.getElementById("share_btn");
 
-  // Day details modal (calendar click)
+  // Day details modal
   const modalDay = document.getElementById("modal_day");
   const dayX = document.getElementById("day_x");
   const dayModalTitle = document.getElementById("day_modal_title");
@@ -1106,7 +1147,6 @@
     startTimerLoop();
   }
 
-  // English-only report
   function buildReport(endTs) {
     const S = state.values.S, Z = state.values.Z, CC = state.values.CC, C = state.values.C, X = state.values.X;
 
@@ -1148,7 +1188,9 @@
       money: (state.values.X || 0) * MONEY_PER_X,
       reportText: reportText || ""
     };
-    upsertDayInHistory(state.date, payload);
+    const hist = loadHistory();
+    hist[state.date] = payload;
+    saveHistory(hist);
   }
 
   function finalizeAndReset() {
@@ -1163,12 +1205,10 @@
     timerEl.textContent = "00:00:00";
     closeModal(modalReport);
     showStartScreen();
-
     renderCalendar();
     renderSummary();
   }
 
-  // ---------- Report mode ----------
   function setReportMode(mode) {
     const isPhone = mode === "phone";
     copyBtn.style.display = isPhone ? "" : "none";
@@ -1186,31 +1226,20 @@
   function showQRForText(text) {
     qrBox.innerHTML = "";
     qrWrap.style.display = "";
-
     const url = makeShareUrlFromReport(text);
-
-    new QRCode(qrBox, {
-      text: url,
-      width: 176,
-      height: 176,
-      correctLevel: QRCode.CorrectLevel.L
-    });
+    new QRCode(qrBox, { text: url, width: 176, height: 176, correctLevel: QRCode.CorrectLevel.L });
   }
 
   function tryLoadReportFromHash() {
     const h = location.hash || "";
     if (!h.startsWith("#r=")) return false;
-
     try {
       const payload = h.slice(3);
       const text = LZString.decompressFromEncodedURIComponent(payload);
       if (!text) return false;
-
       reportBox.textContent = text;
-
       qrWrap.style.display = "none";
       setReportMode("phone");
-
       openModal(modalReport);
       return true;
     } catch {
@@ -1255,9 +1284,7 @@
     const hist = loadHistory();
     const rec = hist[iso];
 
-    dayModalTitle.textContent = rec
-      ? `Detalle del día • ${iso}`
-      : `Sin datos • ${iso}`;
+    dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Sin datos • ${iso}`;
 
     if (!rec){
       dayModalMeta.innerHTML = `
@@ -1298,9 +1325,7 @@
       </div>
     `;
 
-    const fullText = buildFullReportFromRecord(rec);
-    dayModalReport.textContent = fullText;
-
+    dayModalReport.textContent = buildFullReportFromRecord(rec);
     dayCopyBtn.style.display = "";
     dayShareBtn.style.display = "";
     openModal(modalDay);
@@ -1309,11 +1334,9 @@
   async function copyOrShareText(text, kind){
     if (!text) return;
 
-    if (kind === "share") {
-      if (navigator.share) {
-        await navigator.share({ title: "KPI Day", text });
-        return;
-      }
+    if (kind === "share" && navigator.share) {
+      await navigator.share({ title: "KPI Day", text });
+      return;
     }
 
     if (navigator.clipboard?.writeText) {
@@ -1330,12 +1353,8 @@
     }
   }
 
-  dayCopyBtn.addEventListener("click", async () => {
-    try { await copyOrShareText(dayModalReport.textContent, "copy"); } catch {}
-  });
-  dayShareBtn.addEventListener("click", async () => {
-    try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {}
-  });
+  dayCopyBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "copy"); } catch {} });
+  dayShareBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {} });
 
   // ---------- Metrics interactions ----------
   function bump(k, d) {
@@ -1352,9 +1371,7 @@
   let holdInterval = null;
   function startHold(k, d) {
     bump(k, d);
-    holdTimer = setTimeout(() => {
-      holdInterval = setInterval(() => bump(k, d), 90);
-    }, 250);
+    holdTimer = setTimeout(() => { holdInterval = setInterval(() => bump(k, d), 90); }, 250);
   }
   function stopHold() {
     clearTimeout(holdTimer); holdTimer = null;
@@ -1373,9 +1390,7 @@
   document.addEventListener("pointercancel", stopHold);
   document.addEventListener("pointerleave", stopHold);
   window.addEventListener("blur", stopHold);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") stopHold();
-  });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") stopHold(); });
 
   // ---------- Tabs logic ----------
   function setActiveTab(tabName) {
@@ -1383,7 +1398,6 @@
     tabCounter.style.display = (tabName === "counter") ? "" : "none";
     tabCalendar.style.display = (tabName === "calendar") ? "" : "none";
     tabSummary.style.display = (tabName === "summary") ? "" : "none";
-
     if (tabName === "calendar") renderCalendar();
     if (tabName === "summary") renderSummary();
   }
@@ -1410,8 +1424,16 @@
     if (calCursor.m > 11) { calCursor.m = 0; calCursor.y += 1; }
     renderCalendar();
   });
+  document.getElementById("cal_today").addEventListener("click", () => {
+    const d = new Date();
+    calCursor = { y: d.getFullYear(), m: d.getMonth() };
+    renderCalendar();
+  });
+  document.getElementById("cal_month_total").addEventListener("click", () => {
+    const totals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
+    alert(`Mes ${monthName(calCursor.y, calCursor.m)}\nVentas (X): ${totals.X || 0}\nCitas (Z): ${totals.Z || 0}\nGanancia: $${(totals.X || 0) * MONEY_PER_X}`);
+  });
 
-  // open modal on day click (delegated)
   calGrid.addEventListener("click", (e) => {
     const cell = e.target.closest(".dayCell");
     if (!cell) return;
@@ -1423,6 +1445,7 @@
   function renderCalendar() {
     const y = calCursor.y, m = calCursor.m;
     calTitle.textContent = monthName(y, m);
+    renderCalendarTopStats(y, m);
 
     calGrid.innerHTML = "";
     const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -1434,7 +1457,7 @@
     });
 
     const first = new Date(y, m, 1);
-    const firstDow = first.getDay(); // 0 Sun..6 Sat
+    const firstDow = first.getDay();
     const offset = (firstDow === 0) ? 6 : (firstDow - 1);
     const gridStart = new Date(y, m, 1);
     gridStart.setDate(gridStart.getDate() - offset);
@@ -1449,24 +1472,15 @@
       const inMonth = (day.getMonth() === m);
       const rec = hist[iso];
 
-      const cell = document.createElement("div");
-      const dayNum = day.getDate();
-
       const S = rec?.values?.S ?? 0;
       const Z = rec?.values?.Z ?? 0;
       const X = rec?.values?.X ?? 0;
 
       const isToday = (iso === todayISO);
-      const badgeText =
-        isToday ? "TODAY" :
-        (rec ? "$" + (X * MONEY_PER_X) : "");
+      const badgeText = isToday ? "TODAY" : (rec ? "$" + (X * MONEY_PER_X) : "");
+      const badgeHtml = badgeText ? `<div class="badge ${isToday ? "today" : ""}">${badgeText}</div>` : "";
 
-      const badgeClass =
-        isToday ? "badge today" :
-        (rec ? "badge money" : "badge");
-
-      const badgeHtml = badgeText ? `<div class="${badgeClass}">${badgeText}</div>` : "";
-
+      const cell = document.createElement("div");
       cell.className =
         "dayCell" +
         (inMonth ? "" : " muted") +
@@ -1476,23 +1490,16 @@
       cell.dataset.iso = iso;
 
       cell.innerHTML = `
-        <div class="dayTop">
-          <div class="dayNum">${dayNum}</div>
-          ${badgeHtml}
-        </div>
+        <div class="dayContent">
+          <div class="dayTop">
+            <div class="dayNum">${day.getDate()}</div>
+            ${badgeHtml}
+          </div>
 
-        <div class="miniClean">
-          <div class="kpiMini">
-            <div class="k">S</div>
-            <div class="v">${S}</div>
-          </div>
-          <div class="kpiMini">
-            <div class="k">Z</div>
-            <div class="v">${Z}</div>
-          </div>
-          <div class="kpiMini">
-            <div class="k">X</div>
-            <div class="v">${X}</div>
+          <div class="miniClean">
+            <div class="kpiMini"><div class="k">S</div><div class="v">${S}</div></div>
+            <div class="kpiMini"><div class="k">Z</div><div class="v">${Z}</div></div>
+            <div class="kpiMini"><div class="k">X</div><div class="v">${X}</div></div>
           </div>
         </div>
       `;
@@ -1500,6 +1507,32 @@
     }
 
     renderCalendarStats();
+  }
+
+
+  function renderCalendarTopStats(y, m) {
+    const totals = sumRecords(recordsInMonth(y, m));
+    const closeRate = (totals.Z || 0) ? (((totals.X || 0) / (totals.Z || 0)) * 100).toFixed(1) : "0.0";
+    const money = (totals.X || 0) * MONEY_PER_X;
+
+    calStatsTop.innerHTML = `
+      <div class="calMiniStat">
+        <div class="k">Total de ventas</div>
+        <div class="v">${totals.X || 0}</div>
+      </div>
+      <div class="calMiniStat">
+        <div class="k">Total de citas</div>
+        <div class="v">${totals.Z || 0}</div>
+      </div>
+      <div class="calMiniStat">
+        <div class="k">Conversión</div>
+        <div class="v">${closeRate}%</div>
+      </div>
+      <div class="calMiniStat">
+        <div class="k">Ganancia del mes</div>
+        <div class="v">$${money}</div>
+      </div>
+    `;
   }
 
   function renderStatCard(container, title, periodLabel, totals) {
@@ -1511,8 +1544,8 @@
           <div class="p">${periodLabel}</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-weight:1000; letter-spacing:.02em; color:#0f172a;">$${money}</div>
-          <div style="font-size:11px; letter-spacing:.10em; font-weight:1000; margin-top:2px; color:#64748b;">EARNED</div>
+          <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
+          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:1000; margin-top:2px;">EARNED</div>
         </div>
       </div>
 
@@ -1536,11 +1569,9 @@
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
-    const weekRecs = recordsInRange(weekStart, weekEnd);
-    const weekTotals = sumRecords(weekRecs);
+    const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
 
-    const monthRecs = recordsInMonth(calCursor.y, calCursor.m);
-    const monthTotals = sumRecords(monthRecs);
+    const monthTotals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
 
     const wLabel = `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`;
     const mLabel = `${calCursor.y}-${String(calCursor.m+1).padStart(2,"0")}`;
@@ -1555,7 +1586,6 @@
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
     const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
-
     const monthTotals = sumRecords(recordsInMonth(now.getFullYear(), now.getMonth()));
 
     const hist = loadHistory();
@@ -1589,29 +1619,13 @@
             <div class="sumMoney">$${money}<span>EARNED</span></div>
           </div>
           <div class="sumStats">
-            <div class="sumPill">
-              <div class="k">X</div>
-              <div class="v">${totals.X||0}</div>
-            </div>
-            <div class="sumPill">
-              <div class="k">Avg X/Día</div>
-              <div class="v">${avgX}</div>
-            </div>
-            <div class="sumPill">
-              <div class="k">Días</div>
-              <div class="v">${days}</div>
-            </div>
+            <div class="sumPill"><div class="k">X</div><div class="v">${totals.X||0}</div></div>
+            <div class="sumPill"><div class="k">Avg X/Día</div><div class="v">${avgX}</div></div>
+            <div class="sumPill"><div class="k">Días</div><div class="v">${days}</div></div>
           </div>
-
           <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-            <div class="sumPill">
-              <div class="k">% Agg (Z/S)</div>
-              <div class="v">${aggr}</div>
-            </div>
-            <div class="sumPill">
-              <div class="k">% Close (X/Z)</div>
-              <div class="v">${close}</div>
-            </div>
+            <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${aggr}</div></div>
+            <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${close}</div></div>
           </div>
         </div>
       `;
@@ -1628,10 +1642,7 @@
         </div>
         <div class="sumStats">
           ${["S","Z","CC","C","X"].map(k => `
-            <div class="sumPill">
-              <div class="k">${k}</div>
-              <div class="v">${bestDay.values?.[k] ?? 0}</div>
-            </div>
+            <div class="sumPill"><div class="k">${k}</div><div class="v">${bestDay.values?.[k] ?? 0}</div></div>
           `).join("")}
         </div>
       </div>
@@ -1681,15 +1692,12 @@
     });
   });
 
-  // Tablet: End day -> show QR + only End button
   document.getElementById("finish_day").addEventListener("click", () => {
     const endTs = Date.now();
     const text = buildReport(endTs);
     reportBox.textContent = text;
-
     showQRForText(text);
     setReportMode("tablet");
-
     openModal(modalReport);
   });
 
@@ -1722,9 +1730,8 @@
           alert("No native Share here. Copied to clipboard.");
         }
       } else {
-        if (navigator.clipboard?.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
+        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+        else {
           const ta = document.createElement("textarea");
           ta.value = text;
           document.body.appendChild(ta);
@@ -1735,7 +1742,6 @@
       }
 
       persistCompletedDay(endTs, text);
-
       finalizeAndReset();
       history.replaceState(null, "", location.pathname);
     } catch (_) {
@@ -1746,7 +1752,6 @@
   copyBtn.addEventListener("click", () => doCopyOrShare("copy"));
   shareBtn.addEventListener("click", () => doCopyOrShare("share"));
 
-  // Tablet: End button resets after QR was scanned/sent
   endBtn.addEventListener("click", () => {
     const confirmMsg =
       "¿Seguro que quieres finalizar el día y resetear?\nAre you sure you want to end the day and reset?";
@@ -1759,6 +1764,27 @@
     finalizeAndReset();
     history.replaceState(null, "", location.pathname);
   });
+
+  // ---------- Start/End modals ----------
+  function openModal(el) { el.classList.add("show"); }
+  function closeModal(el) { el.classList.remove("show"); }
+
+  function clickOutsideToClose(overlayEl, allow) {
+    overlayEl.addEventListener("click", (e) => {
+      if (!allow) return;
+      if (e.target === overlayEl) closeModal(overlayEl);
+    });
+  }
+  clickOutsideToClose(modalStart, true);
+  clickOutsideToClose(modalReport, false);
+  clickOutsideToClose(modalDay, true);
+
+  // ---------- Buttons: start modal ----------
+  document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
+  document.getElementById("start_cancel").addEventListener("click", () => closeModal(modalStart));
+
+  // ---------- Modals close buttons ----------
+  document.getElementById("day_x").addEventListener("click", () => closeModal(modalDay));
 
   // ---------- Init ----------
   (function init() {
@@ -1776,7 +1802,6 @@
 
     renderCalendar();
     renderSummary();
-
     saveState();
   })();
 </script>
