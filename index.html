@@ -506,13 +506,25 @@
 
     .modal{
       width:min(520px, 96vw);
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.11);
+      border: 1px solid rgba(255,255,255,.18);
       border-radius: 18px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 24px rgba(3,22,40,.22);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 22px rgba(6,34,56,.16);
       padding: 14px;
       position:relative;
+    }
+
+    /* avoid stacked glass layers inside modal */
+    .modal .statCard,
+    .modal .reportBox,
+    .modal .qrWrap{
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
     .modalHeader{
       display:flex;
@@ -800,7 +812,7 @@
       </div>
 
       <div class="modalBody">
-        <div class="statCard" id="day_modal_meta" style="margin:0; background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.14);"></div>
+        <div class="statCard" id="day_modal_meta" style="margin:0;"></div>
 
         <div style="margin-top:10px;">
           <div class="reportBox" id="day_modal_report">—</div>
