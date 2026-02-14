@@ -339,17 +339,16 @@
       margin-top: 1px;
       min-width:0;
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:4px;
-      white-space:nowrap;
-      font-size:12px;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:1px;
+      font-size:10px;
       line-height:1.15;
       color: var(--calInk);
       font-weight:500;
-      letter-spacing:0;
+      letter-spacing:.01em;
     }
-    .miniClean .kpiInline{ min-width:0; }
+    .miniClean .kpiInline{ min-width:0; opacity:.95; }
 
     /* Stats under calendar */
     .statsPanel{
@@ -607,7 +606,7 @@
       .calGrid{ gap:1px; }
       .dayContent{ inset:3px; }
       .dayCell{ border-radius: 0; }
-      .miniClean{ gap:3px; font-size:10px; }
+      .miniClean{ gap:1px; font-size:9px; }
 
       .statGrid{ grid-template-columns: repeat(5, minmax(0,1fr)); }
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
@@ -776,25 +775,15 @@
       </div>
 
       <div class="modalBody">
-        <div class="statCard" style="margin:0; background: rgba(0,0,0,.12);" id="day_modal_meta"></div>
+        <div class="statCard" id="day_modal_meta" style="margin:0; background: rgba(88,163,221,.14); border-color: rgba(153,218,251,.24);"></div>
 
         <div style="margin-top:10px;">
           <div class="reportBox" id="day_modal_report">—</div>
         </div>
 
-        <div class="grid2" style="margin-top:10px;" id="day_edit_grid">
-          <div class="field"><label>S</label><input id="day_edit_s" type="number" min="0" inputmode="numeric" /></div>
-          <div class="field"><label>Z</label><input id="day_edit_z" type="number" min="0" inputmode="numeric" /></div>
-          <div class="field"><label>CC</label><input id="day_edit_cc" type="number" min="0" inputmode="numeric" /></div>
-          <div class="field"><label>C</label><input id="day_edit_c" type="number" min="0" inputmode="numeric" /></div>
-          <div class="field"><label>X</label><input id="day_edit_x" type="number" min="0" inputmode="numeric" /></div>
-          <div class="field"><label>Horas trabajadas</label><input id="day_edit_hours" type="number" min="0" step="0.1" inputmode="decimal" /></div>
-        </div>
-
         <div class="modalActions">
           <button class="btn" id="day_copy">Copy</button>
           <button class="btn primary" id="day_share">Share</button>
-          <button class="btn primary" id="day_save">Guardar día</button>
         </div>
       </div>
     </div>
@@ -977,13 +966,6 @@
   const dayModalReport = document.getElementById("day_modal_report");
   const dayCopyBtn = document.getElementById("day_copy");
   const dayShareBtn = document.getElementById("day_share");
-  const daySaveBtn = document.getElementById("day_save");
-  const dayEditS = document.getElementById("day_edit_s");
-  const dayEditZ = document.getElementById("day_edit_z");
-  const dayEditCC = document.getElementById("day_edit_cc");
-  const dayEditC = document.getElementById("day_edit_c");
-  const dayEditX = document.getElementById("day_edit_x");
-  const dayEditHours = document.getElementById("day_edit_hours");
 
   // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
@@ -1233,75 +1215,51 @@
   function openDayModal(iso){
     const hist = loadHistory();
     const rec = hist[iso];
-    const values = rec?.values || {};
 
-    dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Nuevo día • ${iso}`;
+    dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Sin datos • ${iso}`;
 
-    dayModalMeta.innerHTML = rec ? `
+    if (!rec){
+      dayModalMeta.innerHTML = `
+        <div class="statHead">
+          <div class="h">No hay un día finalizado guardado.</div>
+          <div class="p">Tip: finaliza el día para que aparezca aquí.</div>
+        </div>
+      `;
+      dayModalReport.textContent = "—";
+      dayCopyBtn.style.display = "none";
+      dayShareBtn.style.display = "none";
+      openModal(modalDay);
+      return;
+    }
+
+    const X = rec.values?.X ?? 0;
+    const money = (X * MONEY_PER_X);
+
+    dayModalMeta.innerHTML = `
       <div class="statHead">
         <div>
           <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
           <div class="p">Start: ${fmtTime(rec.startTs)} • End: ${fmtTime(rec.endTs)} • Dur: ${fmtDuration(rec.durationMs || 0)}</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-weight:1000; letter-spacing:.02em;">$${(values.X || 0) * MONEY_PER_X}</div>
+          <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
           <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:900; margin-top:2px;">EARNED</div>
         </div>
       </div>
+
       <div class="statGrid">
         ${["S","Z","CC","C","X"].map(k => `
-          <div class="statItem"><div class="k">${k}</div><div class="v">${values[k] ?? 0}</div></div>
+          <div class="statItem">
+            <div class="k">${k}</div>
+            <div class="v">${rec.values?.[k] ?? 0}</div>
+          </div>
         `).join("")}
-      </div>
-    ` : `
-      <div class="statHead">
-        <div>
-          <div class="h">Día sin registro aún.</div>
-          <div class="p">Puedes cargar stats antiguos y guardarlos.</div>
-        </div>
       </div>
     `;
 
-    dayEditS.value = values.S ?? 0;
-    dayEditZ.value = values.Z ?? 0;
-    dayEditCC.value = values.CC ?? 0;
-    dayEditC.value = values.C ?? 0;
-    dayEditX.value = values.X ?? 0;
-    dayEditHours.value = (((rec?.durationMs || 0) / 3600000).toFixed(1));
-
-    dayModalReport.textContent = rec ? buildFullReportFromRecord(rec) : "Completa los campos y guarda el día.";
-    dayCopyBtn.style.display = rec ? "" : "none";
-    dayShareBtn.style.display = rec ? "" : "none";
-
-    daySaveBtn.onclick = () => {
-      const n = (v) => Math.max(0, Number(v || 0));
-      const S = n(dayEditS.value), Z = n(dayEditZ.value), CC = n(dayEditCC.value), C = n(dayEditC.value), X = n(dayEditX.value);
-      const hours = Math.max(0, Number(dayEditHours.value || 0));
-      const durationMs = Math.round(hours * 3600000);
-
-      const baseTs = new Date(`${iso}T09:00:00`).getTime();
-      const next = {
-        date: iso,
-        rep: rec?.rep || state.rep || "",
-        store: rec?.store || state.store || "",
-        startTs: rec?.startTs || baseTs,
-        endTs: (rec?.startTs || baseTs) + durationMs,
-        durationMs,
-        values: { S, Z, CC, C, X },
-        money: X * MONEY_PER_X,
-        reportText: ""
-      };
-
-      upsertDayInHistory(iso, next);
-      dayModalReport.textContent = buildFullReportFromRecord(next);
-      dayCopyBtn.style.display = "";
-      dayShareBtn.style.display = "";
-      renderCalendar();
-      renderCalendarStats();
-      renderSummary();
-      openDayModal(iso);
-    };
-
+    dayModalReport.textContent = buildFullReportFromRecord(rec);
+    dayCopyBtn.style.display = "";
+    dayShareBtn.style.display = "";
     openModal(modalDay);
   }
 
@@ -1460,9 +1418,9 @@
           </div>
 
           <div class="miniClean">
-            <span class="kpiInline">S${S}</span>
-            <span class="kpiInline">Z${Z}</span>
-            <span class="kpiInline">X${X}</span>
+            <span class="kpiInline">S ${S}</span>
+            <span class="kpiInline">Z ${Z}</span>
+            <span class="kpiInline">X ${X}</span>
           </div>
         </div>
       `;
