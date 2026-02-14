@@ -336,43 +336,20 @@
     }
 
     .miniClean{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:1px;
       margin-top: 1px;
       min-width:0;
-    }
-
-    .kpiMini{
-      border-radius: 5px;
-      padding: 1px 3px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      border: 1px solid rgba(153,218,251,.24);
-      background: rgba(95,165,206,.16);
-      min-width:0;
       gap:4px;
-    }
-    .kpiMini .k{
-      font-size:8px;
-      letter-spacing:.02em;
-      font-weight:900;
-      color: rgba(230,246,255,.86);
-      margin-bottom: 0;
-      flex:0 0 auto;
-    }
-    .kpiMini .v{
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.01em;
-      color: var(--calInk);
       white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      flex:1 1 auto;
-      text-align:right;
+      font-size:12px;
+      line-height:1.15;
+      color: var(--calInk);
+      font-weight:500;
+      letter-spacing:0;
     }
+    .miniClean .kpiInline{ min-width:0; }
 
     /* Stats under calendar */
     .statsPanel{
@@ -630,9 +607,7 @@
       .calGrid{ gap:1px; }
       .dayContent{ inset:3px; }
       .dayCell{ border-radius: 0; }
-      .miniClean{ gap:1px; }
-      .kpiMini{ border-radius: 4px; padding: 1px 2px; gap:2px; }
-      .kpiMini .v{ font-size:10px; }
+      .miniClean{ gap:3px; font-size:10px; }
 
       .statGrid{ grid-template-columns: repeat(5, minmax(0,1fr)); }
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
@@ -807,9 +782,19 @@
           <div class="reportBox" id="day_modal_report">—</div>
         </div>
 
+        <div class="grid2" style="margin-top:10px;" id="day_edit_grid">
+          <div class="field"><label>S</label><input id="day_edit_s" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>Z</label><input id="day_edit_z" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>CC</label><input id="day_edit_cc" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>C</label><input id="day_edit_c" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>X</label><input id="day_edit_x" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>Horas trabajadas</label><input id="day_edit_hours" type="number" min="0" step="0.1" inputmode="decimal" /></div>
+        </div>
+
         <div class="modalActions">
           <button class="btn" id="day_copy">Copy</button>
           <button class="btn primary" id="day_share">Share</button>
+          <button class="btn primary" id="day_save">Guardar día</button>
         </div>
       </div>
     </div>
@@ -828,6 +813,7 @@
 
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
   const pad2 = (n) => String(n).padStart(2,"0");
+  const fmtHours = (ms) => ((ms || 0) / 3600000).toFixed(1) + "h";
 
   const isoDateLocal = (d = new Date()) => {
     const yyyy = d.getFullYear();
@@ -897,10 +883,11 @@
   }
 
   function sumRecords(records) {
-    const totals = { S:0, Z:0, CC:0, C:0, X:0, days:0 };
+    const totals = { S:0, Z:0, CC:0, C:0, X:0, days:0, durationMs:0 };
     records.forEach(r => {
       totals.days += 1;
       metrics.forEach(k => totals[k] += (r.values?.[k] || 0));
+      totals.durationMs += (r.durationMs || 0);
     });
     return totals;
   }
@@ -990,6 +977,13 @@
   const dayModalReport = document.getElementById("day_modal_report");
   const dayCopyBtn = document.getElementById("day_copy");
   const dayShareBtn = document.getElementById("day_share");
+  const daySaveBtn = document.getElementById("day_save");
+  const dayEditS = document.getElementById("day_edit_s");
+  const dayEditZ = document.getElementById("day_edit_z");
+  const dayEditCC = document.getElementById("day_edit_cc");
+  const dayEditC = document.getElementById("day_edit_c");
+  const dayEditX = document.getElementById("day_edit_x");
+  const dayEditHours = document.getElementById("day_edit_hours");
 
   // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
@@ -1239,51 +1233,75 @@
   function openDayModal(iso){
     const hist = loadHistory();
     const rec = hist[iso];
+    const values = rec?.values || {};
 
-    dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Sin datos • ${iso}`;
+    dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Nuevo día • ${iso}`;
 
-    if (!rec){
-      dayModalMeta.innerHTML = `
-        <div class="statHead">
-          <div class="h">No hay un día finalizado guardado.</div>
-          <div class="p">Tip: finaliza el día para que aparezca aquí.</div>
-        </div>
-      `;
-      dayModalReport.textContent = "—";
-      dayCopyBtn.style.display = "none";
-      dayShareBtn.style.display = "none";
-      openModal(modalDay);
-      return;
-    }
-
-    const X = rec.values?.X ?? 0;
-    const money = (X * MONEY_PER_X);
-
-    dayModalMeta.innerHTML = `
+    dayModalMeta.innerHTML = rec ? `
       <div class="statHead">
         <div>
           <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
           <div class="p">Start: ${fmtTime(rec.startTs)} • End: ${fmtTime(rec.endTs)} • Dur: ${fmtDuration(rec.durationMs || 0)}</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
+          <div style="font-weight:1000; letter-spacing:.02em;">$${(values.X || 0) * MONEY_PER_X}</div>
           <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:900; margin-top:2px;">EARNED</div>
         </div>
       </div>
-
       <div class="statGrid">
         ${["S","Z","CC","C","X"].map(k => `
-          <div class="statItem">
-            <div class="k">${k}</div>
-            <div class="v">${rec.values?.[k] ?? 0}</div>
-          </div>
+          <div class="statItem"><div class="k">${k}</div><div class="v">${values[k] ?? 0}</div></div>
         `).join("")}
+      </div>
+    ` : `
+      <div class="statHead">
+        <div>
+          <div class="h">Día sin registro aún.</div>
+          <div class="p">Puedes cargar stats antiguos y guardarlos.</div>
+        </div>
       </div>
     `;
 
-    dayModalReport.textContent = buildFullReportFromRecord(rec);
-    dayCopyBtn.style.display = "";
-    dayShareBtn.style.display = "";
+    dayEditS.value = values.S ?? 0;
+    dayEditZ.value = values.Z ?? 0;
+    dayEditCC.value = values.CC ?? 0;
+    dayEditC.value = values.C ?? 0;
+    dayEditX.value = values.X ?? 0;
+    dayEditHours.value = (((rec?.durationMs || 0) / 3600000).toFixed(1));
+
+    dayModalReport.textContent = rec ? buildFullReportFromRecord(rec) : "Completa los campos y guarda el día.";
+    dayCopyBtn.style.display = rec ? "" : "none";
+    dayShareBtn.style.display = rec ? "" : "none";
+
+    daySaveBtn.onclick = () => {
+      const n = (v) => Math.max(0, Number(v || 0));
+      const S = n(dayEditS.value), Z = n(dayEditZ.value), CC = n(dayEditCC.value), C = n(dayEditC.value), X = n(dayEditX.value);
+      const hours = Math.max(0, Number(dayEditHours.value || 0));
+      const durationMs = Math.round(hours * 3600000);
+
+      const baseTs = new Date(`${iso}T09:00:00`).getTime();
+      const next = {
+        date: iso,
+        rep: rec?.rep || state.rep || "",
+        store: rec?.store || state.store || "",
+        startTs: rec?.startTs || baseTs,
+        endTs: (rec?.startTs || baseTs) + durationMs,
+        durationMs,
+        values: { S, Z, CC, C, X },
+        money: X * MONEY_PER_X,
+        reportText: ""
+      };
+
+      upsertDayInHistory(iso, next);
+      dayModalReport.textContent = buildFullReportFromRecord(next);
+      dayCopyBtn.style.display = "";
+      dayShareBtn.style.display = "";
+      renderCalendar();
+      renderCalendarStats();
+      renderSummary();
+      openDayModal(iso);
+    };
+
     openModal(modalDay);
   }
 
@@ -1442,9 +1460,9 @@
           </div>
 
           <div class="miniClean">
-            <div class="kpiMini"><div class="k">S</div><div class="v">${S}</div></div>
-            <div class="kpiMini"><div class="k">Z</div><div class="v">${Z}</div></div>
-            <div class="kpiMini"><div class="k">X</div><div class="v">${X}</div></div>
+            <span class="kpiInline">S${S}</span>
+            <span class="kpiInline">Z${Z}</span>
+            <span class="kpiInline">X${X}</span>
           </div>
         </div>
       `;
@@ -1481,6 +1499,10 @@
       <div class="moneyLine">
         <div><b>Días trabajados:</b> ${totals.days || 0}</div>
         <div><b>${avgLabel}:</b> ${totals.days ? ((totals.S||0)/totals.days).toFixed(1) : "0.0"}</div>
+      </div>
+      <div class="moneyLine" style="margin-top:6px;">
+        <div><b>Horas trabajadas:</b> ${fmtHours(totals.durationMs || 0)}</div>
+        <div></div>
       </div>
     `;
   }
