@@ -104,6 +104,14 @@
       font-size:16px;
     }
 
+    .langBtn{
+      min-width:58px;
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:.04em;
+    }
+
     .finishResult{
       margin-top:8px;
       text-align:center;
@@ -755,14 +763,16 @@
           <div class="title" id="today_title">KPIs Counter</div>
           <div class="subtitle" id="today_date"></div>
         </div>
-        <div class="btnrow" id="top_actions"></div>
+        <div class="btnrow" id="top_actions">
+          <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">ES</button>
+        </div>
       </div>
 
       <!-- Tabs -->
       <div class="tabs" id="tabs">
-        <div class="tab active" data-tab="counter">Contador</div>
-        <div class="tab" data-tab="calendar">Calendario</div>
-        <div class="tab" data-tab="summary">Resumen</div>
+        <div class="tab active" data-tab="counter" id="tab_counter_label">Contador</div>
+        <div class="tab" data-tab="calendar" id="tab_calendar_label">Calendario</div>
+        <div class="tab" data-tab="summary" id="tab_summary_label">Resumen</div>
       </div>
       </div>
 
@@ -770,11 +780,11 @@
       <!-- ============ TAB: COUNTER ============ -->
       <div id="tab_counter">
         <div id="start_screen" class="center centerIntro">
-          <div style="opacity:.9; font-size:13px; max-width: 360px;">
-            Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
-            Tap <b>Start day</b> to enter your name and store.
+          <div style="opacity:.9; font-size:13px; max-width: 360px;" id="start_intro">
+            Presiona <b>Iniciar día</b> para comenzar.
           </div>
           <button class="btn primary" id="start_day">Start day</button>
+          <button class="btn" id="edit_profile" style="display:none;">Editar datos</button>
         </div>
 
         <div id="session_screen" style="display:none;">
@@ -842,21 +852,20 @@
   <div class="overlay" id="modal_start">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Start day">
       <div class="modalHeader">
-        <div class="modalTitle">Start day</div>
+        <div class="modalTitle" id="start_modal_title">Start day</div>
         <button class="xbtn" id="start_x" aria-label="Close">×</button>
       </div>
       <div class="modalBody">
-        <div style="opacity:.9; font-size:13px;">
-          Ingresa tus datos para iniciar.<br/>
-          Enter your info to start.
+        <div style="opacity:.9; font-size:13px;" id="start_modal_intro">
+          Ingresa tus datos para iniciar.
         </div>
         <div class="grid2">
           <div class="field">
-            <label>Nombre / Name</label>
+            <label id="start_name_label">Nombre</label>
             <input id="start_name" placeholder="Ej: Bob" autocomplete="name" />
           </div>
           <div class="field">
-            <label>Tienda / Store</label>
+            <label id="start_store_label">Tienda</label>
             <input id="start_store" placeholder="Ej: 2770 Valwood - Irving" />
           </div>
         </div>
@@ -969,8 +978,53 @@
   const metrics = ["S","Z","CC","C","X"];
   const STATE_KEY = "kpi_state_v44";
   const HISTORY_KEY = "kpi_history_v1";
+  const PROFILE_KEY = "kpi_profile_v1";
+  const LANG_KEY = "kpi_lang_v1";
   const AGGR_MIN_STOPS = 20;
   const MONEY_PER_X = 100;
+
+  const i18n = {
+    es: {
+      tabCounter: "Contador",
+      tabCalendar: "Calendario",
+      tabSummary: "Resumen",
+      startIntro: "Presiona <b>Iniciar día</b> para comenzar.",
+      startDay: "Iniciar día",
+      editProfile: "Editar datos",
+      finishDay: "Finalizar día",
+      startModalTitle: "Iniciar día",
+      startModalIntro: "Ingresa tus datos para iniciar.",
+      nameLabel: "Nombre",
+      storeLabel: "Tienda",
+      cancel: "Cancelar",
+      start: "Iniciar",
+      date: "Fecha",
+      day: "Día",
+      begins: "Inicio",
+      missingProfile: "Por favor ingresa Nombre y Tienda.",
+      endConfirm: "¿Seguro que quieres finalizar el día y resetear?"
+    },
+    en: {
+      tabCounter: "Counter",
+      tabCalendar: "Calendar",
+      tabSummary: "Summary",
+      startIntro: "Tap <b>Start day</b> to begin.",
+      startDay: "Start day",
+      editProfile: "Edit profile",
+      finishDay: "End day",
+      startModalTitle: "Start day",
+      startModalIntro: "Enter your info to start.",
+      nameLabel: "Name",
+      storeLabel: "Store",
+      cancel: "Cancel",
+      start: "Start",
+      date: "Date",
+      day: "Day",
+      begins: "Start",
+      missingProfile: "Please enter Name and Store.",
+      endConfirm: "Are you sure you want to end the day and reset?"
+    }
+  };
 
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
   const pad2 = (n) => String(n).padStart(2,"0");
@@ -1111,11 +1165,14 @@
 
   // ---------- Load session state ----------
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
+  const savedProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+  const savedLang = localStorage.getItem(LANG_KEY);
+  let currentLang = savedLang === "en" ? "en" : "es";
   const state = {
     active: !!saved.active,
     date: saved.date || isoDateLocal(),
-    rep: saved.rep || "",
-    store: saved.store || "",
+    rep: saved.rep || savedProfile.rep || "",
+    store: saved.store || savedProfile.store || "",
     values: saved.values || {},
     sessionStart: saved.sessionStart || null,
   };
@@ -1123,6 +1180,11 @@
 
   // ---------- DOM ----------
   const todayDateEl = document.getElementById("today_date");
+  const startIntro = document.getElementById("start_intro");
+  const startDayBtn = document.getElementById("start_day");
+  const finishDayBtn = document.getElementById("finish_day");
+  const editProfileBtn = document.getElementById("edit_profile");
+  const langToggleBtn = document.getElementById("lang_toggle");
 
   // Tabs
   const tabEls = Array.from(document.querySelectorAll(".tab"));
@@ -1196,15 +1258,51 @@
     if (document.visibilityState === "hidden") { try { saveStateNow(); } catch {} }
   });
 
+  function t(key) {
+    return i18n[currentLang][key] || i18n.es[key] || key;
+  }
+
+  function saveProfile(rep, store) {
+    try {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep, store }));
+    } catch {}
+  }
+
+  function applyTranslations() {
+    document.documentElement.lang = currentLang;
+    document.getElementById("tab_counter_label").textContent = t("tabCounter");
+    document.getElementById("tab_calendar_label").textContent = t("tabCalendar");
+    document.getElementById("tab_summary_label").textContent = t("tabSummary");
+    startIntro.innerHTML = t("startIntro");
+    startDayBtn.textContent = t("startDay");
+    editProfileBtn.textContent = t("editProfile");
+    finishDayBtn.textContent = t("finishDay");
+    document.getElementById("start_modal_title").textContent = t("startModalTitle");
+    document.getElementById("start_modal_intro").textContent = t("startModalIntro");
+    document.getElementById("start_name_label").textContent = t("nameLabel");
+    document.getElementById("start_store_label").textContent = t("storeLabel");
+    document.getElementById("start_cancel").textContent = t("cancel");
+    document.getElementById("start_confirm").textContent = t("start");
+    langToggleBtn.textContent = currentLang.toUpperCase();
+    renderHeader();
+    if (state.active) renderSessionInfo();
+  }
+
+  function toggleLanguage() {
+    currentLang = currentLang === "es" ? "en" : "es";
+    try { localStorage.setItem(LANG_KEY, currentLang); } catch {}
+    applyTranslations();
+  }
+
   // ---------- UI ----------
   const valEls = {};
   function renderHeader() {
-    todayDateEl.textContent = `Date: ${state.date}`;
+    todayDateEl.textContent = `${t("date")}: ${state.date}`;
   }
 
   function renderSessionInfo() {
     whoLine.textContent = `${state.rep || "—"} • ${state.store || "—"}`;
-    dateLine.textContent = `Day: ${state.date} • Start: ${fmtTime(state.sessionStart)}`;
+    dateLine.textContent = `${t("day")}: ${state.date} • ${t("begins")}: ${fmtTime(state.sessionStart)}`;
   }
 
   function renderMetrics() {
@@ -1242,6 +1340,7 @@
     state.active = false;
     startScreen.style.display = "";
     sessionScreen.style.display = "none";
+    editProfileBtn.style.display = (state.rep && state.store) ? "" : "none";
     renderHeader();
   }
 
@@ -1358,8 +1457,6 @@
     finishResult.textContent = "";
     reportDayRating.style.display = "none";
     reportDayRating.textContent = "";
-    state.rep = "";
-    state.store = "";
     state.sessionStart = null;
     state.date = isoDateLocal();
     metrics.forEach(k => state.values[k] = 0);
@@ -1870,11 +1967,23 @@
   }
 
   // ---------- Buttons ----------
-  document.getElementById("start_day").addEventListener("click", () => {
+  function openStartModal() {
     startName.value = state.rep || "";
     startStore.value = state.store || "";
     openModal(modalStart);
     setTimeout(() => startName.focus(), 50);
+  }
+
+  startDayBtn.addEventListener("click", () => {
+    if (state.rep && state.store) {
+      startDay(state.rep, state.store);
+      return;
+    }
+    openStartModal();
+  });
+
+  editProfileBtn.addEventListener("click", () => {
+    openStartModal();
   });
 
   document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
@@ -1884,9 +1993,12 @@
     const rep = (startName.value || "").trim();
     const store = (startStore.value || "").trim();
     if (!rep || !store) {
-      alert("Por favor ingresa Nombre y Tienda.\nPlease enter Name and Store.");
+      alert(t("missingProfile"));
       return;
     }
+    state.rep = rep;
+    state.store = store;
+    saveProfile(rep, store);
     closeModal(modalStart);
     startDay(rep, store);
   });
@@ -1967,8 +2079,7 @@
   shareBtn.addEventListener("click", () => doCopyOrShare("share"));
 
   endBtn.addEventListener("click", () => {
-    const confirmMsg =
-      "¿Seguro que quieres finalizar el día y resetear?\nAre you sure you want to end the day and reset?";
+    const confirmMsg = t("endConfirm");
     if (!confirm(confirmMsg)) return;
 
     const endTs = Date.now();
@@ -1978,27 +2089,6 @@
     finalizeAndReset();
     history.replaceState(null, "", location.pathname);
   });
-
-  // ---------- Start/End modals ----------
-  function openModal(el) { el.classList.add("show"); }
-  function closeModal(el) { el.classList.remove("show"); }
-
-  function clickOutsideToClose(overlayEl, allow) {
-    overlayEl.addEventListener("click", (e) => {
-      if (!allow) return;
-      if (e.target === overlayEl) closeModal(overlayEl);
-    });
-  }
-  clickOutsideToClose(modalStart, true);
-  clickOutsideToClose(modalReport, false);
-  clickOutsideToClose(modalDay, true);
-
-  // ---------- Buttons: start modal ----------
-  document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
-  document.getElementById("start_cancel").addEventListener("click", () => closeModal(modalStart));
-
-  // ---------- Modals close buttons ----------
-  document.getElementById("day_x").addEventListener("click", () => closeModal(modalDay));
 
   function normalizeHistoryRatings() {
     const hist = loadHistory();
@@ -2015,9 +2105,11 @@
     if (changed) saveHistory(hist);
   }
 
+  langToggleBtn.addEventListener("click", toggleLanguage);
+
   // ---------- Init ----------
   (function init() {
-    renderHeader();
+    applyTranslations();
     normalizeHistoryRatings();
 
     // If opened from QR (phone), open report
