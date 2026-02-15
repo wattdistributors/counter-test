@@ -595,19 +595,24 @@
     .progTitle{ font-size:14px; font-weight:900; letter-spacing:.02em; }
     .progBig{ font-size:23px; font-weight:1000; line-height:1.1; margin-top:4px; }
     .progSub{ font-size:12px; opacity:.85; margin-top:4px; }
-    .progBar{ margin-top:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.14); overflow:hidden; }
-    .progBar > span{ display:block; height:100%; background: linear-gradient(90deg, rgba(80,205,255,.9), rgba(157,231,255,.85)); }
+    .progBar{ margin-top:10px; height:12px; border-radius:999px; background: rgba(255,255,255,.14); border:1px solid rgba(200,236,255,.35); overflow:hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+    .progBar > span{ display:block; height:100%; background: linear-gradient(90deg, rgba(80,205,255,.95), rgba(157,231,255,.95)); box-shadow: 0 0 14px rgba(120,221,255,.45); }
     .checkList{ margin-top:8px; display:grid; gap:6px; }
     .checkItem{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; }
     .checkLeft{ display:flex; align-items:center; gap:8px; }
-    .checkDot{ width:17px; height:17px; border-radius:999px; border:1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; font-size:11px; }
-    .checkItem.done .checkDot{ background: rgba(44,224,106,.22); border-color: rgba(44,224,106,.55); }
-    .progCounter{ font-weight:900; opacity:.95; }
+    .checkDot{ width:19px; height:19px; border-radius:999px; border:1px solid rgba(186,203,216,.55); background: rgba(110,130,146,.30); color: rgba(232,243,252,.92); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; }
+    .checkItem.done .checkDot{ background: rgba(46,217,107,.36); border-color: rgba(90,245,151,.88); color:#d8ffe9; box-shadow: 0 0 10px rgba(46,217,107,.45); }
+    .progCounter{ font-weight:1000; opacity:.98; font-size:19px; letter-spacing:.02em; }
     .goalLine{ margin-top:10px; font-size:12px; opacity:.92; }
-    .rewardBig{ font-size:22px; font-weight:1000; margin-top:4px; }
+    .rewardBig{ font-size:28px; font-weight:1000; margin-top:6px; line-height:1.12; }
     .compactMain{ font-size:26px; font-weight:1000; margin-top:4px; }
     .compactGrid{ margin-top:10px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
     .compactGrid .sumPill .v{ font-size:15px; }
+
+    .rewardCard{ padding:16px 14px; }
+    .rewardTitleRow{ display:flex; align-items:center; gap:8px; }
+    .rewardIcon{ width:24px; height:24px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; background: rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.24); font-size:14px; }
+    .weekImpact{ margin-top:6px; font-size:12px; opacity:.88; }
 
     /* ---------- Modal ---------- */
     .overlay{
@@ -1149,6 +1154,9 @@
       salesX: "Ventas (X)",
       trainedAgents: "Entrenados con cheque",
       requirementsCompleted: "requisitos completados",
+      firstStepGuide: "Primer paso: consigue 12 ventas esta semana.",
+      weekImpact: "Este rendimiento impacta tu progreso hacia ENTRENADOR",
+      rewardIcon: "🏆",
       historical: "Histórico",
       sinceFirstDay: "Desde tu primer día registrado",
       bestDay: "Mejor día",
@@ -1239,6 +1247,9 @@
       salesX: "Sales (X)",
       trainedAgents: "Trained generating check",
       requirementsCompleted: "requirements completed",
+      firstStepGuide: "First step: get 12 sales this week.",
+      weekImpact: "This performance impacts your progress toward TRAINER",
+      rewardIcon: "🏆",
       historical: "Historical",
       sinceFirstDay: "Since your first recorded day",
       bestDay: "Best day",
@@ -2254,6 +2265,7 @@
         <div class="progSub">${t("nextLevel")}: ${t("levelTrainer")}</div>
         <div class="progBar"><span style="width:${overallPct}%"></span></div>
         <div class="progSub">${overallDone}/2 ${t("requirementsCompleted")} · ${overallPct}%</div>
+        <div class="goalLine">${t("firstStepGuide")}</div>
       </div>
 
       <div class="progCard">
@@ -2276,8 +2288,8 @@
         <div class="goalLine">${t("nextGoalWeek")}</div>
       </div>
 
-      <div class="progCard">
-        <div class="progTitle">${t("unlocks")}</div>
+      <div class="progCard rewardCard">
+        <div class="rewardTitleRow"><span class="rewardIcon">${t("rewardIcon")}</span><div class="progTitle">${t("unlocks")}</div></div>
         <div class="rewardBig">${t("unlockReward")}</div>
         <div class="progSub">${t("unlockRewardNote")}</div>
       </div>
@@ -2285,6 +2297,7 @@
       <div class="progCard">
         <div class="progTitle">${t("weekCardTitle")}</div>
         <div class="compactMain">${weekMain}</div>
+        <div class="weekImpact">${t("weekImpact")}</div>
         <div class="compactGrid">
           <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${weekDays}</div></div>
           <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${weekAgg}</div></div>
