@@ -684,6 +684,72 @@
       word-break: break-word;
     }
 
+    .dayRatingRow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .dayRatingPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.12);
+      font-weight:900;
+      font-size:15px;
+      letter-spacing:.01em;
+    }
+    .dayRatingDot{ width:10px; height:10px; border-radius:50%; }
+    .dayRatingPill.good .dayRatingDot{ background:#2ce06a; box-shadow:0 0 0 3px rgba(44,224,106,.18); }
+    .dayRatingPill.regular .dayRatingDot{ background:#ffd24a; box-shadow:0 0 0 3px rgba(255,210,74,.18); }
+    .dayRatingPill.bad .dayRatingDot{ background:#ff4b4b; box-shadow:0 0 0 3px rgba(255,75,75,.18); }
+    .dayBadgeMini{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.09);
+      font-size:12px;
+      font-weight:800;
+      opacity:.95;
+    }
+    .dayMetricGrid{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .dayMetricChip{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.10);
+      padding:8px 6px;
+      text-align:center;
+    }
+    .dayMetricChip .k{ font-size:10px; font-weight:900; letter-spacing:.08em; opacity:.85; }
+    .dayMetricChip .v{ font-size:16px; font-weight:900; margin-top:4px; }
+    .dayDetailsPanel{
+      margin-top:10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      padding:8px;
+    }
+    .dayDetailsPanel summary{
+      cursor:pointer;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.04em;
+      opacity:.9;
+      margin:0 0 8px;
+    }
+    .dayDetailsPanel .reportBox{ opacity:.78; }
+
     /* QR */
     .qrWrap{
       margin-top:12px;
@@ -922,11 +988,14 @@
       </div>
 
       <div class="modalBody">
+        <div class="dayRatingRow" id="day_modal_rating"></div>
+        <div class="dayMetricGrid" id="day_modal_kpis"></div>
         <div class="statCard" id="day_modal_meta" style="margin:0;"></div>
 
-        <div style="margin-top:10px;">
+        <details class="dayDetailsPanel" open>
+          <summary id="day_details_summary">Detalles</summary>
           <div class="reportBox" id="day_modal_report">—</div>
-        </div>
+        </details>
 
         <div class="grid2" id="day_edit_grid" style="display:none; margin-top:10px;">
           <div class="field"><label>S</label><input id="day_edit_s" type="number" min="0" inputmode="numeric" /></div>
@@ -1041,7 +1110,16 @@
       regularDay: "Regular",
       badDay: "Mal día",
       luckyBadge: "🍀 Día con suerte",
-      solidBadge: "🎯 Día sólido (sin resultado)"
+      solidBadge: "🎯 Día sólido (sin resultado)",
+      dayDetailsSummary: "Detalles",
+      dayDetailsTitle: "Detalle del día",
+      dayNoDataTitle: "Sin datos",
+      dayNoDataSaved: "No hay un día finalizado guardado.",
+      dayNoDataTip: "Tip: finaliza el día para que aparezca aquí.",
+      startLbl: "Inicio",
+      endLbl: "Fin",
+      durLbl: "Dur",
+      resultLbl: "Resultado"
     },
     en: {
       tabCounter: "Counter",
@@ -1095,7 +1173,16 @@
       regularDay: "Regular",
       badDay: "Bad day",
       luckyBadge: "🍀 Lucky day",
-      solidBadge: "🎯 Solid day (no result)"
+      solidBadge: "🎯 Solid day (no result)",
+      dayDetailsSummary: "Details",
+      dayDetailsTitle: "Day details",
+      dayNoDataTitle: "No data",
+      dayNoDataSaved: "There is no completed saved day.",
+      dayNoDataTip: "Tip: finish the day so it appears here.",
+      startLbl: "Start",
+      endLbl: "End",
+      durLbl: "Dur",
+      resultLbl: "Result"
     }
   };
 
@@ -1309,6 +1396,8 @@
   const modalDay = document.getElementById("modal_day");
   const dayX = document.getElementById("day_x");
   const dayModalTitle = document.getElementById("day_modal_title");
+  const dayModalRating = document.getElementById("day_modal_rating");
+  const dayModalKpis = document.getElementById("day_modal_kpis");
   const dayModalMeta = document.getElementById("day_modal_meta");
   const dayModalReport = document.getElementById("day_modal_report");
   const dayCopyBtn = document.getElementById("day_copy");
@@ -1366,6 +1455,7 @@
     langEnBtn.textContent = t("languageEnglish");
     document.querySelector(".t1").textContent = t("session");
     document.getElementById("rating_help_title").textContent = t("dayRatingRules");
+    document.getElementById("day_details_summary").textContent = t("dayDetailsSummary");
     document.getElementById("rating_help_body").innerHTML = `
       <div style="font-weight:700; margin-bottom:8px;">${t("quickCriteria")}</div>
       <ul style="margin:0 0 10px 18px; padding:0;">
@@ -1643,16 +1733,18 @@
     const rec = hist[iso];
     activeDayISO = iso;
 
-    dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Sin datos • ${iso}`;
+    dayModalTitle.textContent = rec ? `${t("dayDetailsTitle")} • ${iso}` : `${t("dayNoDataTitle")} • ${iso}`;
     dayEditGrid.style.display = "none";
     daySaveBtn.style.display = "none";
     dayEditBtn.textContent = "Editar día";
 
     if (!rec){
+      dayModalRating.innerHTML = "";
+      dayModalKpis.innerHTML = "";
       dayModalMeta.innerHTML = `
         <div class="statHead">
-          <div class="h">No hay un día finalizado guardado.</div>
-          <div class="p">Tip: finaliza el día para que aparezca aquí.</div>
+          <div class="h">${t("dayNoDataSaved")}</div>
+          <div class="p">${t("dayNoDataTip")}</div>
         </div>
       `;
       dayModalReport.textContent = "—";
@@ -1670,26 +1762,32 @@
     const rating = rec.dayRating || ratingInfo.dayRating;
     const badge = rec.dayBadge ?? ratingInfo.dayBadge;
 
+    dayModalRating.innerHTML = `
+      <div class="dayRatingPill ${rating}">
+        <span class="dayRatingDot"></span>
+        <span>${ratingLabel(rating)}</span>
+      </div>
+      ${badge ? `<div class="dayBadgeMini">${badgeLabel(badge)}</div>` : ""}
+    `;
+
+    dayModalKpis.innerHTML = ["S","Z","CC","C","X"].map(k => `
+      <div class="dayMetricChip">
+        <div class="k">${k}</div>
+        <div class="v">${rec.values?.[k] ?? 0}</div>
+      </div>
+    `).join("");
+
     dayModalMeta.innerHTML = `
       <div class="statHead">
         <div>
           <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
-          <div class="p">Start: ${fmtTime(rec.startTs)} • End: ${fmtTime(rec.endTs)} • Dur: ${fmtDuration(rec.durationMs || 0)}</div>
-          <div class="p">Resultado: ${ratingLine(rating, badge)}</div>
+          <div class="p">${t("startLbl")}: ${fmtTime(rec.startTs)} • ${t("endLbl")}: ${fmtTime(rec.endTs)} • ${t("durLbl")}: ${fmtDuration(rec.durationMs || 0)}</div>
+          <div class="p">${t("resultLbl")}: ${ratingLine(rating, badge)}</div>
         </div>
         <div style="text-align:right;">
           <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
           <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:900; margin-top:2px;">EARNED</div>
         </div>
-      </div>
-
-      <div class="statGrid">
-        ${["S","Z","CC","C","X"].map(k => `
-          <div class="statItem">
-            <div class="k">${k}</div>
-            <div class="v">${rec.values?.[k] ?? 0}</div>
-          </div>
-        `).join("")}
       </div>
     `;
 
