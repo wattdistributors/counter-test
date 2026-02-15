@@ -64,6 +64,7 @@
       min-height:0;
       overflow-y:auto;
       overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
       padding-right:2px;
       display:flex;
       flex-direction:column;
@@ -227,13 +228,13 @@
 
     /* ---------- Calendar (blue translucent style) ---------- */
     .calSurface{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.16);
       border-radius: 12px;
       padding: 6px 6px 6px;
       box-shadow: none;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       overflow:hidden;
     }
 
@@ -666,6 +667,15 @@
       text-align:center;
       line-height:1.25;
       max-width: 420px;
+    }
+
+
+    /* iPad/Safari can render nested glass layers as white blocks.
+       Keep calendar on a single translucent layer there. */
+    @supports (-webkit-touch-callout: none){
+      .calSurface{
+        background: rgba(168,219,245,.12);
+      }
     }
 
     @media (max-width: 520px){
