@@ -764,7 +764,7 @@
           <div class="subtitle" id="today_date"></div>
         </div>
         <div class="btnrow" id="top_actions">
-          <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">ES</button>
+          <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">Idioma</button>
         </div>
       </div>
 
@@ -951,21 +951,26 @@
   <div class="overlay" id="modal_rating_help">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Criterios de clasificación">
       <div class="modalHeader">
-        <div class="modalTitle">Day rating rules</div>
+        <div class="modalTitle" id="rating_help_title">Day rating rules</div>
         <button class="xbtn" id="rating_help_x" aria-label="Close">×</button>
       </div>
-      <div class="modalBody" style="font-size:13px; line-height:1.45;">
-        <div style="font-weight:700; margin-bottom:8px;">Criterios rápidos / Quick criteria:</div>
-        <ul style="margin:0 0 10px 18px; padding:0;">
-          <li><b>Good day (green dot)</b>: S is 80 or more + Aggressiveness is 10% or more, OR X is 2 or more.</li>
-          <li><b>Regular day (yellow dot)</b>: S is between 50 and 79, OR S is 80 or more + Aggressiveness under 10%.</li>
-          <li><b>Bad day (red dot)</b>: S is under 50 + X is 0.</li>
-        </ul>
-        <div style="font-weight:700; margin-bottom:8px;">Special badges:</div>
-        <ul style="margin:0 0 0 18px; padding:0;">
-          <li><b>🍀 Lucky day</b>: S under 50 + X 1 or more (dot stays yellow).</li>
-          <li><b>🎯 Solid day (no result)</b>: S 80 or more + Aggressiveness 10% or more + X 0 (dot stays green).</li>
-        </ul>
+      <div class="modalBody" id="rating_help_body" style="font-size:13px; line-height:1.45;"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Language -->
+  <div class="overlay" id="modal_language">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Language">
+      <div class="modalHeader">
+        <div class="modalTitle" id="lang_modal_title">Idioma</div>
+        <button class="xbtn" id="lang_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody">
+        <div id="lang_modal_intro" style="opacity:.9; font-size:13px; margin-bottom:12px;">Selecciona el idioma:</div>
+        <div class="modalActions">
+          <button class="btn" id="lang_es">Español</button>
+          <button class="btn primary" id="lang_en">English</button>
+        </div>
       </div>
     </div>
   </div>
@@ -988,6 +993,12 @@
       tabCounter: "Contador",
       tabCalendar: "Calendario",
       tabSummary: "Resumen",
+      languageBtn: "Idioma",
+      languageModalTitle: "Idioma",
+      languageModalIntro: "Selecciona el idioma:",
+      languageSpanish: "Español",
+      languageEnglish: "Inglés",
+      session: "Sesión",
       startIntro: "Presiona <b>Iniciar día</b> para comenzar.",
       startDay: "Iniciar día",
       editProfile: "Editar datos",
@@ -1004,12 +1015,44 @@
       missingProfile: "Por favor ingresa Nombre y Tienda.",
       endConfirm: "¿Seguro que quieres finalizar el día y resetear?",
       finishResult: "Resultado",
-      dayResult: "Resultado del día"
+      dayResult: "Resultado del día",
+      weekStatsTitle: "Stats de la semana",
+      monthStatsTitle: "Stats del mes",
+      avgStopsPerDay: "Promedio S/día",
+      hoursWorked: "Horas trabajadas",
+      workedDays: "Días trabajados",
+      currentWeek: "Semana actual",
+      currentMonth: "Mes actual",
+      historical: "Histórico",
+      sinceFirstDay: "Desde tu primer día registrado",
+      bestDay: "Mejor día",
+      noSavedDays: "Aún no hay días finalizados guardados.",
+      avgXPerDay: "Prom. X/día",
+      days: "Días",
+      dayRatingRules: "Criterios de clasificación del día",
+      quickCriteria: "Criterios rápidos:",
+      specialBadges: "Badges especiales:",
+      goodDayRule: "<b>Buen día (punto verde)</b>: S es 80 o más + Agresividad es 10% o más, O X es 2 o más.",
+      regularDayRule: "<b>Día regular (punto amarillo)</b>: S está entre 50 y 79, O S es 80 o más + Agresividad menor a 10%.",
+      badDayRule: "<b>Mal día (punto rojo)</b>: S es menor a 50 + X es 0.",
+      luckyDayRule: "<b>🍀 Día con suerte</b>: S menor a 50 + X 1 o más (el punto sigue amarillo).",
+      solidDayRule: "<b>🎯 Día sólido (sin resultado)</b>: S 80 o más + Agresividad 10% o más + X 0 (el punto sigue verde).",
+      goodDay: "Buen día",
+      regularDay: "Regular",
+      badDay: "Mal día",
+      luckyBadge: "🍀 Día con suerte",
+      solidBadge: "🎯 Día sólido (sin resultado)"
     },
     en: {
       tabCounter: "Counter",
       tabCalendar: "Calendar",
       tabSummary: "Summary",
+      languageBtn: "Language",
+      languageModalTitle: "Language",
+      languageModalIntro: "Select your language:",
+      languageSpanish: "Spanish",
+      languageEnglish: "English",
+      session: "Session",
       startIntro: "Tap <b>Start day</b> to begin.",
       startDay: "Start day",
       editProfile: "Edit profile",
@@ -1026,7 +1069,33 @@
       missingProfile: "Please enter Name and Store.",
       endConfirm: "Are you sure you want to end the day and reset?",
       finishResult: "Result",
-      dayResult: "Day result"
+      dayResult: "Day result",
+      weekStatsTitle: "Week stats",
+      monthStatsTitle: "Month stats",
+      avgStopsPerDay: "Avg S/day",
+      hoursWorked: "Hours worked",
+      workedDays: "Days worked",
+      currentWeek: "Current week",
+      currentMonth: "Current month",
+      historical: "Historical",
+      sinceFirstDay: "Since your first recorded day",
+      bestDay: "Best day",
+      noSavedDays: "No completed days saved yet.",
+      avgXPerDay: "Avg X/day",
+      days: "Days",
+      dayRatingRules: "Day rating rules",
+      quickCriteria: "Quick criteria:",
+      specialBadges: "Special badges:",
+      goodDayRule: "<b>Good day (green dot)</b>: S is 80 or more + Aggressiveness is 10% or more, OR X is 2 or more.",
+      regularDayRule: "<b>Regular day (yellow dot)</b>: S is between 50 and 79, OR S is 80 or more + Aggressiveness under 10%.",
+      badDayRule: "<b>Bad day (red dot)</b>: S is under 50 + X is 0.",
+      luckyDayRule: "<b>🍀 Lucky day</b>: S under 50 + X 1 or more (dot stays yellow).",
+      solidDayRule: "<b>🎯 Solid day (no result)</b>: S 80 or more + Aggressiveness 10% or more + X 0 (dot stays green).",
+      goodDay: "Good day",
+      regularDay: "Regular",
+      badDay: "Bad day",
+      luckyBadge: "🍀 Lucky day",
+      solidBadge: "🎯 Solid day (no result)"
     }
   };
 
@@ -1053,14 +1122,14 @@
   }
 
   function ratingLabel(rating) {
-    if (rating === "good") return "Buen día";
-    if (rating === "bad") return "Mal día";
-    return "Regular";
+    if (rating === "good") return t("goodDay");
+    if (rating === "bad") return t("badDay");
+    return t("regularDay");
   }
 
   function badgeLabel(badge) {
-    if (badge === "lucky") return "🍀 Lucky day";
-    if (badge === "solid_no_result") return "🎯 Solid day (no result)";
+    if (badge === "lucky") return t("luckyBadge");
+    if (badge === "solid_no_result") return t("solidBadge");
     return "";
   }
 
@@ -1189,6 +1258,9 @@
   const finishDayBtn = document.getElementById("finish_day");
   const editProfileBtn = document.getElementById("edit_profile");
   const langToggleBtn = document.getElementById("lang_toggle");
+  const modalLanguage = document.getElementById("modal_language");
+  const langEsBtn = document.getElementById("lang_es");
+  const langEnBtn = document.getElementById("lang_en");
 
   // Tabs
   const tabEls = Array.from(document.querySelectorAll(".tab"));
@@ -1287,15 +1359,37 @@
     document.getElementById("start_store_label").textContent = t("storeLabel");
     document.getElementById("start_cancel").textContent = t("cancel");
     document.getElementById("start_confirm").textContent = t("start");
-    langToggleBtn.textContent = currentLang === "es" ? "EN" : "ES";
+    langToggleBtn.textContent = "Idioma";
+    document.getElementById("lang_modal_title").textContent = t("languageModalTitle");
+    document.getElementById("lang_modal_intro").textContent = t("languageModalIntro");
+    langEsBtn.textContent = t("languageSpanish");
+    langEnBtn.textContent = t("languageEnglish");
+    document.querySelector(".t1").textContent = t("session");
+    document.getElementById("rating_help_title").textContent = t("dayRatingRules");
+    document.getElementById("rating_help_body").innerHTML = `
+      <div style="font-weight:700; margin-bottom:8px;">${t("quickCriteria")}</div>
+      <ul style="margin:0 0 10px 18px; padding:0;">
+        <li>${t("goodDayRule")}</li>
+        <li>${t("regularDayRule")}</li>
+        <li>${t("badDayRule")}</li>
+      </ul>
+      <div style="font-weight:700; margin-bottom:8px;">${t("specialBadges")}</div>
+      <ul style="margin:0 0 0 18px; padding:0;">
+        <li>${t("luckyDayRule")}</li>
+        <li>${t("solidDayRule")}</li>
+      </ul>
+    `;
     renderHeader();
     if (state.active) renderSessionInfo();
   }
 
-  function toggleLanguage() {
-    currentLang = currentLang === "es" ? "en" : "es";
+  function setLanguage(lang) {
+    currentLang = lang === "en" ? "en" : "es";
     try { localStorage.setItem(LANG_KEY, currentLang); } catch {}
+    closeModal(modalLanguage);
     applyTranslations();
+    renderCalendarStats();
+    renderSummary();
   }
 
   // ---------- UI ----------
@@ -1773,7 +1867,7 @@
     calTitle.textContent = monthName(y, m);
 
     calGrid.innerHTML = "";
-    const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const dows = currentLang === "es" ? ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"] : ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     dows.forEach(s => {
       const el = document.createElement("div");
       el.className = "dow";
@@ -1864,11 +1958,11 @@
       </div>
 
       <div class="moneyLine">
-        <div><b>Días trabajados:</b> ${totals.days || 0}</div>
+        <div><b>${t("workedDays")}:</b> ${totals.days || 0}</div>
         <div><b>${avgLabel}:</b> ${totals.days ? ((totals.S||0)/totals.days).toFixed(1) : "0.0"}</div>
       </div>
       <div class="moneyLine" style="margin-top:6px;">
-        <div><b>Horas trabajadas:</b> ${fmtHours(totals.durationMs || 0)}</div>
+        <div><b>${t("hoursWorked")}:</b> ${fmtHours(totals.durationMs || 0)}</div>
         <div></div>
       </div>
     `;
@@ -1885,8 +1979,8 @@
     const wLabel = `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`;
     const mLabel = `${calCursor.y}-${String(calCursor.m+1).padStart(2,"0")}`;
 
-    renderStatCard(weekStatsEl, "Stats de la semana", wLabel, weekTotals, "Promedio S/día");
-    renderStatCard(monthStatsEl, "Stats del mes", mLabel, monthTotals);
+    renderStatCard(weekStatsEl, t("weekStatsTitle"), wLabel, weekTotals, t("avgStopsPerDay"));
+    renderStatCard(monthStatsEl, t("monthStatsTitle"), mLabel, monthTotals, t("avgStopsPerDay"));
   }
 
   // ---------- Summary rendering ----------
@@ -1929,8 +2023,8 @@
           </div>
           <div class="sumStats">
             <div class="sumPill"><div class="k">X</div><div class="v">${totals.X||0}</div></div>
-            <div class="sumPill"><div class="k">Avg X/Día</div><div class="v">${avgX}</div></div>
-            <div class="sumPill"><div class="k">Días</div><div class="v">${days}</div></div>
+            <div class="sumPill"><div class="k">${t("avgXPerDay")}</div><div class="v">${avgX}</div></div>
+            <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${days}</div></div>
           </div>
           <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
             <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${aggr}</div></div>
@@ -1944,7 +2038,7 @@
       <div class="sumCard">
         <div class="sumTop">
           <div>
-            <div class="sumTitle">Mejor día</div>
+            <div class="sumTitle">${t("bestDay")}</div>
             <div class="sumSub">${bestDay.date} • ${bestDay.store || ""}</div>
           </div>
           <div class="sumMoney">$${(bestDay.values?.X||0)*MONEY_PER_X}<span>EARNED</span></div>
@@ -1957,15 +2051,15 @@
       </div>
     ` : `
       <div class="sumCard">
-        <div class="sumTitle">Histórico</div>
-        <div class="sumSub">Aún no hay días finalizados guardados.</div>
+        <div class="sumTitle">${t("historical")}</div>
+        <div class="sumSub">${t("noSavedDays")}</div>
       </div>
     `;
 
     sumWrap.innerHTML = `
-      ${card("Semana actual", `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`, weekTotals)}
-      ${card("Mes actual", `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`, monthTotals)}
-      ${card("Histórico", `Desde tu primer día registrado`, allTotals)}
+      ${card(t("currentWeek"), `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`, weekTotals)}
+      ${card(t("currentMonth"), `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`, monthTotals)}
+      ${card(t("historical"), t("sinceFirstDay"), allTotals)}
       ${bestBlock}
     `;
   }
@@ -2109,7 +2203,11 @@
     if (changed) saveHistory(hist);
   }
 
-  langToggleBtn.addEventListener("click", toggleLanguage);
+  langToggleBtn.addEventListener("click", () => openModal(modalLanguage));
+  document.getElementById("lang_x").addEventListener("click", () => closeModal(modalLanguage));
+  langEsBtn.addEventListener("click", () => setLanguage("es"));
+  langEnBtn.addEventListener("click", () => setLanguage("en"));
+  clickOutsideToClose(modalLanguage, true);
 
   // ---------- Init ----------
   (function init() {
