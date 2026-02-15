@@ -1002,7 +1002,9 @@
       day: "Día",
       begins: "Inicio",
       missingProfile: "Por favor ingresa Nombre y Tienda.",
-      endConfirm: "¿Seguro que quieres finalizar el día y resetear?"
+      endConfirm: "¿Seguro que quieres finalizar el día y resetear?",
+      finishResult: "Resultado",
+      dayResult: "Resultado del día"
     },
     en: {
       tabCounter: "Counter",
@@ -1022,7 +1024,9 @@
       day: "Day",
       begins: "Start",
       missingProfile: "Please enter Name and Store.",
-      endConfirm: "Are you sure you want to end the day and reset?"
+      endConfirm: "Are you sure you want to end the day and reset?",
+      finishResult: "Result",
+      dayResult: "Day result"
     }
   };
 
@@ -1283,7 +1287,7 @@
     document.getElementById("start_store_label").textContent = t("storeLabel");
     document.getElementById("start_cancel").textContent = t("cancel");
     document.getElementById("start_confirm").textContent = t("start");
-    langToggleBtn.textContent = currentLang.toUpperCase();
+    langToggleBtn.textContent = currentLang === "es" ? "EN" : "ES";
     renderHeader();
     if (state.active) renderSessionInfo();
   }
@@ -2017,9 +2021,9 @@
     const text = buildReport(endTs);
     const ratingInfo = classifyDay(state.values || {});
     const result = ratingLine(ratingInfo.dayRating, ratingInfo.dayBadge);
-    finishResult.textContent = `Resultado: ${result}`;
+    finishResult.textContent = `${t("finishResult")}: ${result}`;
     reportDayRating.style.display = "";
-    reportDayRating.textContent = `Resultado del día: ${result}`;
+    reportDayRating.textContent = `${t("dayResult")}: ${result}`;
     reportBox.textContent = text;
     showQRForText(text);
     setReportMode("tablet");
