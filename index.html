@@ -750,6 +750,20 @@
     }
     .dayDetailsPanel .reportBox{ opacity:.78; }
 
+    #modal_day .modal{
+      max-height: 90dvh;
+      display:flex;
+      flex-direction:column;
+    }
+    #modal_day .modalBody{
+      overflow-y:auto;
+      min-height:0;
+      padding-right:2px;
+    }
+    #day_edit_grid{
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
     /* QR */
     .qrWrap{
       margin-top:12px;
@@ -947,20 +961,19 @@
   <div class="overlay" id="modal_report">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Day summary">
       <div class="modalHeader">
-        <div class="modalTitle">Resumen del día / Day summary</div>
+        <div class="modalTitle" id="report_modal_title">Resumen del día</div>
         <button class="xbtn" id="report_x" aria-label="Back">×</button>
       </div>
       <div class="modalBody">
         <div id="report_day_rating" class="ratingNote" style="display:none;"></div>
 
         <div id="qr_wrap" class="qrWrap" style="display:none;">
-          <div class="qrTitle">Abrir reporte en el teléfono / Open report on your phone</div>
+          <div class="qrTitle" id="qr_title">Abrir reporte en el teléfono</div>
           <div class="qrCard">
             <div id="qr_box"></div>
           </div>
           <div class="qrNote" id="qr_note">
             Escanea el QR y envía el reporte desde tu teléfono.
-            Scan the QR and send the report from your phone.
           </div>
         </div>
 
@@ -973,7 +986,7 @@
         </div>
 
         <div id="report_hint" style="margin-top:10px; opacity:.8; font-size:12px;">
-          Copia o comparte para terminar el día y resetear. / Copy or share ends the day and resets.
+          Copia o comparte para terminar el día y resetear.
         </div>
       </div>
     </div>
@@ -992,7 +1005,7 @@
         <div class="dayMetricGrid" id="day_modal_kpis"></div>
         <div class="statCard" id="day_modal_meta" style="margin:0;"></div>
 
-        <details class="dayDetailsPanel" open>
+        <details class="dayDetailsPanel" id="day_details_panel" open>
           <summary id="day_details_summary">Detalles</summary>
           <div class="reportBox" id="day_modal_report">—</div>
         </details>
@@ -1119,7 +1132,14 @@
       startLbl: "Inicio",
       endLbl: "Fin",
       durLbl: "Dur",
-      resultLbl: "Resultado"
+      resultLbl: "Resultado",
+      reportModalTitle: "Resumen del día",
+      qrTitle: "Abrir reporte en el teléfono",
+      qrNote: "Escanea el QR y envía el reporte desde tu teléfono.",
+      reportHint: "Copia o comparte para terminar el día y resetear.",
+      monthDayYear: { month: "long", day: "numeric", year: "numeric" },
+      monthDay: { month: "long", day: "numeric" },
+      weekRangeJoin: "al"
     },
     en: {
       tabCounter: "Counter",
@@ -1182,7 +1202,14 @@
       startLbl: "Start",
       endLbl: "End",
       durLbl: "Dur",
-      resultLbl: "Result"
+      resultLbl: "Result",
+      reportModalTitle: "Day summary",
+      qrTitle: "Open report on your phone",
+      qrNote: "Scan the QR and send the report from your phone.",
+      reportHint: "Copy or share to end the day and reset.",
+      monthDayYear: { month: "long", day: "numeric", year: "numeric" },
+      monthDay: { month: "long", day: "numeric" },
+      weekRangeJoin: "to"
     }
   };
 
@@ -1251,10 +1278,28 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   };
 
+  const localeForLang = () => currentLang === "es" ? "es-ES" : "en-US";
+
   const monthName = (y, m) => {
     const d = new Date(y, m, 1);
-    return d.toLocaleString(undefined, { month:"long", year:"numeric" });
+    return d.toLocaleDateString(localeForLang(), { month:"long", year:"numeric" });
   };
+
+  function prettyDateFromISO(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || "-";
+    const [y,m,d] = iso.split("-").map(Number);
+    const date = new Date(y, m-1, d);
+    return date.toLocaleDateString(localeForLang(), t("monthDayYear"));
+  }
+
+  function prettyDateRange(startDate, endDate) {
+    const a = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const b = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+    const sameYear = a.getFullYear() === b.getFullYear();
+    const left = a.toLocaleDateString(localeForLang(), t("monthDay"));
+    const right = b.toLocaleDateString(localeForLang(), sameYear ? t("monthDay") : t("monthDayYear"));
+    return `${left} ${t("weekRangeJoin")} ${right}`;
+  }
 
   const startOfWeekMon = (d) => {
     const out = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -1456,6 +1501,10 @@
     document.querySelector(".t1").textContent = t("session");
     document.getElementById("rating_help_title").textContent = t("dayRatingRules");
     document.getElementById("day_details_summary").textContent = t("dayDetailsSummary");
+    document.getElementById("report_modal_title").textContent = t("reportModalTitle");
+    document.getElementById("qr_title").textContent = t("qrTitle");
+    document.getElementById("qr_note").textContent = t("qrNote");
+    document.getElementById("report_hint").textContent = t("reportHint");
     document.getElementById("rating_help_body").innerHTML = `
       <div style="font-weight:700; margin-bottom:8px;">${t("quickCriteria")}</div>
       <ul style="margin:0 0 10px 18px; padding:0;">
@@ -1485,12 +1534,12 @@
   // ---------- UI ----------
   const valEls = {};
   function renderHeader() {
-    todayDateEl.textContent = `${t("date")}: ${state.date}`;
+    todayDateEl.textContent = `${t("date")}: ${prettyDateFromISO(state.date)}`;
   }
 
   function renderSessionInfo() {
     whoLine.textContent = `${state.rep || "—"} • ${state.store || "—"}`;
-    dateLine.textContent = `${t("day")}: ${state.date} • ${t("begins")}: ${fmtTime(state.sessionStart)}`;
+    dateLine.textContent = `${t("day")}: ${prettyDateFromISO(state.date)} • ${t("begins")}: ${fmtTime(state.sessionStart)}`;
   }
 
   function renderMetrics() {
@@ -1607,7 +1656,7 @@
     return [
       `Name: ${state.rep || "-"}`,
       `Store: ${state.store || "-"}`,
-      `Date: ${state.date}`,
+      `Date: ${prettyDateFromISO(state.date)}`,
       ``,
       `Start: ${fmtTime(startTs)}`,
       `End: ${fmtTime(endTs)}`,
@@ -1716,7 +1765,7 @@
     return [
       `Name: ${rec.rep || "-"}`,
       `Store: ${rec.store || "-"}`,
-      `Date: ${rec.date || "-"}`,
+      `Date: ${prettyDateFromISO(rec.date || "-")}`,
       ``,
       `Start: ${fmtTime(rec.startTs)}`,
       `End: ${fmtTime(rec.endTs)}`,
@@ -1733,7 +1782,7 @@
     const rec = hist[iso];
     activeDayISO = iso;
 
-    dayModalTitle.textContent = rec ? `${t("dayDetailsTitle")} • ${iso}` : `${t("dayNoDataTitle")} • ${iso}`;
+    dayModalTitle.textContent = rec ? `${t("dayDetailsTitle")} • ${prettyDateFromISO(iso)}` : `${t("dayNoDataTitle")} • ${prettyDateFromISO(iso)}`;
     dayEditGrid.style.display = "none";
     daySaveBtn.style.display = "none";
     dayEditBtn.textContent = "Editar día";
@@ -1831,14 +1880,17 @@
   dayShareBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {} });
 
   dayEditBtn.addEventListener("click", () => {
+    const detailsPanel = document.getElementById("day_details_panel");
     if (dayEditGrid.style.display === "none") {
       dayEditGrid.style.display = "grid";
       daySaveBtn.style.display = "";
       dayEditBtn.textContent = "Cancelar edición";
+      if (detailsPanel) detailsPanel.open = false;
     } else {
       dayEditGrid.style.display = "none";
       daySaveBtn.style.display = "none";
       dayEditBtn.textContent = "Editar día";
+      if (detailsPanel) detailsPanel.open = true;
     }
   });
 
@@ -2074,8 +2126,8 @@
 
     const monthTotals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
 
-    const wLabel = `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`;
-    const mLabel = `${calCursor.y}-${String(calCursor.m+1).padStart(2,"0")}`;
+    const wLabel = prettyDateRange(weekStart, weekEnd);
+    const mLabel = monthName(calCursor.y, calCursor.m);
 
     renderStatCard(weekStatsEl, t("weekStatsTitle"), wLabel, weekTotals, t("avgStopsPerDay"));
     renderStatCard(monthStatsEl, t("monthStatsTitle"), mLabel, monthTotals, t("avgStopsPerDay"));
@@ -2155,8 +2207,8 @@
     `;
 
     sumWrap.innerHTML = `
-      ${card(t("currentWeek"), `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`, weekTotals)}
-      ${card(t("currentMonth"), `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`, monthTotals)}
+      ${card(t("currentWeek"), prettyDateRange(weekStart, weekEnd), weekTotals)}
+      ${card(t("currentMonth"), monthName(now.getFullYear(), now.getMonth()), monthTotals)}
       ${card(t("historical"), t("sinceFirstDay"), allTotals)}
       ${bestBlock}
     `;
