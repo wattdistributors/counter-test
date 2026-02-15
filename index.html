@@ -585,6 +585,30 @@
       letter-spacing:.02em;
     }
 
+    .progWrap{ display:grid; gap:10px; }
+    .progCard{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 11px;
+    }
+    .progTitle{ font-size:14px; font-weight:900; letter-spacing:.02em; }
+    .progBig{ font-size:23px; font-weight:1000; line-height:1.1; margin-top:4px; }
+    .progSub{ font-size:12px; opacity:.85; margin-top:4px; }
+    .progBar{ margin-top:10px; height:10px; border-radius:999px; background: rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.14); overflow:hidden; }
+    .progBar > span{ display:block; height:100%; background: linear-gradient(90deg, rgba(80,205,255,.9), rgba(157,231,255,.85)); }
+    .checkList{ margin-top:8px; display:grid; gap:6px; }
+    .checkItem{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; }
+    .checkLeft{ display:flex; align-items:center; gap:8px; }
+    .checkDot{ width:17px; height:17px; border-radius:999px; border:1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; font-size:11px; }
+    .checkItem.done .checkDot{ background: rgba(44,224,106,.22); border-color: rgba(44,224,106,.55); }
+    .progCounter{ font-weight:900; opacity:.95; }
+    .goalLine{ margin-top:10px; font-size:12px; opacity:.92; }
+    .rewardBig{ font-size:22px; font-weight:1000; margin-top:4px; }
+    .compactMain{ font-size:26px; font-weight:1000; margin-top:4px; }
+    .compactGrid{ margin-top:10px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+    .compactGrid .sumPill .v{ font-size:15px; }
+
     /* ---------- Modal ---------- */
     .overlay{
       position:fixed; inset:0;
@@ -852,7 +876,7 @@
       <div class="tabs" id="tabs">
         <div class="tab active" data-tab="counter" id="tab_counter_label">Contador</div>
         <div class="tab" data-tab="calendar" id="tab_calendar_label">Calendario</div>
-        <div class="tab" data-tab="summary" id="tab_summary_label">Resumen</div>
+        <div class="tab" data-tab="summary" id="tab_summary_label">Progreso</div>
       </div>
       </div>
 
@@ -1074,7 +1098,7 @@
     es: {
       tabCounter: "Contador",
       tabCalendar: "Calendario",
-      tabSummary: "Resumen",
+      tabSummary: "Progreso",
       languageBtn: "Idioma",
       languageModalTitle: "Idioma",
       languageModalIntro: "Selecciona el idioma:",
@@ -1105,6 +1129,26 @@
       workedDays: "Días trabajados",
       currentWeek: "Semana actual",
       currentMonth: "Mes actual",
+      progressLevelTitle: "Tu nivel",
+      currentLevel: "Nivel actual",
+      nextLevel: "Siguiente nivel",
+      levelSeller: "VENDEDOR",
+      levelTrainer: "ENTRENADOR",
+      pathToNextLevel: "Camino al siguiente nivel",
+      reqA: "3 semanas consecutivas con +12 ventas",
+      weekN: "Semana",
+      completed: "completada",
+      pending: "pendiente",
+      reqB: "3 personas entrenadas generando cheque",
+      nextGoalWeek: "Siguiente objetivo recomendado esta semana: llegar a 12+ ventas.",
+      unlocks: "Desbloqueas",
+      unlockReward: "+$10 override por venta de tu equipo",
+      unlockRewardNote: "Se desbloquea al completar ambos requisitos.",
+      weekCardTitle: "Tu semana actual",
+      monthCardTitle: "Tu mes actual",
+      salesX: "Ventas (X)",
+      trainedAgents: "Entrenados con cheque",
+      requirementsCompleted: "requisitos completados",
       historical: "Histórico",
       sinceFirstDay: "Desde tu primer día registrado",
       bestDay: "Mejor día",
@@ -1144,7 +1188,7 @@
     en: {
       tabCounter: "Counter",
       tabCalendar: "Calendar",
-      tabSummary: "Summary",
+      tabSummary: "Progress",
       languageBtn: "Language",
       languageModalTitle: "Language",
       languageModalIntro: "Select your language:",
@@ -1175,6 +1219,26 @@
       workedDays: "Days worked",
       currentWeek: "Current week",
       currentMonth: "Current month",
+      progressLevelTitle: "Your level",
+      currentLevel: "Current level",
+      nextLevel: "Next level",
+      levelSeller: "SELLER",
+      levelTrainer: "TRAINER",
+      pathToNextLevel: "Path to next level",
+      reqA: "3 consecutive weeks with 12+ sales",
+      weekN: "Week",
+      completed: "completed",
+      pending: "pending",
+      reqB: "3 trained people generating check",
+      nextGoalWeek: "Recommended next goal this week: reach 12+ sales.",
+      unlocks: "You unlock",
+      unlockReward: "+$10 override per sale from your team",
+      unlockRewardNote: "Unlocked after completing both requirements.",
+      weekCardTitle: "Your current week",
+      monthCardTitle: "Your current month",
+      salesX: "Sales (X)",
+      trainedAgents: "Trained generating check",
+      requirementsCompleted: "requirements completed",
       historical: "Historical",
       sinceFirstDay: "Since your first recorded day",
       bestDay: "Best day",
@@ -1528,7 +1592,7 @@
     closeModal(modalLanguage);
     applyTranslations();
     renderCalendarStats();
-    renderSummary();
+    renderProgress();
   }
 
   // ---------- UI ----------
@@ -1703,7 +1767,7 @@
     closeModal(modalReport);
     showStartScreen();
     renderCalendar();
-    renderSummary();
+    renderProgress();
   }
 
   function setReportMode(mode) {
@@ -1915,7 +1979,7 @@
     upsertDayInHistory(activeDayISO, rec);
     renderCalendar();
     renderCalendarStats();
-    renderSummary();
+    renderProgress();
     openDayModal(activeDayISO);
   });
 
@@ -1928,7 +1992,7 @@
     closeModal(modalDay);
     renderCalendar();
     renderCalendarStats();
-    renderSummary();
+    renderProgress();
   });
 
   // ---------- Metrics interactions ----------
@@ -1974,7 +2038,7 @@
     tabCalendar.style.display = (tabName === "calendar") ? "" : "none";
     tabSummary.style.display = (tabName === "summary") ? "" : "none";
     if (tabName === "calendar") renderCalendar();
-    if (tabName === "summary") renderSummary();
+    if (tabName === "summary") renderProgress();
   }
 
   document.getElementById("tabs").addEventListener("click", (e) => {
@@ -2133,84 +2197,113 @@
     renderStatCard(monthStatsEl, t("monthStatsTitle"), mLabel, monthTotals, t("avgStopsPerDay"));
   }
 
-  // ---------- Summary rendering ----------
-  function renderSummary() {
+  // ---------- Progress rendering ----------
+  function weekSalesStreak(minSales = 12) {
+    const hist = loadHistory();
+    const now = new Date();
+    const thisWeekStart = startOfWeekMon(now);
+    let streak = 0;
+
+    for (let i = 0; i < 24; i++) {
+      const ws = new Date(thisWeekStart);
+      ws.setDate(thisWeekStart.getDate() - (i * 7));
+      const we = endOfWeekSun(ws);
+      const totals = sumRecords(recordsInRange(ws, we));
+      if ((totals.X || 0) >= minSales) streak += 1;
+      else break;
+    }
+    return streak;
+  }
+
+  function getTrainedAgentsWithCheck() {
+    const n = parseInt(localStorage.getItem("trainedAgentsWithCheck") || "0", 10);
+    return Math.max(0, Number.isFinite(n) ? n : 0);
+  }
+
+  function renderProgress() {
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
     const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
     const monthTotals = sumRecords(recordsInMonth(now.getFullYear(), now.getMonth()));
 
-    const hist = loadHistory();
-    const allRecords = Object.keys(hist).map(k => hist[k]).filter(Boolean);
-    allRecords.sort((a,b) => (a.date||"").localeCompare(b.date||""));
-    const allTotals = sumRecords(allRecords);
+    const weekX = weekTotals.X || 0;
+    const weekDays = weekTotals.days || 0;
+    const weekAgg = (weekTotals.S||0) ? (((weekTotals.Z||0)/(weekTotals.S||0))*100).toFixed(1) + "%" : "0.0%";
+    const weekClose = (weekTotals.Z||0) ? (((weekTotals.X||0)/(weekTotals.Z||0))*100).toFixed(1) + "%" : "0.0%";
+    const weekEarned = (weekTotals.X||0) * MONEY_PER_X;
 
-    const bestDay = (() => {
-      let best = null;
-      for (const r of allRecords) {
-        const x = r.values?.X || 0;
-        if (!best || x > (best.values?.X||0)) best = r;
-      }
-      return best;
-    })();
+    const monthX = monthTotals.X || 0;
+    const monthDays = monthTotals.days || 0;
+    const monthAvgX = monthDays ? ((monthX)/monthDays).toFixed(1) : "0.0";
+    const monthEarned = (monthTotals.X||0) * MONEY_PER_X;
 
-    const card = (title, sub, totals) => {
-      const money = (totals.X||0) * MONEY_PER_X;
-      const days = totals.days || 0;
-      const avgX = days ? ((totals.X||0)/days).toFixed(1) : "0.0";
-      const close = (totals.Z||0) ? (((totals.X||0)/(totals.Z||0))*100).toFixed(1) + "%" : "0.0%";
-      const aggr = (totals.S||0) ? (((totals.Z||0)/(totals.S||0))*100).toFixed(1) + "%" : "0.0%";
+    const streak = Math.min(3, weekSalesStreak(12));
+    const trained = Math.min(3, getTrainedAgentsWithCheck());
+    const reqAProgress = Math.min(100, Math.round((streak / 3) * 100));
+    const reqBProgress = Math.min(100, Math.round((trained / 3) * 100));
+    const overallDone = (streak >= 3 ? 1 : 0) + (trained >= 3 ? 1 : 0);
+    const overallPct = Math.round((overallDone / 2) * 100);
 
-      return `
-        <div class="sumCard">
-          <div class="sumTop">
-            <div>
-              <div class="sumTitle">${title}</div>
-              <div class="sumSub">${sub}</div>
-            </div>
-            <div class="sumMoney">$${money}<span>EARNED</span></div>
-          </div>
-          <div class="sumStats">
-            <div class="sumPill"><div class="k">X</div><div class="v">${totals.X||0}</div></div>
-            <div class="sumPill"><div class="k">${t("avgXPerDay")}</div><div class="v">${avgX}</div></div>
-            <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${days}</div></div>
-          </div>
-          <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-            <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${aggr}</div></div>
-            <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${close}</div></div>
-          </div>
-        </div>
-      `;
-    };
-
-    const bestBlock = bestDay ? `
-      <div class="sumCard">
-        <div class="sumTop">
-          <div>
-            <div class="sumTitle">${t("bestDay")}</div>
-            <div class="sumSub">${bestDay.date} • ${bestDay.store || ""}</div>
-          </div>
-          <div class="sumMoney">$${(bestDay.values?.X||0)*MONEY_PER_X}<span>EARNED</span></div>
-        </div>
-        <div class="sumStats">
-          ${["S","Z","CC","C","X"].map(k => `
-            <div class="sumPill"><div class="k">${k}</div><div class="v">${bestDay.values?.[k] ?? 0}</div></div>
-          `).join("")}
-        </div>
-      </div>
-    ` : `
-      <div class="sumCard">
-        <div class="sumTitle">${t("historical")}</div>
-        <div class="sumSub">${t("noSavedDays")}</div>
-      </div>
-    `;
+    const weekMain = `${t("salesX")}: ${weekX} / 12`;
 
     sumWrap.innerHTML = `
-      ${card(t("currentWeek"), prettyDateRange(weekStart, weekEnd), weekTotals)}
-      ${card(t("currentMonth"), monthName(now.getFullYear(), now.getMonth()), monthTotals)}
-      ${card(t("historical"), t("sinceFirstDay"), allTotals)}
-      ${bestBlock}
+      <div class="progCard">
+        <div class="progTitle">${t("progressLevelTitle")}</div>
+        <div class="progBig">${t("currentLevel")}: ${t("levelSeller")}</div>
+        <div class="progSub">${t("nextLevel")}: ${t("levelTrainer")}</div>
+        <div class="progBar"><span style="width:${overallPct}%"></span></div>
+        <div class="progSub">${overallDone}/2 ${t("requirementsCompleted")} · ${overallPct}%</div>
+      </div>
+
+      <div class="progCard">
+        <div class="progTitle">${t("pathToNextLevel")}</div>
+
+        <div class="progSub" style="margin-top:8px; font-weight:800; opacity:.96;">${t("reqA")}</div>
+        <div class="checkList">
+          ${[1,2,3].map(i => {
+            const done = i <= streak;
+            return `<div class="checkItem ${done ? "done" : ""}"><div class="checkLeft"><span class="checkDot">${done ? "✓" : ""}</span><span>${t("weekN")} ${i}</span></div><span class="progCounter">${done ? t("completed") : t("pending")}</span></div>`;
+          }).join("")}
+        </div>
+        <div class="progBar" style="margin-top:6px;"><span style="width:${reqAProgress}%"></span></div>
+        <div class="progCounter" style="margin-top:6px;">${streak}/3</div>
+
+        <div class="progSub" style="margin-top:10px; font-weight:800; opacity:.96;">${t("reqB")}</div>
+        <div class="progBar"><span style="width:${reqBProgress}%"></span></div>
+        <div class="progCounter" style="margin-top:6px;">${trained}/3</div>
+
+        <div class="goalLine">${t("nextGoalWeek")}</div>
+      </div>
+
+      <div class="progCard">
+        <div class="progTitle">${t("unlocks")}</div>
+        <div class="rewardBig">${t("unlockReward")}</div>
+        <div class="progSub">${t("unlockRewardNote")}</div>
+      </div>
+
+      <div class="progCard">
+        <div class="progTitle">${t("weekCardTitle")}</div>
+        <div class="compactMain">${weekMain}</div>
+        <div class="compactGrid">
+          <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${weekDays}</div></div>
+          <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${weekAgg}</div></div>
+          <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${weekClose}</div></div>
+          <div class="sumPill"><div class="k">EARNED</div><div class="v">$${weekEarned}</div></div>
+        </div>
+      </div>
+
+      <div class="progCard">
+        <div class="progTitle">${t("monthCardTitle")}</div>
+        <div class="compactMain">${t("salesX")}: ${monthX}</div>
+        <div class="progSub">${monthName(now.getFullYear(), now.getMonth())}</div>
+        <div class="compactGrid">
+          <div class="sumPill"><div class="k">${t("avgXPerDay")}</div><div class="v">${monthAvgX}</div></div>
+          <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${monthDays}</div></div>
+          <div class="sumPill"><div class="k">EARNED</div><div class="v">$${monthEarned}</div></div>
+          <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${(monthTotals.Z||0) ? (((monthTotals.X||0)/(monthTotals.Z||0))*100).toFixed(1) + "%" : "0.0%"}</div></div>
+        </div>
+      </div>
     `;
   }
 
@@ -2375,7 +2468,7 @@
     }
 
     renderCalendar();
-    renderSummary();
+    renderProgress();
     saveState();
   })();
 </script>
