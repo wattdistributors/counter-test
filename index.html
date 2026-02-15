@@ -94,6 +94,36 @@
       border-color: rgba(255,255,255,.55);
     }
 
+    .helpBtn{
+      width:38px;
+      min-width:38px;
+      padding:0;
+      border-radius:999px;
+      font-weight:900;
+      font-size:16px;
+    }
+
+    .finishResult{
+      margin-top:8px;
+      text-align:center;
+      font-size:13px;
+      font-weight:700;
+      color:rgba(245,252,255,.96);
+      opacity:.95;
+    }
+    .finishResult .badgeText{ opacity:.85; font-weight:600; }
+
+    .ratingNote{
+      margin-bottom:10px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:13px;
+      font-weight:700;
+      color:rgba(243,251,255,.97);
+    }
+
     /* ---------- Tabs ---------- */
     .tabs{
       display:flex;
@@ -378,6 +408,21 @@
       color: var(--calInk);
       min-width:0;
     }
+
+    .dayDot{
+      margin-left:auto;
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.34);
+      align-self:flex-start;
+      margin-top:1px;
+      flex:0 0 auto;
+    }
+    .dayDot.good{ background:#52d586; }
+    .dayDot.regular{ background:#e6c95a; }
+    .dayDot.bad{ background:#eb6c6c; }
+    .dayCell.muted .dayDot{ opacity:.45; }
 
     .badge{
       display:none;
@@ -757,8 +802,10 @@
           </div>
 
           <div class="btnrow" style="margin-top:12px; justify-content:center;">
+            <button class="btn helpBtn" id="rating_help_btn" aria-label="Ver criterios de clasificación">?</button>
             <button class="btn primary" id="finish_day">Finalizar día / End day</button>
           </div>
+          <div id="finish_result" class="finishResult"></div>
         </div>
       </div>
 
@@ -828,6 +875,7 @@
         <button class="xbtn" id="report_x" aria-label="Back">×</button>
       </div>
       <div class="modalBody">
+        <div id="report_day_rating" class="ratingNote" style="display:none;"></div>
 
         <div id="qr_wrap" class="qrWrap" style="display:none;">
           <div class="qrTitle">Abrir reporte en el teléfono / Open report on your phone</div>
@@ -889,6 +937,29 @@
     </div>
   </div>
 
+  <!-- Modal: Rating help -->
+  <div class="overlay" id="modal_rating_help">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Criterios de clasificación">
+      <div class="modalHeader">
+        <div class="modalTitle">Clasificación del día</div>
+        <button class="xbtn" id="rating_help_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody" style="font-size:13px; line-height:1.45;">
+        <div style="font-weight:700; margin-bottom:8px;">Reglas de color del punto:</div>
+        <ul style="margin:0 0 10px 18px; padding:0;">
+          <li><b>🟢 Buen día</b>: (S ≥ 80 y agresividad ≥ 10) o (X ≥ 2)</li>
+          <li><b>🟡 Regular</b>: (50 ≤ S &lt; 80) o (S ≥ 80 y agresividad &lt; 10)</li>
+          <li><b>🔴 Mal día</b>: (S &lt; 50 y X = 0)</li>
+        </ul>
+        <div style="font-weight:700; margin-bottom:8px;">Badges especiales:</div>
+        <ul style="margin:0 0 0 18px; padding:0;">
+          <li><b>🍀 Lucky day</b>: S &lt; 50 y X ≥ 1 (dot amarillo)</li>
+          <li><b>🎯 Solid day (no result)</b>: S ≥ 80, agresividad ≥ 10 y X = 0 (dot verde)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
@@ -903,6 +974,42 @@
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
   const pad2 = (n) => String(n).padStart(2,"0");
   const fmtHours = (ms) => ((ms || 0) / 3600000).toFixed(1) + "h";
+
+  function classifyDay(values = {}) {
+    const S = Number(values.S || 0);
+    const Z = Number(values.Z || 0);
+    const X = Number(values.X || 0);
+    const aggr = S > 0 ? ((Z / S) * 100) : 0;
+
+    let dayRating = "regular";
+    if ((S >= 80 && aggr >= 10) || X >= 2) dayRating = "good";
+    else if ((S >= 50 && S < 80) || (S >= 80 && aggr < 10)) dayRating = "regular";
+    else if (S < 50 && X === 0) dayRating = "bad";
+
+    let dayBadge = "";
+    if (S < 50 && X >= 1) dayBadge = "lucky";
+    else if (S >= 80 && aggr >= 10 && X === 0) dayBadge = "solid_no_result";
+
+    return { dayRating, dayBadge, aggr };
+  }
+
+  function ratingLabel(rating) {
+    if (rating === "good") return "Buen día";
+    if (rating === "bad") return "Mal día";
+    return "Regular";
+  }
+
+  function badgeLabel(badge) {
+    if (badge === "lucky") return "🍀 Lucky day";
+    if (badge === "solid_no_result") return "🎯 Solid day (no result)";
+    return "";
+  }
+
+  function ratingLine(rating, badge) {
+    const b = badgeLabel(badge);
+    const base = ratingLabel(rating);
+    return b ? `${base} · ${b}` : base;
+  }
 
   const isoDateLocal = (d = new Date()) => {
     const yyyy = d.getFullYear();
@@ -1054,6 +1161,7 @@
 
   // Report actions
   const reportHint = document.getElementById("report_hint");
+  const reportDayRating = document.getElementById("report_day_rating");
   const endBtn = document.getElementById("end_btn");
   const copyBtn = document.getElementById("copy_btn");
   const shareBtn = document.getElementById("share_btn");
@@ -1075,6 +1183,8 @@
   const dayEditCC = document.getElementById("day_edit_cc");
   const dayEditC = document.getElementById("day_edit_c");
   const dayEditX = document.getElementById("day_edit_x");
+  const finishResult = document.getElementById("finish_result");
+  const modalRatingHelp = document.getElementById("modal_rating_help");
 
   // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
@@ -1173,10 +1283,15 @@
   clickOutsideToClose(modalStart, true);
   clickOutsideToClose(modalReport, false);
   clickOutsideToClose(modalDay, true);
+  clickOutsideToClose(modalRatingHelp, true);
   dayX.addEventListener("click", () => closeModal(modalDay));
+  document.getElementById("rating_help_x").addEventListener("click", () => closeModal(modalRatingHelp));
 
   // ---------- Session logic ----------
   function startDay(rep, store) {
+    finishResult.textContent = "";
+    reportDayRating.style.display = "none";
+    reportDayRating.textContent = "";
     state.date = isoDateLocal();
     state.rep = rep;
     state.store = store;
@@ -1218,6 +1333,7 @@
 
   function persistCompletedDay(endTs, reportText) {
     const startTs = state.sessionStart || endTs;
+    const ratingInfo = classifyDay(state.values);
     const payload = {
       date: state.date,
       rep: state.rep || "",
@@ -1227,7 +1343,9 @@
       durationMs: Math.max(0, endTs - startTs),
       values: { ...state.values },
       money: (state.values.X || 0) * MONEY_PER_X,
-      reportText: reportText || ""
+      reportText: reportText || "",
+      dayRating: ratingInfo.dayRating,
+      dayBadge: ratingInfo.dayBadge
     };
     const hist = loadHistory();
     hist[state.date] = payload;
@@ -1236,6 +1354,9 @@
 
   function finalizeAndReset() {
     state.active = false;
+    finishResult.textContent = "";
+    reportDayRating.style.display = "none";
+    reportDayRating.textContent = "";
     state.rep = "";
     state.store = "";
     state.sessionStart = null;
@@ -1349,12 +1470,16 @@
 
     const X = rec.values?.X ?? 0;
     const money = (X * MONEY_PER_X);
+    const ratingInfo = classifyDay(rec.values || {});
+    const rating = rec.dayRating || ratingInfo.dayRating;
+    const badge = rec.dayBadge ?? ratingInfo.dayBadge;
 
     dayModalMeta.innerHTML = `
       <div class="statHead">
         <div>
           <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
           <div class="p">Start: ${fmtTime(rec.startTs)} • End: ${fmtTime(rec.endTs)} • Dur: ${fmtDuration(rec.durationMs || 0)}</div>
+          <div class="p">Resultado: ${ratingLine(rating, badge)}</div>
         </div>
         <div style="text-align:right;">
           <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
@@ -1438,6 +1563,9 @@
       X: n(dayEditX.value),
     };
     rec.money = (rec.values.X || 0) * MONEY_PER_X;
+    const ratingInfo = classifyDay(rec.values || {});
+    rec.dayRating = ratingInfo.dayRating;
+    rec.dayBadge = ratingInfo.dayBadge;
     upsertDayInHistory(activeDayISO, rec);
     renderCalendar();
     renderCalendarStats();
@@ -1570,10 +1698,13 @@
       const S = rec?.values?.S ?? 0;
       const Z = rec?.values?.Z ?? 0;
       const X = rec?.values?.X ?? 0;
+      const ratingInfo = rec ? classifyDay(rec.values || {}) : null;
+      const dayRating = rec ? (rec.dayRating || ratingInfo.dayRating) : "";
 
       const isToday = (iso === todayISO);
       const badgeText = isToday ? "HOY" : "";
       const badgeHtml = badgeText ? `<div class="badge ${isToday ? "today" : ""}">${badgeText}</div>` : "";
+      const dotHtml = dayRating ? `<span class="dayDot ${dayRating}"></span>` : "";
 
       const cell = document.createElement("div");
       cell.className =
@@ -1590,6 +1721,7 @@
           <div class="dayTop">
             <div class="dayNum">${day.getDate()}</div>
             ${badgeHtml}
+            ${dotHtml}
           </div>
 
           <div class="miniClean">
@@ -1770,6 +1902,11 @@
   document.getElementById("finish_day").addEventListener("click", () => {
     const endTs = Date.now();
     const text = buildReport(endTs);
+    const ratingInfo = classifyDay(state.values || {});
+    const result = ratingLine(ratingInfo.dayRating, ratingInfo.dayBadge);
+    finishResult.textContent = `Resultado: ${result}`;
+    reportDayRating.style.display = "";
+    reportDayRating.textContent = `Resultado del día: ${result}`;
     reportBox.textContent = text;
     showQRForText(text);
     setReportMode("tablet");
@@ -1777,6 +1914,7 @@
   });
 
   document.getElementById("report_x").addEventListener("click", () => closeModal(modalReport));
+  document.getElementById("rating_help_btn").addEventListener("click", () => openModal(modalRatingHelp));
 
   async function doCopyOrShare(kind) {
     const confirmMsg =
@@ -1861,9 +1999,25 @@
   // ---------- Modals close buttons ----------
   document.getElementById("day_x").addEventListener("click", () => closeModal(modalDay));
 
+  function normalizeHistoryRatings() {
+    const hist = loadHistory();
+    let changed = false;
+    Object.keys(hist).forEach((iso) => {
+      const rec = hist[iso];
+      if (!rec || !rec.values) return;
+      if (rec.dayRating && rec.dayBadge !== undefined) return;
+      const info = classifyDay(rec.values);
+      rec.dayRating = info.dayRating;
+      rec.dayBadge = info.dayBadge;
+      changed = true;
+    });
+    if (changed) saveHistory(hist);
+  }
+
   // ---------- Init ----------
   (function init() {
     renderHeader();
+    normalizeHistoryRatings();
 
     // If opened from QR (phone), open report
     tryLoadReportFromHash();
