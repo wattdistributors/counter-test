@@ -367,7 +367,7 @@
 
     .dow{
       text-align:center;
-      font-size:10px;
+      font-size:11.4px;
       letter-spacing:.12em;
       font-weight:900;
       padding:7px 0;
@@ -451,7 +451,7 @@
 
     .dayNum{
       font-weight:900;
-      font-size:10px;
+      font-size:11.4px;
       letter-spacing:.01em;
       color: var(--calInk);
       min-width:0;
@@ -459,18 +459,26 @@
 
     .dayDot{
       margin-left:auto;
-      width:8px;
-      height:8px;
+      width:11px;
+      height:11px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.60);
       align-self:flex-start;
       margin-top:1px;
       flex:0 0 auto;
     }
-    .dayDot.good{ background:#2ce06a; }
-    .dayDot.regular{ background:#ffd24a; }
-    .dayDot.bad{ background:#ff4b4b; }
+    .dayDot.good{ background:#2ce06a; box-shadow: 0 1px 3px rgba(0,0,0,.28); }
+    .dayDot.regular{ background:#ffd24a; box-shadow: 0 1px 3px rgba(0,0,0,.24); }
+    .dayDot.bad{ background:#ff4b4b; box-shadow: 0 1px 3px rgba(0,0,0,.30); }
     .dayCell.muted .dayDot{ opacity:.45; }
+
+    .dayCell.rating-good{ background: rgba(255,255,255,.05); }
+    .dayCell.rating-regular{ background: rgba(255,255,255,.02); }
+    .dayCell.rating-bad{ background: rgba(0,0,0,.04); }
+
+    .dayNum.good{ color: rgba(114, 255, 170, .96); }
+    .dayNum.regular{ color: rgba(255, 225, 123, .98); }
+    .dayNum.bad{ color: rgba(255, 141, 141, .97); }
 
     .badge{
       display:none;
@@ -2271,6 +2279,7 @@
         "dayCell" +
         (inMonth ? "" : " muted") +
         (rec ? " hasData" : "") +
+        (dayRating ? ` rating-${dayRating}` : "") +
         (isToday ? " today" : "") +
         (selectedDayISO === iso ? " selected" : "");
 
@@ -2279,7 +2288,7 @@
       cell.innerHTML = `
         <div class="dayContent">
           <div class="dayTop">
-            <div class="dayNum">${day.getDate()}</div>
+            <div class="dayNum ${dayRating || ""}">${day.getDate()}</div>
             ${badgeHtml}
             ${dotHtml}
           </div>
