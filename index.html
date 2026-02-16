@@ -7,54 +7,83 @@
 
   <style>
     :root{
-      --bg1:#1b86c8;
-      --bg2:#0b5a86;
+      --bg1:#145c8c;
+      --bg2:#0e466b;
 
       /* Calendar (blue / celeste + transparency) */
-      --calPanel: rgba(185, 233, 255, .26);
-      --calPanel2: rgba(122, 199, 241, .18);
-      --calLine: rgba(210, 244, 255, .45);
-      --calLine2: rgba(232, 249, 255, .70);
-      --calInk: rgba(248,253,255,.98);
-      --calMuted: rgba(224,242,252,.88);
-      --calChip: rgba(170, 223, 249, .24);
-      --calChipLine: rgba(223, 246, 255, .40);
+      --calPanel: rgba(20, 92, 145, .24);
+      --calPanel2: rgba(10, 62, 104, .22);
+      --calLine: rgba(142, 211, 245, .28);
+      --calLine2: rgba(187, 232, 255, .54);
+      --calInk: rgba(236,248,255,.97);
+      --calMuted: rgba(193,224,241,.84);
+      --calChip: rgba(91, 169, 216, .18);
+      --calChipLine: rgba(173, 224, 250, .30);
       --calShadow: 0 18px 55px rgba(0,0,0,.22);
     }
 
-    html, body { touch-action: manipulation; }
+    html, body { touch-action: manipulation; min-height:100%; background: linear-gradient(150deg, var(--bg1), var(--bg2)); }
 
     body{
-      margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center;
+      margin:0; min-height:100dvh; display:flex; justify-content:center; align-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      background: radial-gradient(130% 120% at 15% 0%, rgba(150,210,242,.24), transparent 62%), linear-gradient(150deg, var(--bg1), var(--bg2));
       color:#fff;
       overflow-x:hidden; /* avoid sideways scroll */
+      overscroll-behavior-y: none;
     }
 
-    .wrap{ width:min(620px, 96vw); padding:22px 12px 26px; }
+    .wrap{ width:min(620px, 99vw); padding:22px 4px 26px; }
 
     .card{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 18px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 20px;
       padding: 14px;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(12px) saturate(130%);
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      box-shadow: 0 10px 24px rgba(4,28,46,.20);
+      display:flex;
+      flex-direction:column;
+      height:min(920px, 94vh);
+      overflow:hidden;
+    }
+
+    .appHeader{
+      position:sticky;
+      top:0;
+      z-index:5;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 6px 0 4px;
+      flex:0 0 auto;
+    }
+
+    .appMain{
+      flex:1 1 auto;
+      min-height:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-right:2px;
+      display:flex;
+      flex-direction:column;
     }
 
     .topbar{
       display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
-      margin-bottom:12px;
+      margin-bottom:6px;
     }
 
-    .title{ font-weight:800; letter-spacing:.02em; font-size:18px; line-height:1.1; }
-    .subtitle{ opacity:.9; font-size:13px; margin-top:4px; }
+    .title{ font-weight:700; letter-spacing:.015em; font-size:19px; line-height:1.1; }
+    .subtitle{ opacity:.75; font-size:13px; margin-top:2px; }
 
     .btnrow{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 
     .btn{
-      border:1px solid rgba(255,255,255,.40);
-      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);
       color:#fff; padding:10px 12px; border-radius:12px;
       cursor:pointer; font-size:14px; font-weight:700;
       user-select:none; touch-action: manipulation;
@@ -66,30 +95,112 @@
       border-color: rgba(255,255,255,.55);
     }
 
+    .helpBtn{
+      width:38px;
+      min-width:38px;
+      padding:0;
+      border-radius:999px;
+      font-weight:900;
+      font-size:16px;
+    }
+
+    .langBtn{
+      min-width:72px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:.04em;
+    }
+    .langChoiceActive{
+      background: rgba(255,255,255,.22) !important;
+      border-color: rgba(255,255,255,.55) !important;
+    }
+
+    .profileBtn{
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      padding:8px 12px;
+      max-width:180px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .startHeroTitle{
+      font-size:34px;
+      line-height:1.05;
+      font-weight:1000;
+      letter-spacing:.01em;
+    }
+    .startHeroSub{
+      font-size:15px;
+      opacity:.86;
+    }
+    .startMainBtn{
+      font-size:18px;
+      padding:16px 30px;
+      min-width:220px;
+      border-radius:14px;
+    }
+    .startHint{
+      margin-top:4px;
+      font-size:12px;
+      opacity:.76;
+      letter-spacing:.02em;
+    }
+
+    .finishResult{
+      margin-top:8px;
+      text-align:center;
+      font-size:13px;
+      font-weight:700;
+      color:rgba(245,252,255,.96);
+      opacity:.95;
+    }
+    .finishResult .badgeText{ opacity:.85; font-weight:600; }
+
+    .ratingNote{
+      margin-bottom:10px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:13px;
+      font-weight:700;
+      color:rgba(243,251,255,.97);
+    }
+
     /* ---------- Tabs ---------- */
     .tabs{
       display:flex;
-      gap:10px;
-      margin: 6px 0 12px;
+      gap:0;
+      margin: 4px 0 0;
+      padding:3px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      border-radius: 14px;
     }
     .tab{
       flex:1;
       text-align:center;
-      padding:10px 10px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.08);
+      padding:9px 8px;
+      border-radius: 10px;
+      border:0;
+      background: transparent;
       font-weight:900;
       letter-spacing:.02em;
       cursor:pointer;
       user-select:none;
       touch-action: manipulation;
+      color: rgba(227,246,255,.86);
     }
     .tab:active{ transform: scale(.99); }
     .tab.active{
-      background: rgba(255,255,255,.22);
-      border-color: rgba(255,255,255,.55);
-      box-shadow: 0 10px 26px rgba(0,0,0,.12);
+      background: rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      color:#fff;
+      box-shadow:none;
     }
 
     .center{
@@ -102,6 +213,16 @@
       text-align:center;
     }
 
+    .centerIntro{
+      min-height: 100%;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
     .sessionInfo{
       width:100%;
       box-sizing: border-box;
@@ -110,10 +231,12 @@
       gap:12px;
       align-items:center;
       margin: 8px 0 4px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
+      padding: 10px 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid rgba(255,255,255,.12);
+      border-bottom: 1px solid rgba(255,255,255,.12);
       overflow:hidden;
     }
 
@@ -124,7 +247,7 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .sessionInfo .left .line2{
-      opacity:.9; font-size:12px; margin-top:3px;
+      opacity:.75; font-size:12px; margin-top:3px;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
@@ -161,32 +284,40 @@
       margin-top:12px;
     }
     .ind{
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.20);
-      border-radius: 14px;
-      padding: 10px 12px;
+      background: transparent;
+      border: 1px solid rgba(184,230,255,.16);
+      border-radius: 10px;
+      padding: 8px 8px;
     }
-    .ind .k{ font-size:12px; opacity:.9; margin-bottom:6px; }
+    .ind .k{ font-size:12px; opacity:.75; margin-bottom:6px; }
     .ind .v{ font-size:18px; font-weight:900; letter-spacing:.02em; }
 
     .footer{
-      margin-top:10px;
+      margin-top:auto;
+      padding-top:8px;
+      padding-bottom:2px;
       text-align:center;
-      font-size:10px;
+      font-size:8px;
       opacity:.70;
       letter-spacing:.03em;
+      border-top:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
+      position:sticky;
+      bottom:0;
+      background: linear-gradient(180deg, rgba(20,92,140,0), rgba(20,92,140,.35));
+      z-index:3;
     }
 
     /* ---------- Calendar (blue translucent style) ---------- */
     .calSurface{
-      background: linear-gradient(165deg, var(--calPanel), var(--calPanel2));
-      border: 1px solid var(--calLine);
-      border-radius: 18px;
-      padding: 13px 8px 12px;
-      box-shadow: var(--calShadow);
-      backdrop-filter: blur(12px) saturate(130%);
-      -webkit-backdrop-filter: blur(12px) saturate(130%);
-      overflow:hidden; /* prevents sideways overflow */
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 12px;
+      padding: 6px 6px 6px;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      overflow:hidden;
     }
 
     .calHeader{
@@ -194,11 +325,11 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin: 2px 0 12px;
+      margin: 2px 0 10px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.14);
     }
 
     .calTitle{
-      font-weight:1000;
+      font-weight:700;
       letter-spacing:.02em;
       font-size:14px;
       text-align:center;
@@ -208,10 +339,10 @@
     }
 
     .iconBtn{
-      width:40px; height:40px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.28);
-      background: rgba(255,255,255,.10);
+      width:34px; height:34px;
+      border-radius: 10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -219,7 +350,7 @@
       user-select:none;
       font-weight:1000;
       color: var(--calInk);
-      box-shadow: 0 12px 26px rgba(0,0,0,.14);
+      box-shadow:none;
       touch-action: manipulation;
     }
     .iconBtn:active{ transform: scale(.98); }
@@ -230,65 +361,83 @@
       box-sizing:border-box;
       display:grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap:0;
+      gap:1px;
       overflow:hidden;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 10px;
+      padding: 1px;
     }
 
     .dow{
       text-align:center;
-      font-size:10px;
-      letter-spacing:.14em;
-      font-weight:1000;
-      padding:6px 0;
+      font-size:11.4px;
+      letter-spacing:.12em;
+      font-weight:900;
+      padding:7px 0;
       color: var(--calMuted);
       user-select:none;
       min-width:0;
-      border: 1px solid rgba(210,244,255,.40);
+      border: 0;
       border-radius: 0;
-      background: rgba(159,220,248,.16);
+      background: rgba(255,255,255,.05);
     }
 
     /* Square day WITHOUT aspect-ratio (avoids Safari grid overflow bugs) */
     .dayCell{
       position:relative;
       border-radius: 0;
-      border: 1px solid rgba(216,245,255,.34);
-      background: linear-gradient(165deg, rgba(188,233,255,.18), rgba(132,206,245,.14));
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(255,255,255,.07);
       cursor:pointer;
       user-select:none;
       min-width:0;              /* key for grid overflow */
       overflow:hidden;           /* clip anything inside */
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.28);
+      box-shadow:none;
       transition: transform .08s ease, background .12s ease, border-color .12s ease;
       touch-action: manipulation;
     }
     .dayCell:active{ transform: scale(.985); }
-    .dayCell:hover{ background: rgba(201,239,255,.28); border-color: var(--calLine2); }
+    .dayCell:hover{ background: rgba(255,255,255,.10); }
 
     .dayCell.muted{
-      opacity:.55;
-      background: rgba(122, 189, 222, .12);
-      box-shadow: none;
+      opacity:1;
+      background: rgba(255,255,255,.03);
+      border-color: rgba(255,255,255,.10);
+      box-shadow: none !important;
     }
+    .dayCell.muted .dayNum,
+    .dayCell.muted .miniClean{ opacity:.45; }
 
     .dayCell.today{
-      border-color: rgba(242,252,255,.90);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
     }
 
     .dayCell.hasData{
-      border-color: rgba(255,255,255,.30);
+      box-shadow: none;
     }
+
+    .dayCell.selected{
+      background: rgba(255,255,255,.16);
+      border-color: rgba(255,255,255,.28);
+      box-shadow: none;
+    }
+    .dayCell.muted.selected{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: none;
+    }
+
 
     /* Square sizing helper */
     .dayCell::before{
       content:"";
       display:block;
-      padding-top:112%;
+      padding-top:134%;
     }
     .dayContent{
       position:absolute;
-      inset:5px;
+      inset:3px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -297,31 +446,48 @@
 
     .dayTop{
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:4px;
+      align-items:flex-start;
+      justify-content:flex-start;
+      gap:2px;
       min-width:0;
+      min-height: 9px;
     }
 
     .dayNum{
       font-weight:900;
-      font-size:11px;
+      font-size:11.4px;
       letter-spacing:.01em;
       color: var(--calInk);
       min-width:0;
     }
 
+    .dayDot{
+      margin-left:auto;
+      width:11px;
+      height:11px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.60);
+      align-self:flex-start;
+      margin-top:1px;
+      flex:0 0 auto;
+    }
+    .dayDot.good{ background:#2ce06a; box-shadow: 0 1px 3px rgba(0,0,0,.28); }
+    .dayDot.regular{ background:#ffd24a; box-shadow: 0 1px 3px rgba(0,0,0,.24); }
+    .dayDot.bad{ background:#ff4b4b; box-shadow: 0 1px 3px rgba(0,0,0,.30); }
+    .dayCell.muted .dayDot{ opacity:.45; }
+
     .badge{
+      display:none;
       font-size:8px;
       font-weight:900;
       letter-spacing:.04em;
-      padding: 1px 4px;
+      padding: 1px 3px;
       border-radius: 999px;
       background: rgba(255,255,255,.14);
       border: 1px solid rgba(255,255,255,.22);
       color: var(--calInk);
       white-space:nowrap;
-      max-width: 44px;
+      max-width: 38px;
       overflow:hidden;
       text-overflow:ellipsis;
     }
@@ -331,40 +497,19 @@
     }
 
     .miniClean{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:2px;
-      margin-top: 4px;
+      margin-top: 1px;
       min-width:0;
-    }
-
-    .kpiMini{
-      border-radius: 6px;
-      padding: 5px 2px;
-      text-align:center;
-      border: 1px solid rgba(145,221,255,.19);
-      background: rgba(217,242,255,.20);
-      min-width:0;
-    }
-    .kpiMini .k{
-      font-size:8px;
-      letter-spacing:.08em;
-      font-weight:1000;
-      color: rgba(255,255,255,.78);
-      margin-bottom: 4px;
-    }
-    .kpiMini .v{
-      font-size:12px;
-      font-weight:1000;
-      letter-spacing:.02em;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:1px;
+      font-size:10px;
+      line-height:1.15;
       color: var(--calInk);
+      font-weight:500;
+      letter-spacing:.01em;
     }
-
-    .calGrid .dow,
-    .calGrid .dayCell{
-      margin-left:-1px;
-      margin-top:-1px;
-    }
+    .miniClean .kpiInline{ min-width:0; opacity:.95; }
 
     /* Stats under calendar */
     .statsPanel{
@@ -374,13 +519,13 @@
       gap:10px;
     }
     .statCard{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 14px;
-      padding: 10px 12px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 10px 10px;
       color: var(--calInk);
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
-      backdrop-filter: blur(6px);
+      box-shadow: none;
+      backdrop-filter: none;
       overflow:hidden;
     }
     .statHead{
@@ -391,7 +536,7 @@
       margin-bottom: 8px;
     }
     .statHead .h{
-      font-weight:1000;
+      font-weight:700;
       letter-spacing:.01em;
       font-size:13px;
       color: var(--calInk);
@@ -407,12 +552,12 @@
       gap:8px;
     }
     .statItem{
-      border-radius: 12px;
-      padding: 8px 8px;
+      border-radius: 8px;
+      padding: 7px 6px;
       text-align:center;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.12);
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      box-shadow: none;
       min-width:0;
     }
     .statItem .k{
@@ -436,13 +581,58 @@
     }
     .moneyLine b{ font-weight:1000; color: var(--calInk); }
 
+    .statsMiniTitle{
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.01em;
+      color: var(--calInk);
+    }
+    .statsHeroNumber{
+      margin-top:6px;
+      font-size:32px;
+      line-height:1;
+      font-weight:1000;
+      color: rgba(244,252,255,.98);
+    }
+    .statsHeroEarned{
+      margin-top:3px;
+      font-size:13px;
+      font-weight:800;
+      color: rgba(223,244,255,.90);
+    }
+    .statsMiniLine{
+      margin-top:8px;
+      font-size:12px;
+      font-weight:700;
+      color: rgba(214,238,252,.84);
+    }
+    .statsMiniChips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:8px;
+    }
+    .statsMiniChip{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.07);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:11px;
+      font-weight:800;
+      color: rgba(235,248,255,.95);
+    }
+    .statsMiniMeta{
+      margin-top:8px;
+      font-size:11px;
+      color: rgba(214,238,252,.78);
+    }
     /* ---------- Summary ---------- */
     .sumWrap{ display:grid; gap:10px; }
     .sumCard{
       background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 14px;
-      padding: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 10px;
     }
     .sumTop{
       display:flex;
@@ -451,7 +641,7 @@
       gap:10px;
       margin-bottom: 10px;
     }
-    .sumTitle{ font-weight:900; letter-spacing:.02em; font-size:14px; opacity:.95; }
+    .sumTitle{ font-weight:700; letter-spacing:.02em; font-size:14px; opacity:.95; }
     .sumSub{ font-size:12px; opacity:.85; margin-top: 4px; }
     .sumMoney{ text-align:right; font-weight:900; letter-spacing:.02em; font-size:14px; }
     .sumMoney span{
@@ -464,10 +654,10 @@
     }
     .sumStats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
     .sumPill{
-      background: rgba(0,0,0,.10);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 12px;
-      padding: 10px 8px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 8px 6px;
       text-align:center;
     }
     .sumPill .k{
@@ -483,6 +673,35 @@
       letter-spacing:.02em;
     }
 
+    .progWrap{ display:grid; gap:10px; }
+    .progCard{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 11px;
+    }
+    .progTitle{ font-size:14px; font-weight:900; letter-spacing:.02em; }
+    .progBig{ font-size:23px; font-weight:1000; line-height:1.1; margin-top:4px; }
+    .progSub{ font-size:12px; opacity:.85; margin-top:4px; }
+    .progBar{ margin-top:10px; height:12px; border-radius:999px; background: rgba(255,255,255,.14); border:1px solid rgba(200,236,255,.35); overflow:hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+    .progBar > span{ display:block; height:100%; background: linear-gradient(90deg, rgba(80,205,255,.95), rgba(157,231,255,.95)); box-shadow: 0 0 14px rgba(120,221,255,.45); }
+    .checkList{ margin-top:8px; display:grid; gap:6px; }
+    .checkItem{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; }
+    .checkLeft{ display:flex; align-items:center; gap:8px; }
+    .checkDot{ width:19px; height:19px; border-radius:999px; border:1px solid rgba(186,203,216,.55); background: rgba(110,130,146,.30); color: rgba(232,243,252,.92); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; }
+    .checkItem.done .checkDot{ background: rgba(46,217,107,.36); border-color: rgba(90,245,151,.88); color:#d8ffe9; box-shadow: 0 0 10px rgba(46,217,107,.45); }
+    .progCounter{ font-weight:1000; opacity:.98; font-size:19px; letter-spacing:.02em; }
+    .goalLine{ margin-top:10px; font-size:12px; opacity:.92; }
+    .rewardBig{ font-size:28px; font-weight:1000; margin-top:6px; line-height:1.12; }
+    .compactMain{ font-size:26px; font-weight:1000; margin-top:4px; }
+    .compactGrid{ margin-top:10px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+    .compactGrid .sumPill .v{ font-size:15px; }
+
+    .rewardCard{ padding:16px 14px; }
+    .rewardTitleRow{ display:flex; align-items:center; gap:8px; }
+    .rewardIcon{ width:24px; height:24px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; background: rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.24); font-size:14px; }
+    .weekImpact{ margin-top:6px; font-size:12px; opacity:.88; }
+
     /* ---------- Modal ---------- */
     .overlay{
       position:fixed; inset:0;
@@ -497,13 +716,25 @@
 
     .modal{
       width:min(520px, 96vw);
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.11);
+      border: 1px solid rgba(255,255,255,.18);
       border-radius: 18px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 18px 55px rgba(0,0,0,.30);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 22px rgba(6,34,56,.16);
       padding: 14px;
       position:relative;
+    }
+
+    /* avoid stacked glass layers inside modal */
+    .modal .statCard,
+    .modal .reportBox,
+    .modal .qrWrap{
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
     .modalHeader{
       display:flex;
@@ -560,8 +791,8 @@
       width:100%;
       box-sizing:border-box;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
       padding: 10px 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12px;
@@ -570,11 +801,91 @@
       word-break: break-word;
     }
 
+    .dayRatingRow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .dayRatingPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.12);
+      font-weight:900;
+      font-size:15px;
+      letter-spacing:.01em;
+    }
+    .dayRatingDot{ width:10px; height:10px; border-radius:50%; }
+    .dayRatingPill.good .dayRatingDot{ background:#2ce06a; box-shadow:0 0 0 3px rgba(44,224,106,.18); }
+    .dayRatingPill.regular .dayRatingDot{ background:#ffd24a; box-shadow:0 0 0 3px rgba(255,210,74,.18); }
+    .dayRatingPill.bad .dayRatingDot{ background:#ff4b4b; box-shadow:0 0 0 3px rgba(255,75,75,.18); }
+    .dayBadgeMini{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.09);
+      font-size:12px;
+      font-weight:800;
+      opacity:.95;
+    }
+    .dayMetricGrid{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .dayMetricChip{
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.10);
+      padding:8px 6px;
+      text-align:center;
+    }
+    .dayMetricChip .k{ font-size:10px; font-weight:900; letter-spacing:.08em; opacity:.85; }
+    .dayMetricChip .v{ font-size:16px; font-weight:900; margin-top:4px; }
+    .dayDetailsPanel{
+      margin-top:10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      padding:8px;
+    }
+    .dayDetailsPanel summary{
+      cursor:pointer;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.04em;
+      opacity:.9;
+      margin:0 0 8px;
+    }
+    .dayDetailsPanel .reportBox{ opacity:.78; }
+
+    #modal_day .modal{
+      max-height: 90dvh;
+      display:flex;
+      flex-direction:column;
+    }
+    #modal_day .modalBody{
+      overflow-y:auto;
+      min-height:0;
+      padding-right:2px;
+    }
+    #day_edit_grid{
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
     /* QR */
     .qrWrap{
       margin-top:12px;
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.08);
       padding: 12px;
       display:flex;
@@ -609,20 +920,30 @@
       max-width: 420px;
     }
 
+
+    /* iPad/Safari can render nested glass layers as white blocks.
+       Keep calendar on a single translucent layer there. */
+    @supports (-webkit-touch-callout: none){
+      .calSurface{
+        background: rgba(168,219,245,.12);
+      }
+    }
+
     @media (max-width: 520px){
+      .wrap{ width:100vw; padding:12px 2px 20px; }
+      .card{ padding:10px; height:min(920px,95vh); }
+      .appHeader{ padding:4px 0 4px; }
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
       .timerBox{ flex-basis: 112px; }
 
       /* tighter calendar on small screens so it NEVER overflows */
-      .calSurface{ padding:10px 6px; }
+      .calSurface{ padding:8px 4px 8px; }
       .statsPanel{ grid-template-columns: 1fr; }
-      .calGrid{ gap:0; }
-      .dayContent{ inset:5px; }
+      .calGrid{ gap:1px; }
+      .dayContent{ inset:3px; }
       .dayCell{ border-radius: 0; }
-      .miniClean{ gap:2px; }
-      .kpiMini{ border-radius: 6px; padding: 5px 2px; }
-      .kpiMini .v{ font-size:11px; }
+      .miniClean{ gap:1px; font-size:9px; }
 
       .statGrid{ grid-template-columns: repeat(5, minmax(0,1fr)); }
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
@@ -633,30 +954,34 @@
 <body>
   <div class="wrap">
     <div class="card">
-
+      <div class="appHeader">
       <div class="topbar">
         <div>
-          <div class="title" id="today_title">KPIs Counter</div>
+          <div class="title" id="today_title">Retail Sales Tracker</div>
           <div class="subtitle" id="today_date"></div>
         </div>
-        <div class="btnrow" id="top_actions"></div>
+        <div class="btnrow" id="top_actions">
+          <button class="btn profileBtn" id="profile_btn">Perfil</button>
+          <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">Idioma</button>
+        </div>
       </div>
 
       <!-- Tabs -->
       <div class="tabs" id="tabs">
-        <div class="tab active" data-tab="counter">Contador</div>
-        <div class="tab" data-tab="calendar">Calendario</div>
-        <div class="tab" data-tab="summary">Resumen</div>
+        <div class="tab active" data-tab="counter" id="tab_counter_label">Contador</div>
+        <div class="tab" data-tab="calendar" id="tab_calendar_label">Calendario</div>
+        <div class="tab" data-tab="summary" id="tab_summary_label">Progreso</div>
+      </div>
       </div>
 
+      <div class="appMain">
       <!-- ============ TAB: COUNTER ============ -->
       <div id="tab_counter">
-        <div id="start_screen" class="center">
-          <div style="opacity:.9; font-size:13px; max-width: 360px;">
-            Presiona <b>Iniciar día</b> para ingresar tu nombre y tienda.<br/>
-            Tap <b>Start day</b> to enter your name and store.
-          </div>
-          <button class="btn primary" id="start_day">Iniciar día / Start day</button>
+        <div id="start_screen" class="center centerIntro">
+          <div class="startHeroTitle" id="start_headline">Comienza tu jornada</div>
+          <div class="startHeroSub" id="start_intro">Registra tu día de ventas</div>
+          <button class="btn primary startMainBtn" id="start_day">Iniciar día</button>
+          <div class="startHint" id="start_hint">Tus datos se guardan automáticamente</div>
         </div>
 
         <div id="session_screen" style="display:none;">
@@ -675,18 +1000,20 @@
 
           <div class="indicators">
             <div class="ind">
-              <div class="k">% Agresividad (Z/S)</div>
+              <div class="k">% Aggressiveness (Z/S)</div>
               <div class="v" id="aggr">—</div>
             </div>
             <div class="ind">
-              <div class="k">% Cierre (X/Z)</div>
+              <div class="k">% Close (X/Z)</div>
               <div class="v" id="close">0.0%</div>
             </div>
           </div>
 
           <div class="btnrow" style="margin-top:12px; justify-content:center;">
-            <button class="btn primary" id="finish_day">Finalizar día / End day</button>
+            <button class="btn helpBtn" id="rating_help_btn" aria-label="Ver criterios de clasificación">?</button>
+            <button class="btn primary" id="finish_day">End day</button>
           </div>
+          <div id="finish_result" class="finishResult"></div>
         </div>
       </div>
 
@@ -713,6 +1040,7 @@
         <div class="sumWrap" id="sum_wrap"></div>
       </div>
 
+      </div>
       <div class="footer">KPIs Counter v4.4 — Designed by Alen Cordero</div>
     </div>
   </div>
@@ -721,27 +1049,43 @@
   <div class="overlay" id="modal_start">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Start day">
       <div class="modalHeader">
-        <div class="modalTitle">Iniciar día / Start day</div>
+        <div class="modalTitle" id="start_modal_title">Iniciar día</div>
         <button class="xbtn" id="start_x" aria-label="Close">×</button>
       </div>
       <div class="modalBody">
-        <div style="opacity:.9; font-size:13px;">
-          Ingresa tus datos para iniciar.<br/>
-          Enter your info to start.
+        <div style="opacity:.9; font-size:13px;" id="start_modal_intro">
+          Confirma tu perfil y agrega la tienda del día.
         </div>
+        <div style="margin-top:8px; font-weight:800;" id="start_profile_name">—</div>
         <div class="grid2">
-          <div class="field">
-            <label>Nombre / Name</label>
-            <input id="start_name" placeholder="Ej: Bob" autocomplete="name" />
-          </div>
-          <div class="field">
-            <label>Tienda / Store</label>
+          <div class="field" style="grid-column:1/-1;">
+            <label id="start_store_label">Tienda del día</label>
             <input id="start_store" placeholder="Ej: 2770 Valwood - Irving" />
           </div>
         </div>
         <div class="modalActions">
-          <button class="btn" id="start_cancel">Cancelar / Cancel</button>
-          <button class="btn primary" id="start_confirm">Comenzar / Start</button>
+          <button class="btn" id="start_cancel">Cancel</button>
+          <button class="btn primary" id="start_confirm">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Profile -->
+  <div class="overlay" id="modal_profile">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Profile">
+      <div class="modalHeader">
+        <div class="modalTitle" id="profile_modal_title">Perfil</div>
+        <button class="xbtn" id="profile_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody">
+        <div class="field">
+          <label id="profile_name_label">Nombre</label>
+          <input id="profile_name" placeholder="Ej: Alen Cordero" autocomplete="name" />
+        </div>
+        <div class="modalActions">
+          <button class="btn" id="profile_reset">Reset datos</button>
+          <button class="btn primary" id="profile_save">Guardar</button>
         </div>
       </div>
     </div>
@@ -751,19 +1095,19 @@
   <div class="overlay" id="modal_report">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Day summary">
       <div class="modalHeader">
-        <div class="modalTitle">Resumen del día / Day summary</div>
+        <div class="modalTitle" id="report_modal_title">Resumen del día</div>
         <button class="xbtn" id="report_x" aria-label="Back">×</button>
       </div>
       <div class="modalBody">
+        <div id="report_day_rating" class="ratingNote" style="display:none;"></div>
 
         <div id="qr_wrap" class="qrWrap" style="display:none;">
-          <div class="qrTitle">Abrir reporte en el teléfono / Open report on your phone</div>
+          <div class="qrTitle" id="qr_title">Abrir reporte en el teléfono</div>
           <div class="qrCard">
             <div id="qr_box"></div>
           </div>
           <div class="qrNote" id="qr_note">
             Escanea el QR y envía el reporte desde tu teléfono.
-            Scan the QR and send the report from your phone.
           </div>
         </div>
 
@@ -772,11 +1116,11 @@
         <div class="modalActions" id="report_actions">
           <button class="btn" id="copy_btn">Copy</button>
           <button class="btn primary" id="share_btn">Share</button>
-          <button class="btn primary" id="end_btn" style="display:none;">Finalizar día / End day</button>
+          <button class="btn primary" id="end_btn" style="display:none;">End day</button>
         </div>
 
         <div id="report_hint" style="margin-top:10px; opacity:.8; font-size:12px;">
-          Copia o comparte para terminar el día y resetear. / Copy or share ends the day and resets.
+          Copia o comparte para terminar el día y resetear.
         </div>
       </div>
     </div>
@@ -791,15 +1135,57 @@
       </div>
 
       <div class="modalBody">
-        <div class="statCard" style="margin:0; background: rgba(0,0,0,.12);" id="day_modal_meta"></div>
+        <div class="dayRatingRow" id="day_modal_rating"></div>
+        <div class="dayMetricGrid" id="day_modal_kpis"></div>
+        <div class="statCard" id="day_modal_meta" style="margin:0;"></div>
 
-        <div style="margin-top:10px;">
+        <details class="dayDetailsPanel" id="day_details_panel" open>
+          <summary id="day_details_summary">Detalles</summary>
           <div class="reportBox" id="day_modal_report">—</div>
+        </details>
+
+        <div class="grid2" id="day_edit_grid" style="display:none; margin-top:10px;">
+          <div class="field"><label>S</label><input id="day_edit_s" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>Z</label><input id="day_edit_z" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>CC</label><input id="day_edit_cc" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>C</label><input id="day_edit_c" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>X</label><input id="day_edit_x" type="number" min="0" inputmode="numeric" /></div>
         </div>
 
         <div class="modalActions">
           <button class="btn" id="day_copy">Copy</button>
-          <button class="btn primary" id="day_share">Share</button>
+          <button class="btn" id="day_share">Share</button>
+          <button class="btn" id="day_edit">Editar día</button>
+          <button class="btn" id="day_delete">Borrar día</button>
+          <button class="btn primary" id="day_save" style="display:none;">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Rating help -->
+  <div class="overlay" id="modal_rating_help">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Criterios de clasificación">
+      <div class="modalHeader">
+        <div class="modalTitle" id="rating_help_title">Day rating rules</div>
+        <button class="xbtn" id="rating_help_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody" id="rating_help_body" style="font-size:13px; line-height:1.45;"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Language -->
+  <div class="overlay" id="modal_language">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Language">
+      <div class="modalHeader">
+        <div class="modalTitle" id="lang_modal_title">Idioma</div>
+        <button class="xbtn" id="lang_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody">
+        <div id="lang_modal_intro" style="opacity:.9; font-size:13px; margin-bottom:12px;">Selecciona el idioma:</div>
+        <div class="modalActions">
+          <button class="btn" id="lang_es">Español</button>
+          <button class="btn" id="lang_en">English</button>
         </div>
       </div>
     </div>
@@ -813,11 +1199,277 @@
   const metrics = ["S","Z","CC","C","X"];
   const STATE_KEY = "kpi_state_v44";
   const HISTORY_KEY = "kpi_history_v1";
+  const PROFILE_KEY = "kpi_profile_v1";
+  const LANG_KEY = "kpi_lang_v1";
   const AGGR_MIN_STOPS = 20;
   const MONEY_PER_X = 100;
 
+  const i18n = {
+    es: {
+      tabCounter: "Contador",
+      tabCalendar: "Calendario",
+      tabSummary: "Progreso",
+      languageBtn: "Idioma",
+      languageModalTitle: "Idioma",
+      languageModalIntro: "Selecciona el idioma:",
+      languageSpanish: "Español",
+      languageEnglish: "Inglés",
+      session: "Sesión",
+      appTitle: "Retail Sales Tracker",
+      startHeadline: "Comienza tu jornada",
+      startIntro: "Registra tu día de ventas",
+      startHint: "Tus datos se guardan automáticamente",
+      startDay: "Iniciar día",
+      profileBtn: "Perfil",
+      profileTitle: "Perfil",
+      profileSave: "Guardar",
+      profileReset: "Reset datos",
+      finishDay: "Finalizar día",
+      startModalTitle: "Iniciar día",
+      startModalIntro: "Confirma tu perfil y agrega la tienda del día.",
+      profileForDay: "Perfil",
+      nameLabel: "Nombre",
+      storeLabel: "Tienda del día",
+      cancel: "Cancelar",
+      start: "Comenzar",
+      date: "Fecha",
+      day: "Día",
+      begins: "Inicio",
+      missingProfile: "Primero guarda tu nombre en Perfil.",
+      missingStore: "Por favor ingresa la tienda del día.",
+      endConfirm: "¿Seguro que quieres finalizar el día y resetear?",
+      finishResult: "Resultado",
+      dayResult: "Resultado del día",
+      weekStatsTitle: "Stats de la semana",
+      monthStatsTitle: "Stats del mes",
+      avgStopsPerDay: "Promedio S/día",
+      avgStopsPerDayLabel: "Promedio stops/día",
+      earnedWord: "ganado",
+      calendarMonths: ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
+      calendarWeekdays: ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],
+      hoursWorked: "Horas trabajadas",
+      workedDays: "Días trabajados",
+      earnedLabel: "GANADO",
+      stopsLabel: "Stops",
+      aggLabel: "Agg",
+      closeLabel: "Close",
+      weekLabel: "Semana",
+      monthLabel: "Mes",
+      salesWord: "ventas",
+      currentWeek: "Semana actual",
+      currentMonth: "Mes actual",
+      progressLevelTitle: "Tu nivel",
+      currentLevel: "Nivel actual",
+      nextLevel: "Siguiente nivel",
+      levelSeller: "VENDEDOR",
+      levelTrainer: "ENTRENADOR",
+      pathToNextLevel: "Camino al siguiente nivel",
+      reqA: "3 semanas consecutivas con +12 ventas",
+      weekN: "Semana",
+      completed: "completada",
+      pending: "pendiente",
+      reqB: "3 personas entrenadas generando cheque",
+      nextGoalWeek: "Siguiente objetivo recomendado esta semana: llegar a 12+ ventas.",
+      unlocks: "Desbloqueas",
+      unlockReward: "+$10 override por venta de tu equipo",
+      unlockRewardNote: "Se desbloquea al completar ambos requisitos.",
+      weekCardTitle: "Tu semana actual",
+      monthCardTitle: "Tu mes actual",
+      salesX: "Ventas (X)",
+      trainedAgents: "Entrenados con cheque",
+      requirementsCompleted: "requisitos completados",
+      firstStepGuide: "Primer paso: consigue 12 ventas esta semana.",
+      weekImpact: "Este rendimiento impacta tu progreso hacia ENTRENADOR",
+      rewardIcon: "🏆",
+      historical: "Histórico",
+      sinceFirstDay: "Desde tu primer día registrado",
+      bestDay: "Mejor día",
+      noSavedDays: "Aún no hay días finalizados guardados.",
+      avgXPerDay: "Prom. X/día",
+      days: "Días",
+      dayRatingRules: "Criterios de clasificación del día",
+      quickCriteria: "Criterios rápidos:",
+      specialBadges: "Badges especiales:",
+      goodDayRule: "<b>Buen día (punto verde)</b>: S es 80 o más + Agresividad es 10% o más, O X es 2 o más.",
+      regularDayRule: "<b>Día regular (punto amarillo)</b>: S está entre 50 y 79, O S es 80 o más + Agresividad menor a 10%.",
+      badDayRule: "<b>Mal día (punto rojo)</b>: S es menor a 50 + X es 0.",
+      luckyDayRule: "<b>🍀 Día con suerte</b>: S menor a 50 + X 1 o más (el punto sigue amarillo).",
+      solidDayRule: "<b>🎯 Día sólido (sin resultado)</b>: S 80 o más + Agresividad 10% o más + X 0 (el punto sigue verde).",
+      goodDay: "Buen día",
+      regularDay: "Regular",
+      badDay: "Mal día",
+      luckyBadge: "🍀 Día con suerte",
+      solidBadge: "🎯 Día sólido (sin resultado)",
+      dayDetailsSummary: "Detalles",
+      dayDetailsTitle: "Detalle del día",
+      dayNoDataTitle: "Sin datos",
+      dayNoDataSaved: "No hay un día finalizado guardado.",
+      dayNoDataTip: "Tip: finaliza el día para que aparezca aquí.",
+      startLbl: "Inicio",
+      endLbl: "Fin",
+      durLbl: "Dur",
+      resultLbl: "Resultado",
+      reportModalTitle: "Resumen del día",
+      qrTitle: "Abrir reporte en el teléfono",
+      qrNote: "Escanea el QR y envía el reporte desde tu teléfono.",
+      reportHint: "Copia o comparte para terminar el día y resetear.",
+      monthDayYear: { month: "long", day: "numeric", year: "numeric" },
+      monthDay: { month: "long", day: "numeric" },
+      weekRangeJoin: "al"
+    },
+    en: {
+      tabCounter: "Counter",
+      tabCalendar: "Calendar",
+      tabSummary: "Progress",
+      languageBtn: "Language",
+      languageModalTitle: "Language",
+      languageModalIntro: "Select your language:",
+      languageSpanish: "Spanish",
+      languageEnglish: "English",
+      session: "Session",
+      appTitle: "Retail Sales Tracker",
+      startHeadline: "Start your day",
+      startIntro: "Track your sales day",
+      startHint: "Your data is saved automatically",
+      startDay: "Start day",
+      profileBtn: "Profile",
+      profileTitle: "Profile",
+      profileSave: "Save",
+      profileReset: "Reset data",
+      finishDay: "End day",
+      startModalTitle: "Start day",
+      startModalIntro: "Confirm your profile and add today's store.",
+      profileForDay: "Profile",
+      nameLabel: "Name",
+      storeLabel: "Store for today",
+      cancel: "Cancel",
+      start: "Start",
+      date: "Date",
+      day: "Day",
+      begins: "Start",
+      missingProfile: "Please save your name first in Profile.",
+      missingStore: "Please enter today's store.",
+      endConfirm: "Are you sure you want to end the day and reset?",
+      finishResult: "Result",
+      dayResult: "Day result",
+      weekStatsTitle: "Week stats",
+      monthStatsTitle: "Month stats",
+      avgStopsPerDay: "Avg S/day",
+      avgStopsPerDayLabel: "Average stops/day",
+      earnedWord: "earned",
+      calendarMonths: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+      calendarWeekdays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+      hoursWorked: "Hours worked",
+      workedDays: "Days worked",
+      earnedLabel: "EARNED",
+      stopsLabel: "Stops",
+      aggLabel: "Agg",
+      closeLabel: "Close",
+      weekLabel: "Week",
+      monthLabel: "Month",
+      salesWord: "sales",
+      currentWeek: "Current week",
+      currentMonth: "Current month",
+      progressLevelTitle: "Your level",
+      currentLevel: "Current level",
+      nextLevel: "Next level",
+      levelSeller: "SELLER",
+      levelTrainer: "TRAINER",
+      pathToNextLevel: "Path to next level",
+      reqA: "3 consecutive weeks with 12+ sales",
+      weekN: "Week",
+      completed: "completed",
+      pending: "pending",
+      reqB: "3 trained people generating check",
+      nextGoalWeek: "Recommended next goal this week: reach 12+ sales.",
+      unlocks: "You unlock",
+      unlockReward: "+$10 override per sale from your team",
+      unlockRewardNote: "Unlocked after completing both requirements.",
+      weekCardTitle: "Your current week",
+      monthCardTitle: "Your current month",
+      salesX: "Sales (X)",
+      trainedAgents: "Trained generating check",
+      requirementsCompleted: "requirements completed",
+      firstStepGuide: "First step: get 12 sales this week.",
+      weekImpact: "This performance impacts your progress toward TRAINER",
+      rewardIcon: "🏆",
+      historical: "Historical",
+      sinceFirstDay: "Since your first recorded day",
+      bestDay: "Best day",
+      noSavedDays: "No completed days saved yet.",
+      avgXPerDay: "Avg X/day",
+      days: "Days",
+      dayRatingRules: "Day rating rules",
+      quickCriteria: "Quick criteria:",
+      specialBadges: "Special badges:",
+      goodDayRule: "<b>Good day (green dot)</b>: S is 80 or more + Aggressiveness is 10% or more, OR X is 2 or more.",
+      regularDayRule: "<b>Regular day (yellow dot)</b>: S is between 50 and 79, OR S is 80 or more + Aggressiveness under 10%.",
+      badDayRule: "<b>Bad day (red dot)</b>: S is under 50 + X is 0.",
+      luckyDayRule: "<b>🍀 Lucky day</b>: S under 50 + X 1 or more (dot stays yellow).",
+      solidDayRule: "<b>🎯 Solid day (no result)</b>: S 80 or more + Aggressiveness 10% or more + X 0 (dot stays green).",
+      goodDay: "Good day",
+      regularDay: "Regular",
+      badDay: "Bad day",
+      luckyBadge: "🍀 Lucky day",
+      solidBadge: "🎯 Solid day (no result)",
+      dayDetailsSummary: "Details",
+      dayDetailsTitle: "Day details",
+      dayNoDataTitle: "No data",
+      dayNoDataSaved: "There is no completed saved day.",
+      dayNoDataTip: "Tip: finish the day so it appears here.",
+      startLbl: "Start",
+      endLbl: "End",
+      durLbl: "Dur",
+      resultLbl: "Result",
+      reportModalTitle: "Day summary",
+      qrTitle: "Open report on your phone",
+      qrNote: "Scan the QR and send the report from your phone.",
+      reportHint: "Copy or share to end the day and reset.",
+      monthDayYear: { month: "long", day: "numeric", year: "numeric" },
+      monthDay: { month: "long", day: "numeric" },
+      weekRangeJoin: "to"
+    }
+  };
+
   const fmtPct = (n) => (Number.isFinite(n) ? (n * 100).toFixed(1) + "%" : "0.0%");
   const pad2 = (n) => String(n).padStart(2,"0");
+  const fmtHours = (ms) => ((ms || 0) / 3600000).toFixed(1) + "h";
+
+  function classifyDay(values = {}) {
+    const S = Number(values.S || 0);
+    const Z = Number(values.Z || 0);
+    const X = Number(values.X || 0);
+    const aggr = S > 0 ? ((Z / S) * 100) : 0;
+
+    let dayRating = "regular";
+    if ((S >= 80 && aggr >= 10) || X >= 2) dayRating = "good";
+    else if ((S >= 50 && S < 80) || (S >= 80 && aggr < 10)) dayRating = "regular";
+    else if (S < 50 && X === 0) dayRating = "bad";
+
+    let dayBadge = "";
+    if (S < 50 && X >= 1) dayBadge = "lucky";
+    else if (S >= 80 && aggr >= 10 && X === 0) dayBadge = "solid_no_result";
+
+    return { dayRating, dayBadge, aggr };
+  }
+
+  function ratingLabel(rating) {
+    if (rating === "good") return t("goodDay");
+    if (rating === "bad") return t("badDay");
+    return t("regularDay");
+  }
+
+  function badgeLabel(badge) {
+    if (badge === "lucky") return t("luckyBadge");
+    if (badge === "solid_no_result") return t("solidBadge");
+    return "";
+  }
+
+  function ratingLine(rating, badge) {
+    const b = badgeLabel(badge);
+    const base = ratingLabel(rating);
+    return b ? `${base} · ${b}` : base;
+  }
 
   const isoDateLocal = (d = new Date()) => {
     const yyyy = d.getFullYear();
@@ -844,10 +1496,28 @@
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
   };
 
+  const localeForLang = () => currentLang === "es" ? "es-ES" : "en-US";
+
   const monthName = (y, m) => {
-    const d = new Date(y, m, 1);
-    return d.toLocaleString(undefined, { month:"long", year:"numeric" });
+    const month = (t("calendarMonths") || [])[m] || "";
+    return `${month} ${y}`;
   };
+
+  function prettyDateFromISO(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || "-";
+    const [y,m,d] = iso.split("-").map(Number);
+    const date = new Date(y, m-1, d);
+    return date.toLocaleDateString(localeForLang(), t("monthDayYear"));
+  }
+
+  function prettyDateRange(startDate, endDate) {
+    const a = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const b = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+    const sameYear = a.getFullYear() === b.getFullYear();
+    const left = a.toLocaleDateString(localeForLang(), t("monthDay"));
+    const right = b.toLocaleDateString(localeForLang(), sameYear ? t("monthDay") : t("monthDayYear"));
+    return `${left} ${t("weekRangeJoin")} ${right}`;
+  }
 
   const startOfWeekMon = (d) => {
     const out = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -887,10 +1557,11 @@
   }
 
   function sumRecords(records) {
-    const totals = { S:0, Z:0, CC:0, C:0, X:0, days:0 };
+    const totals = { S:0, Z:0, CC:0, C:0, X:0, days:0, durationMs:0 };
     records.forEach(r => {
       totals.days += 1;
       metrics.forEach(k => totals[k] += (r.values?.[k] || 0));
+      totals.durationMs += (r.durationMs || 0);
     });
     return totals;
   }
@@ -917,10 +1588,13 @@
 
   // ---------- Load session state ----------
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
+  const savedProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+  const savedLang = localStorage.getItem(LANG_KEY);
+  let currentLang = savedLang === "en" ? "en" : "es";
   const state = {
     active: !!saved.active,
     date: saved.date || isoDateLocal(),
-    rep: saved.rep || "",
+    rep: saved.rep || savedProfile.rep || "",
     store: saved.store || "",
     values: saved.values || {},
     sessionStart: saved.sessionStart || null,
@@ -929,6 +1603,16 @@
 
   // ---------- DOM ----------
   const todayDateEl = document.getElementById("today_date");
+  const startIntro = document.getElementById("start_intro");
+  const startHeadline = document.getElementById("start_headline");
+  const startHint = document.getElementById("start_hint");
+  const startDayBtn = document.getElementById("start_day");
+  const finishDayBtn = document.getElementById("finish_day");
+  const profileBtn = document.getElementById("profile_btn");
+  const langToggleBtn = document.getElementById("lang_toggle");
+  const modalLanguage = document.getElementById("modal_language");
+  const langEsBtn = document.getElementById("lang_es");
+  const langEnBtn = document.getElementById("lang_en");
 
   // Tabs
   const tabEls = Array.from(document.querySelectorAll(".tab"));
@@ -957,9 +1641,11 @@
 
   // Modals
   const modalStart = document.getElementById("modal_start");
+  const modalProfile = document.getElementById("modal_profile");
   const modalReport = document.getElementById("modal_report");
-  const startName = document.getElementById("start_name");
   const startStore = document.getElementById("start_store");
+  const startProfileName = document.getElementById("start_profile_name");
+  const profileNameInput = document.getElementById("profile_name");
   const reportBox = document.getElementById("report_box");
 
   // QR
@@ -968,6 +1654,7 @@
 
   // Report actions
   const reportHint = document.getElementById("report_hint");
+  const reportDayRating = document.getElementById("report_day_rating");
   const endBtn = document.getElementById("end_btn");
   const copyBtn = document.getElementById("copy_btn");
   const shareBtn = document.getElementById("share_btn");
@@ -976,10 +1663,23 @@
   const modalDay = document.getElementById("modal_day");
   const dayX = document.getElementById("day_x");
   const dayModalTitle = document.getElementById("day_modal_title");
+  const dayModalRating = document.getElementById("day_modal_rating");
+  const dayModalKpis = document.getElementById("day_modal_kpis");
   const dayModalMeta = document.getElementById("day_modal_meta");
   const dayModalReport = document.getElementById("day_modal_report");
   const dayCopyBtn = document.getElementById("day_copy");
   const dayShareBtn = document.getElementById("day_share");
+  const dayEditBtn = document.getElementById("day_edit");
+  const dayDeleteBtn = document.getElementById("day_delete");
+  const daySaveBtn = document.getElementById("day_save");
+  const dayEditGrid = document.getElementById("day_edit_grid");
+  const dayEditS = document.getElementById("day_edit_s");
+  const dayEditZ = document.getElementById("day_edit_z");
+  const dayEditCC = document.getElementById("day_edit_cc");
+  const dayEditC = document.getElementById("day_edit_c");
+  const dayEditX = document.getElementById("day_edit_x");
+  const finishResult = document.getElementById("finish_result");
+  const modalRatingHelp = document.getElementById("modal_rating_help");
 
   // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
@@ -990,15 +1690,86 @@
     if (document.visibilityState === "hidden") { try { saveStateNow(); } catch {} }
   });
 
+  function t(key) {
+    return i18n[currentLang][key] || i18n.es[key] || key;
+  }
+
+  function saveProfile(rep) {
+    try {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep }));
+    } catch {}
+  }
+
+  function applyTranslations() {
+    document.documentElement.lang = currentLang;
+    document.getElementById("tab_counter_label").textContent = t("tabCounter");
+    document.getElementById("tab_calendar_label").textContent = t("tabCalendar");
+    document.getElementById("tab_summary_label").textContent = t("tabSummary");
+    document.getElementById("today_title").textContent = t("appTitle");
+    startHeadline.textContent = t("startHeadline");
+    startIntro.textContent = t("startIntro");
+    startHint.textContent = t("startHint");
+    startDayBtn.textContent = t("startDay");
+    profileBtn.textContent = `${state.rep || t("profileBtn")} ⌄`;
+    finishDayBtn.textContent = t("finishDay");
+    document.getElementById("start_modal_title").textContent = t("startModalTitle");
+    document.getElementById("start_modal_intro").textContent = t("startModalIntro");
+    document.getElementById("start_store_label").textContent = t("storeLabel");
+    document.getElementById("start_cancel").textContent = t("cancel");
+    document.getElementById("start_confirm").textContent = t("start");
+    document.getElementById("profile_modal_title").textContent = t("profileTitle");
+    document.getElementById("profile_name_label").textContent = t("nameLabel");
+    document.getElementById("profile_save").textContent = t("profileSave");
+    document.getElementById("profile_reset").textContent = t("profileReset");
+    langToggleBtn.textContent = "Idioma";
+    document.getElementById("lang_modal_title").textContent = t("languageModalTitle");
+    document.getElementById("lang_modal_intro").textContent = t("languageModalIntro");
+    langEsBtn.textContent = t("languageSpanish");
+    langEnBtn.textContent = t("languageEnglish");
+    langEsBtn.classList.toggle("langChoiceActive", currentLang === "es");
+    langEnBtn.classList.toggle("langChoiceActive", currentLang === "en");
+    document.querySelector(".t1").textContent = t("session");
+    document.getElementById("rating_help_title").textContent = t("dayRatingRules");
+    document.getElementById("day_details_summary").textContent = t("dayDetailsSummary");
+    document.getElementById("report_modal_title").textContent = t("reportModalTitle");
+    document.getElementById("qr_title").textContent = t("qrTitle");
+    document.getElementById("qr_note").textContent = t("qrNote");
+    document.getElementById("report_hint").textContent = t("reportHint");
+    document.getElementById("rating_help_body").innerHTML = `
+      <div style="font-weight:700; margin-bottom:8px;">${t("quickCriteria")}</div>
+      <ul style="margin:0 0 10px 18px; padding:0;">
+        <li>${t("goodDayRule")}</li>
+        <li>${t("regularDayRule")}</li>
+        <li>${t("badDayRule")}</li>
+      </ul>
+      <div style="font-weight:700; margin-bottom:8px;">${t("specialBadges")}</div>
+      <ul style="margin:0 0 0 18px; padding:0;">
+        <li>${t("luckyDayRule")}</li>
+        <li>${t("solidDayRule")}</li>
+      </ul>
+    `;
+    renderHeader();
+    if (state.active) renderSessionInfo();
+  }
+
+  function setLanguage(lang) {
+    currentLang = lang === "en" ? "en" : "es";
+    try { localStorage.setItem(LANG_KEY, currentLang); } catch {}
+    closeModal(modalLanguage);
+    applyTranslations();
+    renderCalendarStats();
+    renderProgress();
+  }
+
   // ---------- UI ----------
   const valEls = {};
   function renderHeader() {
-    todayDateEl.textContent = `Date: ${state.date}`;
+    todayDateEl.textContent = `${t("date")}: ${prettyDateFromISO(state.date)}`;
   }
 
   function renderSessionInfo() {
     whoLine.textContent = `${state.rep || "—"} • ${state.store || "—"}`;
-    dateLine.textContent = `Day: ${state.date} • Start: ${fmtTime(state.sessionStart)}`;
+    dateLine.textContent = `${t("day")}: ${prettyDateFromISO(state.date)} • ${t("begins")}: ${fmtTime(state.sessionStart)}`;
   }
 
   function renderMetrics() {
@@ -1076,12 +1847,18 @@
     });
   }
   clickOutsideToClose(modalStart, true);
+  clickOutsideToClose(modalProfile, true);
   clickOutsideToClose(modalReport, false);
   clickOutsideToClose(modalDay, true);
+  clickOutsideToClose(modalRatingHelp, true);
   dayX.addEventListener("click", () => closeModal(modalDay));
+  document.getElementById("rating_help_x").addEventListener("click", () => closeModal(modalRatingHelp));
 
   // ---------- Session logic ----------
   function startDay(rep, store) {
+    finishResult.textContent = "";
+    reportDayRating.style.display = "none";
+    reportDayRating.textContent = "";
     state.date = isoDateLocal();
     state.rep = rep;
     state.store = store;
@@ -1109,7 +1886,7 @@
     return [
       `Name: ${state.rep || "-"}`,
       `Store: ${state.store || "-"}`,
-      `Date: ${state.date}`,
+      `Date: ${prettyDateFromISO(state.date)}`,
       ``,
       `Start: ${fmtTime(startTs)}`,
       `End: ${fmtTime(endTs)}`,
@@ -1123,6 +1900,7 @@
 
   function persistCompletedDay(endTs, reportText) {
     const startTs = state.sessionStart || endTs;
+    const ratingInfo = classifyDay(state.values);
     const payload = {
       date: state.date,
       rep: state.rep || "",
@@ -1132,7 +1910,9 @@
       durationMs: Math.max(0, endTs - startTs),
       values: { ...state.values },
       money: (state.values.X || 0) * MONEY_PER_X,
-      reportText: reportText || ""
+      reportText: reportText || "",
+      dayRating: ratingInfo.dayRating,
+      dayBadge: ratingInfo.dayBadge
     };
     const hist = loadHistory();
     hist[state.date] = payload;
@@ -1141,7 +1921,9 @@
 
   function finalizeAndReset() {
     state.active = false;
-    state.rep = "";
+    finishResult.textContent = "";
+    reportDayRating.style.display = "none";
+    reportDayRating.textContent = "";
     state.store = "";
     state.sessionStart = null;
     state.date = isoDateLocal();
@@ -1152,7 +1934,7 @@
     closeModal(modalReport);
     showStartScreen();
     renderCalendar();
-    renderSummary();
+    renderProgress();
   }
 
   function setReportMode(mode) {
@@ -1214,7 +1996,7 @@
     return [
       `Name: ${rec.rep || "-"}`,
       `Store: ${rec.store || "-"}`,
-      `Date: ${rec.date || "-"}`,
+      `Date: ${prettyDateFromISO(rec.date || "-")}`,
       ``,
       `Start: ${fmtTime(rec.startTs)}`,
       `End: ${fmtTime(rec.endTs)}`,
@@ -1229,51 +2011,77 @@
   function openDayModal(iso){
     const hist = loadHistory();
     const rec = hist[iso];
+    activeDayISO = iso;
 
-    dayModalTitle.textContent = rec ? `Detalle del día • ${iso}` : `Sin datos • ${iso}`;
+    dayModalTitle.textContent = rec ? `${t("dayDetailsTitle")} • ${prettyDateFromISO(iso)}` : `${t("dayNoDataTitle")} • ${prettyDateFromISO(iso)}`;
+    dayEditGrid.style.display = "none";
+    daySaveBtn.style.display = "none";
+    dayEditBtn.textContent = "Editar día";
 
     if (!rec){
+      dayModalRating.innerHTML = "";
+      dayModalKpis.innerHTML = "";
       dayModalMeta.innerHTML = `
         <div class="statHead">
-          <div class="h">No hay un día finalizado guardado.</div>
-          <div class="p">Tip: finaliza el día para que aparezca aquí.</div>
+          <div class="h">${t("dayNoDataSaved")}</div>
+          <div class="p">${t("dayNoDataTip")}</div>
         </div>
       `;
       dayModalReport.textContent = "—";
       dayCopyBtn.style.display = "none";
       dayShareBtn.style.display = "none";
+      dayEditBtn.style.display = "none";
+      dayDeleteBtn.style.display = "none";
       openModal(modalDay);
       return;
     }
 
     const X = rec.values?.X ?? 0;
     const money = (X * MONEY_PER_X);
+    const ratingInfo = classifyDay(rec.values || {});
+    const rating = rec.dayRating || ratingInfo.dayRating;
+    const badge = rec.dayBadge ?? ratingInfo.dayBadge;
+
+    dayModalRating.innerHTML = `
+      <div class="dayRatingPill ${rating}">
+        <span class="dayRatingDot"></span>
+        <span>${ratingLabel(rating)}</span>
+      </div>
+      ${badge ? `<div class="dayBadgeMini">${badgeLabel(badge)}</div>` : ""}
+    `;
+
+    dayModalKpis.innerHTML = ["S","Z","CC","C","X"].map(k => `
+      <div class="dayMetricChip">
+        <div class="k">${k}</div>
+        <div class="v">${rec.values?.[k] ?? 0}</div>
+      </div>
+    `).join("");
 
     dayModalMeta.innerHTML = `
       <div class="statHead">
         <div>
           <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
-          <div class="p">Start: ${fmtTime(rec.startTs)} • End: ${fmtTime(rec.endTs)} • Dur: ${fmtDuration(rec.durationMs || 0)}</div>
+          <div class="p">${t("startLbl")}: ${fmtTime(rec.startTs)} • ${t("endLbl")}: ${fmtTime(rec.endTs)} • ${t("durLbl")}: ${fmtDuration(rec.durationMs || 0)}</div>
+          <div class="p">${t("resultLbl")}: ${ratingLine(rating, badge)}</div>
         </div>
         <div style="text-align:right;">
           <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
           <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:900; margin-top:2px;">EARNED</div>
         </div>
       </div>
-
-      <div class="statGrid">
-        ${["S","Z","CC","C","X"].map(k => `
-          <div class="statItem">
-            <div class="k">${k}</div>
-            <div class="v">${rec.values?.[k] ?? 0}</div>
-          </div>
-        `).join("")}
-      </div>
     `;
+
+    dayEditS.value = rec.values?.S ?? 0;
+    dayEditZ.value = rec.values?.Z ?? 0;
+    dayEditCC.value = rec.values?.CC ?? 0;
+    dayEditC.value = rec.values?.C ?? 0;
+    dayEditX.value = rec.values?.X ?? 0;
 
     dayModalReport.textContent = buildFullReportFromRecord(rec);
     dayCopyBtn.style.display = "";
     dayShareBtn.style.display = "";
+    dayEditBtn.style.display = "";
+    dayDeleteBtn.style.display = "";
     openModal(modalDay);
   }
 
@@ -1301,6 +2109,58 @@
 
   dayCopyBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "copy"); } catch {} });
   dayShareBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {} });
+
+  dayEditBtn.addEventListener("click", () => {
+    const detailsPanel = document.getElementById("day_details_panel");
+    if (dayEditGrid.style.display === "none") {
+      dayEditGrid.style.display = "grid";
+      daySaveBtn.style.display = "";
+      dayEditBtn.textContent = "Cancelar edición";
+      if (detailsPanel) detailsPanel.open = false;
+    } else {
+      dayEditGrid.style.display = "none";
+      daySaveBtn.style.display = "none";
+      dayEditBtn.textContent = "Editar día";
+      if (detailsPanel) detailsPanel.open = true;
+    }
+  });
+
+  daySaveBtn.addEventListener("click", () => {
+    if (!activeDayISO) return;
+    const hist = loadHistory();
+    const rec = hist[activeDayISO];
+    if (!rec) return;
+    const n = (v) => Math.max(0, parseInt(v || 0, 10) || 0);
+    rec.values = {
+      ...rec.values,
+      S: n(dayEditS.value),
+      Z: n(dayEditZ.value),
+      CC: n(dayEditCC.value),
+      C: n(dayEditC.value),
+      X: n(dayEditX.value),
+    };
+    rec.money = (rec.values.X || 0) * MONEY_PER_X;
+    const ratingInfo = classifyDay(rec.values || {});
+    rec.dayRating = ratingInfo.dayRating;
+    rec.dayBadge = ratingInfo.dayBadge;
+    upsertDayInHistory(activeDayISO, rec);
+    renderCalendar();
+    renderCalendarStats();
+    renderProgress();
+    openDayModal(activeDayISO);
+  });
+
+  dayDeleteBtn.addEventListener("click", () => {
+    if (!activeDayISO) return;
+    if (!confirm(`¿Borrar el día ${activeDayISO}?`)) return;
+    const hist = loadHistory();
+    delete hist[activeDayISO];
+    saveHistory(hist);
+    closeModal(modalDay);
+    renderCalendar();
+    renderCalendarStats();
+    renderProgress();
+  });
 
   // ---------- Metrics interactions ----------
   function bump(k, d) {
@@ -1345,7 +2205,7 @@
     tabCalendar.style.display = (tabName === "calendar") ? "" : "none";
     tabSummary.style.display = (tabName === "summary") ? "" : "none";
     if (tabName === "calendar") renderCalendar();
-    if (tabName === "summary") renderSummary();
+    if (tabName === "summary") renderProgress();
   }
 
   document.getElementById("tabs").addEventListener("click", (e) => {
@@ -1355,6 +2215,9 @@
   });
 
   // ---------- Calendar rendering ----------
+  let selectedDayISO = null;
+  let activeDayISO = null;
+
   let calCursor = (() => {
     const d = new Date();
     return { y: d.getFullYear(), m: d.getMonth() };
@@ -1375,6 +2238,8 @@
     if (!cell) return;
     const iso = cell.dataset.iso;
     if (!iso) return;
+    selectedDayISO = iso;
+    renderCalendar();
     openDayModal(iso);
   });
 
@@ -1383,7 +2248,7 @@
     calTitle.textContent = monthName(y, m);
 
     calGrid.innerHTML = "";
-    const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const dows = t("calendarWeekdays") || ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     dows.forEach(s => {
       const el = document.createElement("div");
       el.className = "dow";
@@ -1410,17 +2275,21 @@
       const S = rec?.values?.S ?? 0;
       const Z = rec?.values?.Z ?? 0;
       const X = rec?.values?.X ?? 0;
+      const ratingInfo = rec ? classifyDay(rec.values || {}) : null;
+      const dayRating = rec ? (rec.dayRating || ratingInfo.dayRating) : "";
 
       const isToday = (iso === todayISO);
-      const badgeText = isToday ? "TODAY" : (rec ? "$" + (X * MONEY_PER_X) : "");
+      const badgeText = isToday ? "HOY" : "";
       const badgeHtml = badgeText ? `<div class="badge ${isToday ? "today" : ""}">${badgeText}</div>` : "";
+      const dotHtml = dayRating ? `<span class="dayDot ${dayRating}"></span>` : "";
 
       const cell = document.createElement("div");
       cell.className =
         "dayCell" +
         (inMonth ? "" : " muted") +
         (rec ? " hasData" : "") +
-        (isToday ? " today" : "");
+                (isToday ? " today" : "") +
+        (selectedDayISO === iso ? " selected" : "");
 
       cell.dataset.iso = iso;
 
@@ -1429,12 +2298,13 @@
           <div class="dayTop">
             <div class="dayNum">${day.getDate()}</div>
             ${badgeHtml}
+            ${dotHtml}
           </div>
 
           <div class="miniClean">
-            <div class="kpiMini"><div class="k">S</div><div class="v">${S}</div></div>
-            <div class="kpiMini"><div class="k">Z</div><div class="v">${Z}</div></div>
-            <div class="kpiMini"><div class="k">X</div><div class="v">${X}</div></div>
+            <span class="kpiInline">S ${S}</span>
+            <span class="kpiInline">Z ${Z}</span>
+            <span class="kpiInline">X ${X}</span>
           </div>
         </div>
       `;
@@ -1445,33 +2315,26 @@
   }
 
 
-  function renderStatCard(container, title, periodLabel, totals, avgLabel = "Promedio X/día") {
-    const money = (totals.X || 0) * MONEY_PER_X;
+  function renderCompactStatCard(container, title, totals) {
+    const x = totals.X || 0;
+    const s = totals.S || 0;
+    const z = totals.Z || 0;
+    const aggr = s ? ((z / s) * 100).toFixed(1) + "%" : "0.0%";
+    const close = z ? ((x / z) * 100).toFixed(1) + "%" : "0.0%";
+    const money = x * MONEY_PER_X;
+    const avgStops = (totals.days || 0) ? (s / totals.days).toFixed(1) : "0.0";
+
     container.innerHTML = `
-      <div class="statHead">
-        <div>
-          <div class="h">${title}</div>
-          <div class="p">${periodLabel}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
-          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:1000; margin-top:2px;">EARNED</div>
-        </div>
+      <div class="statsMiniTitle">${title}</div>
+      <div class="statsHeroNumber">${x} ${t("salesWord")}</div>
+      <div class="statsHeroEarned">$${money} ${t("earnedWord")}</div>
+      <div class="statsMiniLine">${t("avgStopsPerDayLabel")}: ${avgStops}</div>
+      <div class="statsMiniChips">
+        <span class="statsMiniChip">${t("stopsLabel")}: ${s}</span>
+        <span class="statsMiniChip">${t("aggLabel")}: ${aggr}</span>
+        <span class="statsMiniChip">${t("closeLabel")}: ${close}</span>
       </div>
-
-      <div class="statGrid">
-        ${["S","Z","CC","C","X"].map(k => `
-          <div class="statItem">
-            <div class="k">${k}</div>
-            <div class="v">${totals[k] || 0}</div>
-          </div>
-        `).join("")}
-      </div>
-
-      <div class="moneyLine">
-        <div><b>Días trabajados:</b> ${totals.days || 0}</div>
-        <div><b>${avgLabel}:</b> ${totals.days ? ((totals.X||0)/totals.days).toFixed(1) : "0.0"}</div>
-      </div>
+      <div class="statsMiniMeta">${t("workedDays")}: ${totals.days || 0} • ${t("hoursWorked")}: ${fmtHours(totals.durationMs || 0)}</div>
     `;
   }
 
@@ -1483,128 +2346,197 @@
 
     const monthTotals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
 
-    const wLabel = `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`;
-    const mLabel = `${calCursor.y}-${String(calCursor.m+1).padStart(2,"0")}`;
-
-    renderStatCard(weekStatsEl, "Stats de la semana", wLabel, weekTotals, "Promedio");
-    renderStatCard(monthStatsEl, "Stats del mes", mLabel, monthTotals);
+    renderCompactStatCard(weekStatsEl, t("weekStatsTitle"), weekTotals);
+    renderCompactStatCard(monthStatsEl, t("monthStatsTitle"), monthTotals);
   }
 
-  // ---------- Summary rendering ----------
-  function renderSummary() {
+  // ---------- Progress rendering ----------
+  function weekSalesStreak(minSales = 12) {
+    const hist = loadHistory();
+    const now = new Date();
+    const thisWeekStart = startOfWeekMon(now);
+    let streak = 0;
+
+    for (let i = 0; i < 24; i++) {
+      const ws = new Date(thisWeekStart);
+      ws.setDate(thisWeekStart.getDate() - (i * 7));
+      const we = endOfWeekSun(ws);
+      const totals = sumRecords(recordsInRange(ws, we));
+      if ((totals.X || 0) >= minSales) streak += 1;
+      else break;
+    }
+    return streak;
+  }
+
+  function getTrainedAgentsWithCheck() {
+    const n = parseInt(localStorage.getItem("trainedAgentsWithCheck") || "0", 10);
+    return Math.max(0, Number.isFinite(n) ? n : 0);
+  }
+
+  function renderProgress() {
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
     const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
     const monthTotals = sumRecords(recordsInMonth(now.getFullYear(), now.getMonth()));
 
-    const hist = loadHistory();
-    const allRecords = Object.keys(hist).map(k => hist[k]).filter(Boolean);
-    allRecords.sort((a,b) => (a.date||"").localeCompare(b.date||""));
-    const allTotals = sumRecords(allRecords);
+    const weekX = weekTotals.X || 0;
+    const weekDays = weekTotals.days || 0;
+    const weekAgg = (weekTotals.S||0) ? (((weekTotals.Z||0)/(weekTotals.S||0))*100).toFixed(1) + "%" : "0.0%";
+    const weekClose = (weekTotals.Z||0) ? (((weekTotals.X||0)/(weekTotals.Z||0))*100).toFixed(1) + "%" : "0.0%";
+    const weekEarned = (weekTotals.X||0) * MONEY_PER_X;
 
-    const bestDay = (() => {
-      let best = null;
-      for (const r of allRecords) {
-        const x = r.values?.X || 0;
-        if (!best || x > (best.values?.X||0)) best = r;
-      }
-      return best;
-    })();
+    const monthX = monthTotals.X || 0;
+    const monthDays = monthTotals.days || 0;
+    const monthAvgX = monthDays ? ((monthX)/monthDays).toFixed(1) : "0.0";
+    const monthEarned = (monthTotals.X||0) * MONEY_PER_X;
 
-    const card = (title, sub, totals) => {
-      const money = (totals.X||0) * MONEY_PER_X;
-      const days = totals.days || 0;
-      const avgX = days ? ((totals.X||0)/days).toFixed(1) : "0.0";
-      const close = (totals.Z||0) ? (((totals.X||0)/(totals.Z||0))*100).toFixed(1) + "%" : "0.0%";
-      const aggr = (totals.S||0) ? (((totals.Z||0)/(totals.S||0))*100).toFixed(1) + "%" : "0.0%";
+    const streak = Math.min(3, weekSalesStreak(12));
+    const trained = Math.min(3, getTrainedAgentsWithCheck());
+    const reqAProgress = Math.min(100, Math.round((streak / 3) * 100));
+    const reqBProgress = Math.min(100, Math.round((trained / 3) * 100));
+    const overallDone = (streak >= 3 ? 1 : 0) + (trained >= 3 ? 1 : 0);
+    const overallPct = Math.round((overallDone / 2) * 100);
 
-      return `
-        <div class="sumCard">
-          <div class="sumTop">
-            <div>
-              <div class="sumTitle">${title}</div>
-              <div class="sumSub">${sub}</div>
-            </div>
-            <div class="sumMoney">$${money}<span>EARNED</span></div>
-          </div>
-          <div class="sumStats">
-            <div class="sumPill"><div class="k">X</div><div class="v">${totals.X||0}</div></div>
-            <div class="sumPill"><div class="k">Avg X/Día</div><div class="v">${avgX}</div></div>
-            <div class="sumPill"><div class="k">Días</div><div class="v">${days}</div></div>
-          </div>
-          <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-            <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${aggr}</div></div>
-            <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${close}</div></div>
-          </div>
-        </div>
-      `;
-    };
-
-    const bestBlock = bestDay ? `
-      <div class="sumCard">
-        <div class="sumTop">
-          <div>
-            <div class="sumTitle">Mejor día</div>
-            <div class="sumSub">${bestDay.date} • ${bestDay.store || ""}</div>
-          </div>
-          <div class="sumMoney">$${(bestDay.values?.X||0)*MONEY_PER_X}<span>EARNED</span></div>
-        </div>
-        <div class="sumStats">
-          ${["S","Z","CC","C","X"].map(k => `
-            <div class="sumPill"><div class="k">${k}</div><div class="v">${bestDay.values?.[k] ?? 0}</div></div>
-          `).join("")}
-        </div>
-      </div>
-    ` : `
-      <div class="sumCard">
-        <div class="sumTitle">Histórico</div>
-        <div class="sumSub">Aún no hay días finalizados guardados.</div>
-      </div>
-    `;
+    const weekMain = `${t("salesX")}: ${weekX} / 12`;
 
     sumWrap.innerHTML = `
-      ${card("Semana actual", `${isoDateLocal(weekStart)} → ${isoDateLocal(weekEnd)}`, weekTotals)}
-      ${card("Mes actual", `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`, monthTotals)}
-      ${card("Histórico", `Desde tu primer día registrado`, allTotals)}
-      ${bestBlock}
+      <div class="progCard">
+        <div class="progTitle">${t("progressLevelTitle")}</div>
+        <div class="progBig">${t("currentLevel")}: ${t("levelSeller")}</div>
+        <div class="progSub">${t("nextLevel")}: ${t("levelTrainer")}</div>
+        <div class="progBar"><span style="width:${overallPct}%"></span></div>
+        <div class="progSub">${overallDone}/2 ${t("requirementsCompleted")} · ${overallPct}%</div>
+        <div class="goalLine">${t("firstStepGuide")}</div>
+      </div>
+
+      <div class="progCard">
+        <div class="progTitle">${t("pathToNextLevel")}</div>
+
+        <div class="progSub" style="margin-top:8px; font-weight:800; opacity:.96;">${t("reqA")}</div>
+        <div class="checkList">
+          ${[1,2,3].map(i => {
+            const done = i <= streak;
+            return `<div class="checkItem ${done ? "done" : ""}"><div class="checkLeft"><span class="checkDot">${done ? "✓" : ""}</span><span>${t("weekN")} ${i}</span></div><span class="progCounter">${done ? t("completed") : t("pending")}</span></div>`;
+          }).join("")}
+        </div>
+        <div class="progBar" style="margin-top:6px;"><span style="width:${reqAProgress}%"></span></div>
+        <div class="progCounter" style="margin-top:6px;">${streak}/3</div>
+
+        <div class="progSub" style="margin-top:10px; font-weight:800; opacity:.96;">${t("reqB")}</div>
+        <div class="progBar"><span style="width:${reqBProgress}%"></span></div>
+        <div class="progCounter" style="margin-top:6px;">${trained}/3</div>
+
+        <div class="goalLine">${t("nextGoalWeek")}</div>
+      </div>
+
+      <div class="progCard rewardCard">
+        <div class="rewardTitleRow"><span class="rewardIcon">${t("rewardIcon")}</span><div class="progTitle">${t("unlocks")}</div></div>
+        <div class="rewardBig">${t("unlockReward")}</div>
+        <div class="progSub">${t("unlockRewardNote")}</div>
+      </div>
+
+      <div class="progCard">
+        <div class="progTitle">${t("weekCardTitle")}</div>
+        <div class="compactMain">${weekMain}</div>
+        <div class="weekImpact">${t("weekImpact")}</div>
+        <div class="compactGrid">
+          <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${weekDays}</div></div>
+          <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${weekAgg}</div></div>
+          <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${weekClose}</div></div>
+          <div class="sumPill"><div class="k">EARNED</div><div class="v">$${weekEarned}</div></div>
+        </div>
+      </div>
+
+      <div class="progCard">
+        <div class="progTitle">${t("monthCardTitle")}</div>
+        <div class="compactMain">${t("salesX")}: ${monthX}</div>
+        <div class="progSub">${monthName(now.getFullYear(), now.getMonth())}</div>
+        <div class="compactGrid">
+          <div class="sumPill"><div class="k">${t("avgXPerDay")}</div><div class="v">${monthAvgX}</div></div>
+          <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${monthDays}</div></div>
+          <div class="sumPill"><div class="k">EARNED</div><div class="v">$${monthEarned}</div></div>
+          <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${(monthTotals.Z||0) ? (((monthTotals.X||0)/(monthTotals.Z||0))*100).toFixed(1) + "%" : "0.0%"}</div></div>
+        </div>
+      </div>
     `;
   }
 
   // ---------- Buttons ----------
-  document.getElementById("start_day").addEventListener("click", () => {
-    startName.value = state.rep || "";
-    startStore.value = state.store || "";
+  function openStartModal() {
+    if (!state.rep) {
+      alert(t("missingProfile"));
+      openProfileModal();
+      return;
+    }
+    startProfileName.textContent = `${t("profileForDay")}: ${state.rep}`;
+    startStore.value = "";
     openModal(modalStart);
-    setTimeout(() => startName.focus(), 50);
+    setTimeout(() => startStore.focus(), 50);
+  }
+
+  function openProfileModal() {
+    profileNameInput.value = state.rep || "";
+    openModal(modalProfile);
+    setTimeout(() => profileNameInput.focus(), 50);
+  }
+
+  startDayBtn.addEventListener("click", openStartModal);
+  profileBtn.addEventListener("click", openProfileModal);
+
+  document.getElementById("profile_x").addEventListener("click", () => closeModal(modalProfile));
+  document.getElementById("profile_save").addEventListener("click", () => {
+    const rep = (profileNameInput.value || "").trim();
+    if (!rep) { alert(t("missingProfile")); return; }
+    state.rep = rep;
+    saveProfile(rep);
+    saveStateNow();
+    applyTranslations();
+    closeModal(modalProfile);
+  });
+
+  document.getElementById("profile_reset").addEventListener("click", () => {
+    const ok = confirm(currentLang === "es" ? "¿Resetear nombre e historial?" : "Reset name and history?");
+    if (!ok) return;
+    try { localStorage.removeItem(PROFILE_KEY); } catch {}
+    try { localStorage.removeItem(HISTORY_KEY); } catch {}
+    state.rep = "";
+    state.store = "";
+    saveStateNow();
+    renderCalendar();
+    renderProgress();
+    applyTranslations();
+    closeModal(modalProfile);
   });
 
   document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
   document.getElementById("start_cancel").addEventListener("click", () => closeModal(modalStart));
 
   document.getElementById("start_confirm").addEventListener("click", () => {
-    const rep = (startName.value || "").trim();
     const store = (startStore.value || "").trim();
-    if (!rep || !store) {
-      alert("Por favor ingresa Nombre y Tienda.\nPlease enter Name and Store.");
+    if (!store) {
+      alert(t("missingStore"));
       return;
     }
+    state.store = store;
     closeModal(modalStart);
-    startDay(rep, store);
+    startDay(state.rep, store);
   });
 
-  [startName, startStore].forEach((inp) => {
-    inp.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-      if (inp === startName) startStore.focus();
-      else document.getElementById("start_confirm").click();
-    });
+  startStore.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    document.getElementById("start_confirm").click();
   });
 
   document.getElementById("finish_day").addEventListener("click", () => {
     const endTs = Date.now();
     const text = buildReport(endTs);
+    const ratingInfo = classifyDay(state.values || {});
+    const result = ratingLine(ratingInfo.dayRating, ratingInfo.dayBadge);
+    finishResult.textContent = `${t("finishResult")}: ${result}`;
+    reportDayRating.style.display = "";
+    reportDayRating.textContent = `${t("dayResult")}: ${result}`;
     reportBox.textContent = text;
     showQRForText(text);
     setReportMode("tablet");
@@ -1612,6 +2544,7 @@
   });
 
   document.getElementById("report_x").addEventListener("click", () => closeModal(modalReport));
+  document.getElementById("rating_help_btn").addEventListener("click", () => openModal(modalRatingHelp));
 
   async function doCopyOrShare(kind) {
     const confirmMsg =
@@ -1663,8 +2596,7 @@
   shareBtn.addEventListener("click", () => doCopyOrShare("share"));
 
   endBtn.addEventListener("click", () => {
-    const confirmMsg =
-      "¿Seguro que quieres finalizar el día y resetear?\nAre you sure you want to end the day and reset?";
+    const confirmMsg = t("endConfirm");
     if (!confirm(confirmMsg)) return;
 
     const endTs = Date.now();
@@ -1675,30 +2607,31 @@
     history.replaceState(null, "", location.pathname);
   });
 
-  // ---------- Start/End modals ----------
-  function openModal(el) { el.classList.add("show"); }
-  function closeModal(el) { el.classList.remove("show"); }
-
-  function clickOutsideToClose(overlayEl, allow) {
-    overlayEl.addEventListener("click", (e) => {
-      if (!allow) return;
-      if (e.target === overlayEl) closeModal(overlayEl);
+  function normalizeHistoryRatings() {
+    const hist = loadHistory();
+    let changed = false;
+    Object.keys(hist).forEach((iso) => {
+      const rec = hist[iso];
+      if (!rec || !rec.values) return;
+      if (rec.dayRating && rec.dayBadge !== undefined) return;
+      const info = classifyDay(rec.values);
+      rec.dayRating = info.dayRating;
+      rec.dayBadge = info.dayBadge;
+      changed = true;
     });
+    if (changed) saveHistory(hist);
   }
-  clickOutsideToClose(modalStart, true);
-  clickOutsideToClose(modalReport, false);
-  clickOutsideToClose(modalDay, true);
 
-  // ---------- Buttons: start modal ----------
-  document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
-  document.getElementById("start_cancel").addEventListener("click", () => closeModal(modalStart));
-
-  // ---------- Modals close buttons ----------
-  document.getElementById("day_x").addEventListener("click", () => closeModal(modalDay));
+  langToggleBtn.addEventListener("click", () => openModal(modalLanguage));
+  document.getElementById("lang_x").addEventListener("click", () => closeModal(modalLanguage));
+  langEsBtn.addEventListener("click", () => setLanguage("es"));
+  langEnBtn.addEventListener("click", () => setLanguage("en"));
+  clickOutsideToClose(modalLanguage, true);
 
   // ---------- Init ----------
   (function init() {
-    renderHeader();
+    applyTranslations();
+    normalizeHistoryRatings();
 
     // If opened from QR (phone), open report
     tryLoadReportFromHash();
@@ -1711,7 +2644,7 @@
     }
 
     renderCalendar();
-    renderSummary();
+    renderProgress();
     saveState();
   })();
 </script>
