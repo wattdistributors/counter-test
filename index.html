@@ -1253,8 +1253,8 @@
       avgStopsPerDay: "Promedio S/día",
       avgStopsPerDayLabel: "Promedio stops/día",
       earnedWord: "ganado",
-      months: ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
-      days: ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],
+      calendarMonths: ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
+      calendarWeekdays: ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],
       hoursWorked: "Horas trabajadas",
       workedDays: "Días trabajados",
       earnedLabel: "GANADO",
@@ -1365,8 +1365,8 @@
       avgStopsPerDay: "Avg S/day",
       avgStopsPerDayLabel: "Average stops/day",
       earnedWord: "earned",
-      months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
-      days: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+      calendarMonths: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+      calendarWeekdays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
       hoursWorked: "Hours worked",
       workedDays: "Days worked",
       earnedLabel: "EARNED",
@@ -1507,7 +1507,7 @@
   const localeForLang = () => currentLang === "es" ? "es-ES" : "en-US";
 
   const monthName = (y, m) => {
-    const month = (t("months") || [])[m] || "";
+    const month = (t("calendarMonths") || [])[m] || "";
     return `${month} ${y}`;
   };
 
@@ -2256,7 +2256,7 @@
     calTitle.textContent = monthName(y, m);
 
     calGrid.innerHTML = "";
-    const dows = t("days") || ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const dows = t("calendarWeekdays") || ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     dows.forEach(s => {
       const el = document.createElement("div");
       el.className = "dow";
