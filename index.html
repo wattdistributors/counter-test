@@ -476,14 +476,6 @@
     .dayDot.bad{ background:#ff4b4b; box-shadow: 0 1px 3px rgba(0,0,0,.30); }
     .dayCell.muted .dayDot{ opacity:.45; }
 
-    .dayCell.rating-good{ background: rgba(255,255,255,.05); }
-    .dayCell.rating-regular{ background: rgba(255,255,255,.02); }
-    .dayCell.rating-bad{ background: rgba(255, 80, 80, 0.06); }
-
-    .dayNum.good{ color: rgba(114, 255, 170, .96); }
-    .dayNum.regular{ color: rgba(255, 225, 123, .98); }
-    .dayNum.bad{ color: rgba(255, 141, 141, .97); }
-
     .badge{
       display:none;
       font-size:8px;
@@ -2296,8 +2288,7 @@
         "dayCell" +
         (inMonth ? "" : " muted") +
         (rec ? " hasData" : "") +
-        (dayRating ? ` rating-${dayRating}` : "") +
-        (isToday ? " today" : "") +
+                (isToday ? " today" : "") +
         (selectedDayISO === iso ? " selected" : "");
 
       cell.dataset.iso = iso;
@@ -2305,7 +2296,7 @@
       cell.innerHTML = `
         <div class="dayContent">
           <div class="dayTop">
-            <div class="dayNum ${dayRating || ""}">${day.getDate()}</div>
+            <div class="dayNum">${day.getDate()}</div>
             ${badgeHtml}
             ${dotHtml}
           </div>
@@ -2324,40 +2315,20 @@
   }
 
 
-  function renderWeekStatCard(container, totals) {
+  function renderCompactStatCard(container, title, totals) {
     const x = totals.X || 0;
     const s = totals.S || 0;
     const z = totals.Z || 0;
     const aggr = s ? ((z / s) * 100).toFixed(1) + "%" : "0.0%";
     const close = z ? ((x / z) * 100).toFixed(1) + "%" : "0.0%";
     const money = x * MONEY_PER_X;
-
     const avgStops = (totals.days || 0) ? (s / totals.days).toFixed(1) : "0.0";
+
     container.innerHTML = `
-      <div class="statsMiniTitle">${t("weekStatsTitle")}</div>
-      <div class="statsHeroNumber">${x}</div>
+      <div class="statsMiniTitle">${title}</div>
+      <div class="statsHeroNumber">${x} ${t("salesWord")}</div>
       <div class="statsHeroEarned">$${money} ${t("earnedWord")}</div>
       <div class="statsMiniLine">${t("avgStopsPerDayLabel")}: ${avgStops}</div>
-      <div class="statsMiniChips">
-        <span class="statsMiniChip">${t("stopsLabel")}: ${s}</span>
-        <span class="statsMiniChip">${t("aggLabel")}: ${aggr}</span>
-        <span class="statsMiniChip">${t("closeLabel")}: ${close}</span>
-      </div>
-      <div class="statsMiniMeta">${t("workedDays")}: ${totals.days || 0} • ${t("hoursWorked")}: ${fmtHours(totals.durationMs || 0)}</div>
-    `;
-  }
-
-  function renderMonthStatCard(container, totals) {
-    const x = totals.X || 0;
-    const money = x * MONEY_PER_X;
-    const s = totals.S || 0;
-    const z = totals.Z || 0;
-    const aggr = s ? ((z / s) * 100).toFixed(1) + "%" : "0.0%";
-    const close = z ? ((x / z) * 100).toFixed(1) + "%" : "0.0%";
-
-    container.innerHTML = `
-      <div class="statsMiniTitle">${t("monthStatsTitle")}</div>
-      <div class="statsMiniLine">${t("monthLabel")}: ${x} ${t("salesWord")} • $${money}</div>
       <div class="statsMiniChips">
         <span class="statsMiniChip">${t("stopsLabel")}: ${s}</span>
         <span class="statsMiniChip">${t("aggLabel")}: ${aggr}</span>
@@ -2375,8 +2346,8 @@
 
     const monthTotals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
 
-    renderWeekStatCard(weekStatsEl, weekTotals);
-    renderMonthStatCard(monthStatsEl, monthTotals);
+    renderCompactStatCard(weekStatsEl, t("weekStatsTitle"), weekTotals);
+    renderCompactStatCard(monthStatsEl, t("monthStatsTitle"), monthTotals);
   }
 
   // ---------- Progress rendering ----------
