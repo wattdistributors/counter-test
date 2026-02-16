@@ -105,11 +105,45 @@
     }
 
     .langBtn{
-      min-width:58px;
-      padding:8px 10px;
+      min-width:72px;
+      padding:8px 12px;
       border-radius:999px;
       font-size:12px;
       letter-spacing:.04em;
+    }
+
+    .profileBtn{
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      padding:8px 12px;
+      max-width:180px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .startHeroTitle{
+      font-size:34px;
+      line-height:1.05;
+      font-weight:1000;
+      letter-spacing:.01em;
+    }
+    .startHeroSub{
+      font-size:15px;
+      opacity:.86;
+    }
+    .startMainBtn{
+      font-size:18px;
+      padding:16px 30px;
+      min-width:220px;
+      border-radius:14px;
+    }
+    .startHint{
+      margin-top:4px;
+      font-size:12px;
+      opacity:.76;
+      letter-spacing:.02em;
     }
 
     .finishResult{
@@ -257,12 +291,17 @@
     .footer{
       margin-top:auto;
       padding-top:8px;
+      padding-bottom:2px;
       text-align:center;
       font-size:8px;
       opacity:.70;
       letter-spacing:.03em;
       border-top:1px solid rgba(255,255,255,.10);
       flex:0 0 auto;
+      position:sticky;
+      bottom:0;
+      background: linear-gradient(180deg, rgba(20,92,140,0), rgba(20,92,140,.35));
+      z-index:3;
     }
 
     /* ---------- Calendar (blue translucent style) ---------- */
@@ -869,10 +908,11 @@
       <div class="appHeader">
       <div class="topbar">
         <div>
-          <div class="title" id="today_title">KPIs Counter</div>
+          <div class="title" id="today_title">Retail Sales Tracker</div>
           <div class="subtitle" id="today_date"></div>
         </div>
         <div class="btnrow" id="top_actions">
+          <button class="btn profileBtn" id="profile_btn">Perfil</button>
           <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">Idioma</button>
         </div>
       </div>
@@ -889,11 +929,10 @@
       <!-- ============ TAB: COUNTER ============ -->
       <div id="tab_counter">
         <div id="start_screen" class="center centerIntro">
-          <div style="opacity:.9; font-size:13px; max-width: 360px;" id="start_intro">
-            Presiona <b>Iniciar día</b> para comenzar.
-          </div>
-          <button class="btn primary" id="start_day">Start day</button>
-          <button class="btn" id="edit_profile" style="display:none;">Editar datos</button>
+          <div class="startHeroTitle" id="start_headline">Comienza tu jornada</div>
+          <div class="startHeroSub" id="start_intro">Registra tu día de ventas</div>
+          <button class="btn primary startMainBtn" id="start_day">Iniciar día</button>
+          <div class="startHint" id="start_hint">Tus datos se guardan automáticamente</div>
         </div>
 
         <div id="session_screen" style="display:none;">
@@ -961,26 +1000,43 @@
   <div class="overlay" id="modal_start">
     <div class="modal" role="dialog" aria-modal="true" aria-label="Start day">
       <div class="modalHeader">
-        <div class="modalTitle" id="start_modal_title">Start day</div>
+        <div class="modalTitle" id="start_modal_title">Iniciar día</div>
         <button class="xbtn" id="start_x" aria-label="Close">×</button>
       </div>
       <div class="modalBody">
         <div style="opacity:.9; font-size:13px;" id="start_modal_intro">
-          Ingresa tus datos para iniciar.
+          Confirma tu perfil y agrega la tienda del día.
         </div>
+        <div style="margin-top:8px; font-weight:800;" id="start_profile_name">—</div>
         <div class="grid2">
-          <div class="field">
-            <label id="start_name_label">Nombre</label>
-            <input id="start_name" placeholder="Ej: Bob" autocomplete="name" />
-          </div>
-          <div class="field">
-            <label id="start_store_label">Tienda</label>
+          <div class="field" style="grid-column:1/-1;">
+            <label id="start_store_label">Tienda del día</label>
             <input id="start_store" placeholder="Ej: 2770 Valwood - Irving" />
           </div>
         </div>
         <div class="modalActions">
           <button class="btn" id="start_cancel">Cancel</button>
           <button class="btn primary" id="start_confirm">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Profile -->
+  <div class="overlay" id="modal_profile">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Profile">
+      <div class="modalHeader">
+        <div class="modalTitle" id="profile_modal_title">Perfil</div>
+        <button class="xbtn" id="profile_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody">
+        <div class="field">
+          <label id="profile_name_label">Nombre</label>
+          <input id="profile_name" placeholder="Ej: Alen Cordero" autocomplete="name" />
+        </div>
+        <div class="modalActions">
+          <button class="btn" id="profile_reset">Reset datos</button>
+          <button class="btn primary" id="profile_save">Guardar</button>
         </div>
       </div>
     </div>
@@ -1110,20 +1166,28 @@
       languageSpanish: "Español",
       languageEnglish: "Inglés",
       session: "Sesión",
-      startIntro: "Presiona <b>Iniciar día</b> para comenzar.",
+      appTitle: "Retail Sales Tracker",
+      startHeadline: "Comienza tu jornada",
+      startIntro: "Registra tu día de ventas",
+      startHint: "Tus datos se guardan automáticamente",
       startDay: "Iniciar día",
-      editProfile: "Editar datos",
+      profileBtn: "Perfil",
+      profileTitle: "Perfil",
+      profileSave: "Guardar",
+      profileReset: "Reset datos",
       finishDay: "Finalizar día",
       startModalTitle: "Iniciar día",
-      startModalIntro: "Ingresa tus datos para iniciar.",
+      startModalIntro: "Confirma tu perfil y agrega la tienda del día.",
+      profileForDay: "Perfil",
       nameLabel: "Nombre",
-      storeLabel: "Tienda",
+      storeLabel: "Tienda del día",
       cancel: "Cancelar",
-      start: "Iniciar",
+      start: "Comenzar",
       date: "Fecha",
       day: "Día",
       begins: "Inicio",
-      missingProfile: "Por favor ingresa Nombre y Tienda.",
+      missingProfile: "Primero guarda tu nombre en Perfil.",
+      missingStore: "Por favor ingresa la tienda del día.",
       endConfirm: "¿Seguro que quieres finalizar el día y resetear?",
       finishResult: "Resultado",
       dayResult: "Resultado del día",
@@ -1203,20 +1267,28 @@
       languageSpanish: "Spanish",
       languageEnglish: "English",
       session: "Session",
-      startIntro: "Tap <b>Start day</b> to begin.",
+      appTitle: "Retail Sales Tracker",
+      startHeadline: "Start your day",
+      startIntro: "Track your sales day",
+      startHint: "Your data is saved automatically",
       startDay: "Start day",
-      editProfile: "Edit profile",
+      profileBtn: "Profile",
+      profileTitle: "Profile",
+      profileSave: "Save",
+      profileReset: "Reset data",
       finishDay: "End day",
       startModalTitle: "Start day",
-      startModalIntro: "Enter your info to start.",
+      startModalIntro: "Confirm your profile and add today's store.",
+      profileForDay: "Profile",
       nameLabel: "Name",
-      storeLabel: "Store",
+      storeLabel: "Store for today",
       cancel: "Cancel",
       start: "Start",
       date: "Date",
       day: "Day",
       begins: "Start",
-      missingProfile: "Please enter Name and Store.",
+      missingProfile: "Please save your name first in Profile.",
+      missingStore: "Please enter today's store.",
       endConfirm: "Are you sure you want to end the day and reset?",
       finishResult: "Result",
       dayResult: "Day result",
@@ -1452,7 +1524,7 @@
     active: !!saved.active,
     date: saved.date || isoDateLocal(),
     rep: saved.rep || savedProfile.rep || "",
-    store: saved.store || savedProfile.store || "",
+    store: saved.store || "",
     values: saved.values || {},
     sessionStart: saved.sessionStart || null,
   };
@@ -1461,9 +1533,11 @@
   // ---------- DOM ----------
   const todayDateEl = document.getElementById("today_date");
   const startIntro = document.getElementById("start_intro");
+  const startHeadline = document.getElementById("start_headline");
+  const startHint = document.getElementById("start_hint");
   const startDayBtn = document.getElementById("start_day");
   const finishDayBtn = document.getElementById("finish_day");
-  const editProfileBtn = document.getElementById("edit_profile");
+  const profileBtn = document.getElementById("profile_btn");
   const langToggleBtn = document.getElementById("lang_toggle");
   const modalLanguage = document.getElementById("modal_language");
   const langEsBtn = document.getElementById("lang_es");
@@ -1496,9 +1570,11 @@
 
   // Modals
   const modalStart = document.getElementById("modal_start");
+  const modalProfile = document.getElementById("modal_profile");
   const modalReport = document.getElementById("modal_report");
-  const startName = document.getElementById("start_name");
   const startStore = document.getElementById("start_store");
+  const startProfileName = document.getElementById("start_profile_name");
+  const profileNameInput = document.getElementById("profile_name");
   const reportBox = document.getElementById("report_box");
 
   // QR
@@ -1547,9 +1623,9 @@
     return i18n[currentLang][key] || i18n.es[key] || key;
   }
 
-  function saveProfile(rep, store) {
+  function saveProfile(rep) {
     try {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep, store }));
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep }));
     } catch {}
   }
 
@@ -1558,16 +1634,22 @@
     document.getElementById("tab_counter_label").textContent = t("tabCounter");
     document.getElementById("tab_calendar_label").textContent = t("tabCalendar");
     document.getElementById("tab_summary_label").textContent = t("tabSummary");
-    startIntro.innerHTML = t("startIntro");
+    document.getElementById("today_title").textContent = t("appTitle");
+    startHeadline.textContent = t("startHeadline");
+    startIntro.textContent = t("startIntro");
+    startHint.textContent = t("startHint");
     startDayBtn.textContent = t("startDay");
-    editProfileBtn.textContent = t("editProfile");
+    profileBtn.textContent = `${state.rep || t("profileBtn")} ⌄`;
     finishDayBtn.textContent = t("finishDay");
     document.getElementById("start_modal_title").textContent = t("startModalTitle");
     document.getElementById("start_modal_intro").textContent = t("startModalIntro");
-    document.getElementById("start_name_label").textContent = t("nameLabel");
     document.getElementById("start_store_label").textContent = t("storeLabel");
     document.getElementById("start_cancel").textContent = t("cancel");
     document.getElementById("start_confirm").textContent = t("start");
+    document.getElementById("profile_modal_title").textContent = t("profileTitle");
+    document.getElementById("profile_name_label").textContent = t("nameLabel");
+    document.getElementById("profile_save").textContent = t("profileSave");
+    document.getElementById("profile_reset").textContent = t("profileReset");
     langToggleBtn.textContent = "Idioma";
     document.getElementById("lang_modal_title").textContent = t("languageModalTitle");
     document.getElementById("lang_modal_intro").textContent = t("languageModalIntro");
@@ -1652,7 +1734,6 @@
     state.active = false;
     startScreen.style.display = "";
     sessionScreen.style.display = "none";
-    editProfileBtn.style.display = (state.rep && state.store) ? "" : "none";
     renderHeader();
   }
 
@@ -1693,6 +1774,7 @@
     });
   }
   clickOutsideToClose(modalStart, true);
+  clickOutsideToClose(modalProfile, true);
   clickOutsideToClose(modalReport, false);
   clickOutsideToClose(modalDay, true);
   clickOutsideToClose(modalRatingHelp, true);
@@ -1769,6 +1851,7 @@
     finishResult.textContent = "";
     reportDayRating.style.display = "none";
     reportDayRating.textContent = "";
+    state.store = "";
     state.sessionStart = null;
     state.date = isoDateLocal();
     metrics.forEach(k => state.values[k] = 0);
@@ -2322,48 +2405,69 @@
 
   // ---------- Buttons ----------
   function openStartModal() {
-    startName.value = state.rep || "";
-    startStore.value = state.store || "";
-    openModal(modalStart);
-    setTimeout(() => startName.focus(), 50);
-  }
-
-  startDayBtn.addEventListener("click", () => {
-    if (state.rep && state.store) {
-      startDay(state.rep, state.store);
+    if (!state.rep) {
+      alert(t("missingProfile"));
+      openProfileModal();
       return;
     }
-    openStartModal();
+    startProfileName.textContent = `${t("profileForDay")}: ${state.rep}`;
+    startStore.value = "";
+    openModal(modalStart);
+    setTimeout(() => startStore.focus(), 50);
+  }
+
+  function openProfileModal() {
+    profileNameInput.value = state.rep || "";
+    openModal(modalProfile);
+    setTimeout(() => profileNameInput.focus(), 50);
+  }
+
+  startDayBtn.addEventListener("click", openStartModal);
+  profileBtn.addEventListener("click", openProfileModal);
+
+  document.getElementById("profile_x").addEventListener("click", () => closeModal(modalProfile));
+  document.getElementById("profile_save").addEventListener("click", () => {
+    const rep = (profileNameInput.value || "").trim();
+    if (!rep) { alert(t("missingProfile")); return; }
+    state.rep = rep;
+    saveProfile(rep);
+    saveStateNow();
+    applyTranslations();
+    closeModal(modalProfile);
   });
 
-  editProfileBtn.addEventListener("click", () => {
-    openStartModal();
+  document.getElementById("profile_reset").addEventListener("click", () => {
+    const ok = confirm(currentLang === "es" ? "¿Resetear nombre e historial?" : "Reset name and history?");
+    if (!ok) return;
+    try { localStorage.removeItem(PROFILE_KEY); } catch {}
+    try { localStorage.removeItem(HISTORY_KEY); } catch {}
+    state.rep = "";
+    state.store = "";
+    saveStateNow();
+    renderCalendar();
+    renderProgress();
+    applyTranslations();
+    closeModal(modalProfile);
   });
 
   document.getElementById("start_x").addEventListener("click", () => closeModal(modalStart));
   document.getElementById("start_cancel").addEventListener("click", () => closeModal(modalStart));
 
   document.getElementById("start_confirm").addEventListener("click", () => {
-    const rep = (startName.value || "").trim();
     const store = (startStore.value || "").trim();
-    if (!rep || !store) {
-      alert(t("missingProfile"));
+    if (!store) {
+      alert(t("missingStore"));
       return;
     }
-    state.rep = rep;
     state.store = store;
-    saveProfile(rep, store);
     closeModal(modalStart);
-    startDay(rep, store);
+    startDay(state.rep, store);
   });
 
-  [startName, startStore].forEach((inp) => {
-    inp.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-      if (inp === startName) startStore.focus();
-      else document.getElementById("start_confirm").click();
-    });
+  startStore.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    document.getElementById("start_confirm").click();
   });
 
   document.getElementById("finish_day").addEventListener("click", () => {
