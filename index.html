@@ -577,6 +577,54 @@
     }
     .moneyLine b{ font-weight:1000; color: var(--calInk); }
 
+    .weekHero{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .weekHero .main{
+      font-size:24px;
+      font-weight:1000;
+      letter-spacing:.01em;
+      line-height:1.1;
+    }
+    .weekHero .sub{
+      font-size:12px;
+      opacity:.82;
+      margin-top:4px;
+    }
+    .weekEarned{
+      min-width:92px;
+      text-align:right;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      border-radius:10px;
+      padding:7px 8px;
+    }
+    .weekEarned .v{ font-size:18px; font-weight:1000; }
+    .weekEarned .k{ font-size:10px; letter-spacing:.08em; font-weight:900; opacity:.88; margin-top:2px; }
+    .weekPerfRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:8px 0 6px;
+    }
+    .weekChip{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .weekEffort{
+      font-size:12px;
+      opacity:.84;
+      line-height:1.4;
+    }
+
     /* ---------- Summary ---------- */
     .sumWrap{ display:grid; gap:10px; }
     .sumCard{
@@ -1196,6 +1244,10 @@
       avgStopsPerDay: "Promedio S/día",
       hoursWorked: "Horas trabajadas",
       workedDays: "Días trabajados",
+      earnedLabel: "GANADO",
+      stopsLabel: "Stops",
+      aggLabel: "Agg",
+      closeLabel: "Close",
       currentWeek: "Semana actual",
       currentMonth: "Mes actual",
       progressLevelTitle: "Tu nivel",
@@ -1297,6 +1349,10 @@
       avgStopsPerDay: "Avg S/day",
       hoursWorked: "Hours worked",
       workedDays: "Days worked",
+      earnedLabel: "EARNED",
+      stopsLabel: "Stops",
+      aggLabel: "Agg",
+      closeLabel: "Close",
       currentWeek: "Current week",
       currentMonth: "Current month",
       progressLevelTitle: "Your level",
@@ -2252,7 +2308,7 @@
         </div>
         <div style="text-align:right;">
           <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
-          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:1000; margin-top:2px;">EARNED</div>
+          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:1000; margin-top:2px;">${t("earnedLabel")}</div>
         </div>
       </div>
 
@@ -2276,6 +2332,39 @@
     `;
   }
 
+  function renderWeekStatCard(container, totals, periodLabel) {
+    const x = totals.X || 0;
+    const s = totals.S || 0;
+    const z = totals.Z || 0;
+    const aggr = s ? ((z / s) * 100).toFixed(1) + "%" : "0.0%";
+    const close = z ? ((x / z) * 100).toFixed(1) + "%" : "0.0%";
+    const money = x * MONEY_PER_X;
+
+    container.innerHTML = `
+      <div class="weekHero">
+        <div>
+          <div class="main">${t("salesX")}: ${x}</div>
+          <div class="sub">${t("currentWeek")} · ${periodLabel}</div>
+        </div>
+        <div class="weekEarned">
+          <div class="v">$${money}</div>
+          <div class="k">${t("earnedLabel")}</div>
+        </div>
+      </div>
+
+      <div class="weekPerfRow">
+        <span class="weekChip">${t("stopsLabel")}: ${s}</span>
+        <span class="weekChip">${t("aggLabel")}: ${aggr}</span>
+        <span class="weekChip">${t("closeLabel")}: ${close}</span>
+      </div>
+
+      <div class="weekEffort">
+        <div>${t("workedDays")}: ${totals.days || 0}</div>
+        <div>${t("hoursWorked")}: ${fmtHours(totals.durationMs || 0)}</div>
+      </div>
+    `;
+  }
+
   function renderCalendarStats() {
     const now = new Date();
     const weekStart = startOfWeekMon(now);
@@ -2287,7 +2376,7 @@
     const wLabel = prettyDateRange(weekStart, weekEnd);
     const mLabel = monthName(calCursor.y, calCursor.m);
 
-    renderStatCard(weekStatsEl, t("weekStatsTitle"), wLabel, weekTotals, t("avgStopsPerDay"));
+    renderWeekStatCard(weekStatsEl, weekTotals, wLabel);
     renderStatCard(monthStatsEl, t("monthStatsTitle"), mLabel, monthTotals, t("avgStopsPerDay"));
   }
 
