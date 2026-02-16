@@ -111,6 +111,10 @@
       font-size:12px;
       letter-spacing:.04em;
     }
+    .langChoiceActive{
+      background: rgba(255,255,255,.22) !important;
+      border-color: rgba(255,255,255,.55) !important;
+    }
 
     .profileBtn{
       border-radius:999px;
@@ -591,11 +595,24 @@
       letter-spacing:.01em;
       color: var(--calInk);
     }
-    .statsMiniLine{
+    .statsHeroNumber{
       margin-top:6px;
-      font-size:14px;
+      font-size:32px;
+      line-height:1;
+      font-weight:1000;
+      color: rgba(244,252,255,.98);
+    }
+    .statsHeroEarned{
+      margin-top:3px;
+      font-size:13px;
       font-weight:800;
-      color: rgba(235,248,255,.96);
+      color: rgba(223,244,255,.90);
+    }
+    .statsMiniLine{
+      margin-top:8px;
+      font-size:12px;
+      font-weight:700;
+      color: rgba(214,238,252,.84);
     }
     .statsMiniChips{
       display:flex;
@@ -1176,7 +1193,7 @@
         <div id="lang_modal_intro" style="opacity:.9; font-size:13px; margin-bottom:12px;">Selecciona el idioma:</div>
         <div class="modalActions">
           <button class="btn" id="lang_es">Español</button>
-          <button class="btn primary" id="lang_en">English</button>
+          <button class="btn" id="lang_en">English</button>
         </div>
       </div>
     </div>
@@ -1234,6 +1251,10 @@
       weekStatsTitle: "Stats de la semana",
       monthStatsTitle: "Stats del mes",
       avgStopsPerDay: "Promedio S/día",
+      avgStopsPerDayLabel: "Promedio stops/día",
+      earnedWord: "ganado",
+      months: ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
+      days: ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"],
       hoursWorked: "Horas trabajadas",
       workedDays: "Días trabajados",
       earnedLabel: "GANADO",
@@ -1342,6 +1363,10 @@
       weekStatsTitle: "Week stats",
       monthStatsTitle: "Month stats",
       avgStopsPerDay: "Avg S/day",
+      avgStopsPerDayLabel: "Average stops/day",
+      earnedWord: "earned",
+      months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+      days: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
       hoursWorked: "Hours worked",
       workedDays: "Days worked",
       earnedLabel: "EARNED",
@@ -1482,8 +1507,8 @@
   const localeForLang = () => currentLang === "es" ? "es-ES" : "en-US";
 
   const monthName = (y, m) => {
-    const d = new Date(y, m, 1);
-    return d.toLocaleDateString(localeForLang(), { month:"long", year:"numeric" });
+    const month = (t("months") || [])[m] || "";
+    return `${month} ${y}`;
   };
 
   function prettyDateFromISO(iso) {
@@ -1709,6 +1734,8 @@
     document.getElementById("lang_modal_intro").textContent = t("languageModalIntro");
     langEsBtn.textContent = t("languageSpanish");
     langEnBtn.textContent = t("languageEnglish");
+    langEsBtn.classList.toggle("langChoiceActive", currentLang === "es");
+    langEnBtn.classList.toggle("langChoiceActive", currentLang === "en");
     document.querySelector(".t1").textContent = t("session");
     document.getElementById("rating_help_title").textContent = t("dayRatingRules");
     document.getElementById("day_details_summary").textContent = t("dayDetailsSummary");
@@ -2229,7 +2256,7 @@
     calTitle.textContent = monthName(y, m);
 
     calGrid.innerHTML = "";
-    const dows = currentLang === "es" ? ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"] : ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const dows = t("days") || ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
     dows.forEach(s => {
       const el = document.createElement("div");
       el.className = "dow";
@@ -2305,9 +2332,12 @@
     const close = z ? ((x / z) * 100).toFixed(1) + "%" : "0.0%";
     const money = x * MONEY_PER_X;
 
+    const avgStops = (totals.days || 0) ? (s / totals.days).toFixed(1) : "0.0";
     container.innerHTML = `
       <div class="statsMiniTitle">${t("weekStatsTitle")}</div>
-      <div class="statsMiniLine">${t("weekLabel")}: ${x} ${t("salesWord")} • $${money}</div>
+      <div class="statsHeroNumber">${x}</div>
+      <div class="statsHeroEarned">$${money} ${t("earnedWord")}</div>
+      <div class="statsMiniLine">${t("avgStopsPerDayLabel")}: ${avgStops}</div>
       <div class="statsMiniChips">
         <span class="statsMiniChip">${t("stopsLabel")}: ${s}</span>
         <span class="statsMiniChip">${t("aggLabel")}: ${aggr}</span>
