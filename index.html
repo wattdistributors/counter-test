@@ -474,7 +474,7 @@
 
     .dayCell.rating-good{ background: rgba(255,255,255,.05); }
     .dayCell.rating-regular{ background: rgba(255,255,255,.02); }
-    .dayCell.rating-bad{ background: rgba(0,0,0,.04); }
+    .dayCell.rating-bad{ background: rgba(255, 80, 80, 0.06); }
 
     .dayNum.good{ color: rgba(114, 255, 170, .96); }
     .dayNum.regular{ color: rgba(255, 225, 123, .98); }
@@ -585,54 +585,38 @@
     }
     .moneyLine b{ font-weight:1000; color: var(--calInk); }
 
-    .weekHero{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:8px;
-    }
-    .weekHero .main{
-      font-size:24px;
-      font-weight:1000;
+    .statsMiniTitle{
+      font-size:13px;
+      font-weight:900;
       letter-spacing:.01em;
-      line-height:1.1;
+      color: var(--calInk);
     }
-    .weekHero .sub{
-      font-size:12px;
-      opacity:.82;
-      margin-top:4px;
-    }
-    .weekEarned{
-      min-width:92px;
-      text-align:right;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      border-radius:10px;
-      padding:7px 8px;
-    }
-    .weekEarned .v{ font-size:18px; font-weight:1000; }
-    .weekEarned .k{ font-size:10px; letter-spacing:.08em; font-weight:900; opacity:.88; margin-top:2px; }
-    .weekPerfRow{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin:8px 0 6px;
-    }
-    .weekChip{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      border-radius:999px;
-      padding:5px 10px;
-      font-size:12px;
+    .statsMiniLine{
+      margin-top:6px;
+      font-size:14px;
       font-weight:800;
+      color: rgba(235,248,255,.96);
     }
-    .weekEffort{
-      font-size:12px;
-      opacity:.84;
-      line-height:1.4;
+    .statsMiniChips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:8px;
     }
-
+    .statsMiniChip{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.07);
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:11px;
+      font-weight:800;
+      color: rgba(235,248,255,.95);
+    }
+    .statsMiniMeta{
+      margin-top:8px;
+      font-size:11px;
+      color: rgba(214,238,252,.78);
+    }
     /* ---------- Summary ---------- */
     .sumWrap{ display:grid; gap:10px; }
     .sumCard{
@@ -1256,6 +1240,9 @@
       stopsLabel: "Stops",
       aggLabel: "Agg",
       closeLabel: "Close",
+      weekLabel: "Semana",
+      monthLabel: "Mes",
+      salesWord: "ventas",
       currentWeek: "Semana actual",
       currentMonth: "Mes actual",
       progressLevelTitle: "Tu nivel",
@@ -1361,6 +1348,9 @@
       stopsLabel: "Stops",
       aggLabel: "Agg",
       closeLabel: "Close",
+      weekLabel: "Week",
+      monthLabel: "Month",
+      salesWord: "sales",
       currentWeek: "Current week",
       currentMonth: "Current month",
       progressLevelTitle: "Your level",
@@ -2307,41 +2297,7 @@
   }
 
 
-  function renderStatCard(container, title, periodLabel, totals, avgLabel = "Promedio S/día") {
-    const money = (totals.X || 0) * MONEY_PER_X;
-    container.innerHTML = `
-      <div class="statHead">
-        <div>
-          <div class="h">${title}</div>
-          <div class="p">${periodLabel}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
-          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:1000; margin-top:2px;">${t("earnedLabel")}</div>
-        </div>
-      </div>
-
-      <div class="statGrid">
-        ${["S","Z","CC","C","X"].map(k => `
-          <div class="statItem">
-            <div class="k">${k}</div>
-            <div class="v">${totals[k] || 0}</div>
-          </div>
-        `).join("")}
-      </div>
-
-      <div class="moneyLine">
-        <div><b>${t("workedDays")}:</b> ${totals.days || 0}</div>
-        <div><b>${avgLabel}:</b> ${totals.days ? ((totals.S||0)/totals.days).toFixed(1) : "0.0"}</div>
-      </div>
-      <div class="moneyLine" style="margin-top:6px;">
-        <div><b>${t("hoursWorked")}:</b> ${fmtHours(totals.durationMs || 0)}</div>
-        <div></div>
-      </div>
-    `;
-  }
-
-  function renderWeekStatCard(container, totals, periodLabel) {
+  function renderWeekStatCard(container, totals) {
     const x = totals.X || 0;
     const s = totals.S || 0;
     const z = totals.Z || 0;
@@ -2350,27 +2306,34 @@
     const money = x * MONEY_PER_X;
 
     container.innerHTML = `
-      <div class="weekHero">
-        <div>
-          <div class="main">${t("salesX")}: ${x}</div>
-          <div class="sub">${t("currentWeek")} · ${periodLabel}</div>
-        </div>
-        <div class="weekEarned">
-          <div class="v">$${money}</div>
-          <div class="k">${t("earnedLabel")}</div>
-        </div>
+      <div class="statsMiniTitle">${t("weekStatsTitle")}</div>
+      <div class="statsMiniLine">${t("weekLabel")}: ${x} ${t("salesWord")} • $${money}</div>
+      <div class="statsMiniChips">
+        <span class="statsMiniChip">${t("stopsLabel")}: ${s}</span>
+        <span class="statsMiniChip">${t("aggLabel")}: ${aggr}</span>
+        <span class="statsMiniChip">${t("closeLabel")}: ${close}</span>
       </div>
+      <div class="statsMiniMeta">${t("workedDays")}: ${totals.days || 0} • ${t("hoursWorked")}: ${fmtHours(totals.durationMs || 0)}</div>
+    `;
+  }
 
-      <div class="weekPerfRow">
-        <span class="weekChip">${t("stopsLabel")}: ${s}</span>
-        <span class="weekChip">${t("aggLabel")}: ${aggr}</span>
-        <span class="weekChip">${t("closeLabel")}: ${close}</span>
-      </div>
+  function renderMonthStatCard(container, totals) {
+    const x = totals.X || 0;
+    const money = x * MONEY_PER_X;
+    const s = totals.S || 0;
+    const z = totals.Z || 0;
+    const aggr = s ? ((z / s) * 100).toFixed(1) + "%" : "0.0%";
+    const close = z ? ((x / z) * 100).toFixed(1) + "%" : "0.0%";
 
-      <div class="weekEffort">
-        <div>${t("workedDays")}: ${totals.days || 0}</div>
-        <div>${t("hoursWorked")}: ${fmtHours(totals.durationMs || 0)}</div>
+    container.innerHTML = `
+      <div class="statsMiniTitle">${t("monthStatsTitle")}</div>
+      <div class="statsMiniLine">${t("monthLabel")}: ${x} ${t("salesWord")} • $${money}</div>
+      <div class="statsMiniChips">
+        <span class="statsMiniChip">${t("stopsLabel")}: ${s}</span>
+        <span class="statsMiniChip">${t("aggLabel")}: ${aggr}</span>
+        <span class="statsMiniChip">${t("closeLabel")}: ${close}</span>
       </div>
+      <div class="statsMiniMeta">${t("workedDays")}: ${totals.days || 0} • ${t("hoursWorked")}: ${fmtHours(totals.durationMs || 0)}</div>
     `;
   }
 
@@ -2382,11 +2345,8 @@
 
     const monthTotals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
 
-    const wLabel = prettyDateRange(weekStart, weekEnd);
-    const mLabel = monthName(calCursor.y, calCursor.m);
-
-    renderWeekStatCard(weekStatsEl, weekTotals, wLabel);
-    renderStatCard(monthStatsEl, t("monthStatsTitle"), mLabel, monthTotals, t("avgStopsPerDay"));
+    renderWeekStatCard(weekStatsEl, weekTotals);
+    renderMonthStatCard(monthStatsEl, monthTotals);
   }
 
   // ---------- Progress rendering ----------
