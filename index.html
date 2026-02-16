@@ -196,6 +196,11 @@
       color: rgba(227,246,255,.86);
     }
     .tab:active{ transform: scale(.99); }
+     .tab.disabled{
+      opacity:.42;
+      cursor:not-allowed;
+      filter:saturate(.7);
+    }
     .tab.active{
       background: rgba(255,255,255,.14);
       border:1px solid rgba(255,255,255,.18);
@@ -1191,6 +1196,18 @@
     </div>
   </div>
 
+
+  <!-- Modal: Unavailable -->
+  <div class="overlay" id="modal_unavailable">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Unavailable">
+      <div class="modalHeader">
+        <div class="modalTitle" id="unavailable_title">No disponible</div>
+        <button class="xbtn" id="unavailable_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody" id="unavailable_msg">Función no disponible en esta versión.</div>
+    </div>
+  </div>
+
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
@@ -1201,6 +1218,11 @@
   const HISTORY_KEY = "kpi_history_v1";
   const PROFILE_KEY = "kpi_profile_v1";
   const LANG_KEY = "kpi_lang_v1";
+  const APP_STATE_KEY = "rst_app_state_v1";
+  const APP_STATE_BACKUP_KEY = "rst_app_state_backup_v1";
+  const APP_SCHEMA_VERSION = 1;
+  const APP_MODE = "agent";
+  const features = { progressEnabled: APP_MODE !== "agent" };
   const AGGR_MIN_STOPS = 20;
   const MONEY_PER_X = 100;
 
@@ -1315,7 +1337,11 @@
       reportHint: "Copia o comparte para terminar el día y resetear.",
       monthDayYear: { month: "long", day: "numeric", year: "numeric" },
       monthDay: { month: "long", day: "numeric" },
-      weekRangeJoin: "al"
+      weekRangeJoin: "al",
+      unavailableTitle: "No disponible",
+      unavailableMsg: "Función no disponible en esta versión.",
+      resetConfirm1: "¿Seguro que quieres resetear datos?",
+      resetConfirm2: "Escribe BORRAR para confirmar"
     },
     en: {
       tabCounter: "Counter",
@@ -1427,7 +1453,11 @@
       reportHint: "Copy or share to end the day and reset.",
       monthDayYear: { month: "long", day: "numeric", year: "numeric" },
       monthDay: { month: "long", day: "numeric" },
-      weekRangeJoin: "to"
+      weekRangeJoin: "to",
+      unavailableTitle: "Not available",
+      unavailableMsg: "Feature not available in this version.",
+      resetConfirm1: "Are you sure you want to reset data?",
+      resetConfirm2: "Type DELETE to confirm"
     }
   };
 
@@ -1538,17 +1568,103 @@
 
   document.addEventListener("dblclick", (e) => e.preventDefault(), { passive:false });
 
+  function makeDefaultAppData() {
+    return {
+      language: "es",
+      profile: { rep: "" },
+      session: { active:false, date: isoDateLocal(), rep:"", store:"", values:{}, sessionStart:null },
+      history: {},
+      trainedAgentsWithCheck: 0
+    };
+  }
+
+  function normalizeAppData(input) {
+    const base = makeDefaultAppData();
+    const source = (input && typeof input === "object") ? input : {};
+    const session = (source.session && typeof source.session === "object") ? source.session : {};
+    const values = (session.values && typeof session.values === "object") ? session.values : {};
+    const history = (source.history && typeof source.history === "object") ? source.history : {};
+    const profile = (source.profile && typeof source.profile === "object") ? source.profile : {};
+    const trained = parseInt(String(source.trainedAgentsWithCheck ?? base.trainedAgentsWithCheck), 10);
+
+    const normalized = {
+      ...base,
+      ...source,
+      language: source.language === "en" ? "en" : "es",
+      profile: { ...base.profile, ...profile, rep: typeof profile.rep === "string" ? profile.rep : "" },
+      session: {
+        ...base.session,
+        ...session,
+        values: { ...base.session.values, ...values }
+      },
+      history,
+      trainedAgentsWithCheck: Number.isFinite(trained) ? Math.max(0, trained) : 0
+    };
+
+    metrics.forEach((k) => {
+      if (typeof normalized.session.values[k] !== "number") normalized.session.values[k] = 0;
+    });
+
+    return normalized;
+  }
+
+  function migrateLegacyData() {
+    const data = makeDefaultAppData();
+    try { const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}"); if (saved && typeof saved === "object") data.session = { ...data.session, ...saved }; } catch {}
+    try { const prof = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); if (prof?.rep) data.profile.rep = prof.rep; } catch {}
+    try { const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}"); if (hist && typeof hist === "object") data.history = hist; } catch {}
+    try { const lang = localStorage.getItem(LANG_KEY); if (lang === "en" || lang === "es") data.language = lang; } catch {}
+    try { const t = parseInt(localStorage.getItem("trainedAgentsWithCheck") || "0", 10); if (Number.isFinite(t)) data.trainedAgentsWithCheck = Math.max(0,t); } catch {}
+    return data;
+  }
+
+  function loadAppState() {
+    const tryParse = (k) => {
+      try {
+        const raw = localStorage.getItem(k);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return null;
+        if (parsed.schemaVersion !== APP_SCHEMA_VERSION || !parsed.data || typeof parsed.data !== "object") return null;
+        return {
+          schemaVersion: APP_SCHEMA_VERSION,
+          updatedAt: parsed.updatedAt || new Date().toISOString(),
+          data: normalizeAppData(parsed.data)
+        };
+      } catch { return null; }
+    };
+    const primary = tryParse(APP_STATE_KEY);
+    if (primary) return primary;
+    const backup = tryParse(APP_STATE_BACKUP_KEY);
+    if (backup) return backup;
+    return {
+      schemaVersion: APP_SCHEMA_VERSION,
+      updatedAt: new Date().toISOString(),
+      data: normalizeAppData(migrateLegacyData())
+    };
+  }
+
+  let appState = loadAppState();
+
+  function saveAppState() {
+    try {
+      const prev = localStorage.getItem(APP_STATE_KEY);
+      if (prev) localStorage.setItem(APP_STATE_BACKUP_KEY, prev);
+    } catch {}
+    appState.schemaVersion = APP_SCHEMA_VERSION;
+    appState.updatedAt = new Date().toISOString();
+    try { localStorage.setItem(APP_STATE_KEY, JSON.stringify(appState)); } catch {}
+  }
+
   // ---------- History ----------
   function loadHistory() {
-    try {
-      const h = JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}");
-      return (h && typeof h === "object") ? h : {};
-    } catch {
-      return {};
-    }
+    const h = appState?.data?.history;
+    return (h && typeof h === "object") ? h : {};
   }
   function saveHistory(hist) {
-    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(hist)); } catch {}
+    if (!appState.data) appState.data = makeDefaultAppData();
+    appState.data.history = hist || {};
+    saveAppState();
   }
   function upsertDayInHistory(dayISO, payload) {
     const hist = loadHistory();
@@ -1587,17 +1703,16 @@
   }
 
   // ---------- Load session state ----------
-  const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
-  const savedProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
-  const savedLang = localStorage.getItem(LANG_KEY);
-  let currentLang = savedLang === "en" ? "en" : "es";
+  if (!appState.data) appState.data = makeDefaultAppData();
+  let currentLang = appState.data.language === "en" ? "en" : "es";
+  const savedSession = appState.data.session || {};
   const state = {
-    active: !!saved.active,
-    date: saved.date || isoDateLocal(),
-    rep: saved.rep || savedProfile.rep || "",
-    store: saved.store || "",
-    values: saved.values || {},
-    sessionStart: saved.sessionStart || null,
+    active: !!savedSession.active,
+    date: savedSession.date || isoDateLocal(),
+    rep: savedSession.rep || appState.data.profile?.rep || "",
+    store: savedSession.store || "",
+    values: savedSession.values || {},
+    sessionStart: savedSession.sessionStart || null,
   };
   metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
 
@@ -1616,6 +1731,7 @@
 
   // Tabs
   const tabEls = Array.from(document.querySelectorAll(".tab"));
+  const unavailableModal = document.getElementById("modal_unavailable");
   const tabCounter = document.getElementById("tab_counter");
   const tabCalendar = document.getElementById("tab_calendar");
   const tabSummary = document.getElementById("tab_summary");
@@ -1682,7 +1798,13 @@
   const modalRatingHelp = document.getElementById("modal_rating_help");
 
   // ---------- Save session ----------
-  function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+  function saveStateNow() {
+    if (!appState.data) appState.data = makeDefaultAppData();
+    appState.data.session = { ...state, values: { ...state.values } };
+    appState.data.language = currentLang;
+    appState.data.profile = { ...(appState.data.profile || {}), rep: state.rep || "" };
+    saveAppState();
+  }
   function saveState() { try { saveStateNow(); } catch {} }
 
   window.addEventListener("pagehide", () => { try { saveStateNow(); } catch {} });
@@ -1695,9 +1817,9 @@
   }
 
   function saveProfile(rep) {
-    try {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep }));
-    } catch {}
+    if (!appState.data) appState.data = makeDefaultAppData();
+    appState.data.profile = { ...(appState.data.profile || {}), rep: rep || "" };
+    saveAppState();
   }
 
   function applyTranslations() {
@@ -1705,6 +1827,8 @@
     document.getElementById("tab_counter_label").textContent = t("tabCounter");
     document.getElementById("tab_calendar_label").textContent = t("tabCalendar");
     document.getElementById("tab_summary_label").textContent = t("tabSummary");
+    document.getElementById("tab_summary_label").classList.toggle("disabled", !features.progressEnabled);
+    document.getElementById("tab_summary_label").setAttribute("aria-disabled", (!features.progressEnabled).toString());
     document.getElementById("today_title").textContent = t("appTitle");
     startHeadline.textContent = t("startHeadline");
     startIntro.textContent = t("startIntro");
@@ -1721,7 +1845,10 @@
     document.getElementById("profile_name_label").textContent = t("nameLabel");
     document.getElementById("profile_save").textContent = t("profileSave");
     document.getElementById("profile_reset").textContent = t("profileReset");
-    langToggleBtn.textContent = "Idioma";
+    document.getElementById("profile_reset").style.display = APP_MODE === "agent" ? "none" : "";
+    document.getElementById("unavailable_title").textContent = t("unavailableTitle");
+    document.getElementById("unavailable_msg").textContent = t("unavailableMsg");
+    langToggleBtn.textContent = t("languageBtn");
     document.getElementById("lang_modal_title").textContent = t("languageModalTitle");
     document.getElementById("lang_modal_intro").textContent = t("languageModalIntro");
     langEsBtn.textContent = t("languageSpanish");
@@ -1754,11 +1881,11 @@
 
   function setLanguage(lang) {
     currentLang = lang === "en" ? "en" : "es";
-    try { localStorage.setItem(LANG_KEY, currentLang); } catch {}
+    saveStateNow();
     closeModal(modalLanguage);
     applyTranslations();
     renderCalendarStats();
-    renderProgress();
+    if (features.progressEnabled) renderProgress(); else setActiveTab("counter");
   }
 
   // ---------- UI ----------
@@ -1850,6 +1977,7 @@
   clickOutsideToClose(modalProfile, true);
   clickOutsideToClose(modalReport, false);
   clickOutsideToClose(modalDay, true);
+  clickOutsideToClose(unavailableModal, true);
   clickOutsideToClose(modalRatingHelp, true);
   dayX.addEventListener("click", () => closeModal(modalDay));
   document.getElementById("rating_help_x").addEventListener("click", () => closeModal(modalRatingHelp));
@@ -1934,7 +2062,7 @@
     closeModal(modalReport);
     showStartScreen();
     renderCalendar();
-    renderProgress();
+    if (features.progressEnabled) renderProgress();
   }
 
   function setReportMode(mode) {
@@ -2146,7 +2274,7 @@
     upsertDayInHistory(activeDayISO, rec);
     renderCalendar();
     renderCalendarStats();
-    renderProgress();
+    if (features.progressEnabled) renderProgress();
     openDayModal(activeDayISO);
   });
 
@@ -2159,7 +2287,7 @@
     closeModal(modalDay);
     renderCalendar();
     renderCalendarStats();
-    renderProgress();
+    if (features.progressEnabled) renderProgress();
   });
 
   // ---------- Metrics interactions ----------
@@ -2200,17 +2328,24 @@
 
   // ---------- Tabs logic ----------
   function setActiveTab(tabName) {
+    if (tabName === "summary" && !features.progressEnabled) {
+      tabName = "counter";
+    }
     tabEls.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
     tabCounter.style.display = (tabName === "counter") ? "" : "none";
     tabCalendar.style.display = (tabName === "calendar") ? "" : "none";
-    tabSummary.style.display = (tabName === "summary") ? "" : "none";
+    tabSummary.style.display = (tabName === "summary" && features.progressEnabled) ? "" : "none";
     if (tabName === "calendar") renderCalendar();
-    if (tabName === "summary") renderProgress();
+    if (tabName === "summary" && features.progressEnabled) renderProgress();
   }
 
   document.getElementById("tabs").addEventListener("click", (e) => {
     const t = e.target.closest(".tab");
     if (!t) return;
+    if (t.dataset.tab === "summary" && !features.progressEnabled) {
+      openModal(unavailableModal);
+      return;
+    }
     setActiveTab(t.dataset.tab);
   });
 
@@ -2279,7 +2414,7 @@
       const dayRating = rec ? (rec.dayRating || ratingInfo.dayRating) : "";
 
       const isToday = (iso === todayISO);
-      const badgeText = isToday ? "HOY" : "";
+      const badgeText = isToday ? t("todayBadge") : "";
       const badgeHtml = badgeText ? `<div class="badge ${isToday ? "today" : ""}">${badgeText}</div>` : "";
       const dotHtml = dayRating ? `<span class="dayDot ${dayRating}"></span>` : "";
 
@@ -2369,7 +2504,7 @@
   }
 
   function getTrainedAgentsWithCheck() {
-    const n = parseInt(localStorage.getItem("trainedAgentsWithCheck") || "0", 10);
+    const n = parseInt(String(appState?.data?.trainedAgentsWithCheck ?? 0), 10);
     return Math.max(0, Number.isFinite(n) ? n : 0);
   }
 
@@ -2496,15 +2631,19 @@
   });
 
   document.getElementById("profile_reset").addEventListener("click", () => {
-    const ok = confirm(currentLang === "es" ? "¿Resetear nombre e historial?" : "Reset name and history?");
+    if (APP_MODE === "agent") return;
+    const ok = confirm(t("resetConfirm1"));
     if (!ok) return;
-    try { localStorage.removeItem(PROFILE_KEY); } catch {}
-    try { localStorage.removeItem(HISTORY_KEY); } catch {}
+    const token = prompt(t("resetConfirm2"), "");
+    const expected = currentLang === "es" ? "BORRAR" : "DELETE";
+    if ((token || "").trim().toUpperCase() !== expected) return;
+    appState = { schemaVersion: APP_SCHEMA_VERSION, updatedAt: new Date().toISOString(), data: makeDefaultAppData() };
     state.rep = "";
     state.store = "";
-    saveStateNow();
+    state.values = { ...makeDefaultAppData().session.values };
+    saveAppState();
     renderCalendar();
-    renderProgress();
+    if (features.progressEnabled) renderProgress();
     applyTranslations();
     closeModal(modalProfile);
   });
@@ -2624,6 +2763,7 @@
 
   langToggleBtn.addEventListener("click", () => openModal(modalLanguage));
   document.getElementById("lang_x").addEventListener("click", () => closeModal(modalLanguage));
+  document.getElementById("unavailable_x").addEventListener("click", () => closeModal(unavailableModal));
   langEsBtn.addEventListener("click", () => setLanguage("es"));
   langEnBtn.addEventListener("click", () => setLanguage("en"));
   clickOutsideToClose(modalLanguage, true);
@@ -2644,7 +2784,7 @@
     }
 
     renderCalendar();
-    renderProgress();
+    if (features.progressEnabled) renderProgress();
     saveState();
   })();
 </script>
