@@ -1051,7 +1051,6 @@
       <input id="authEmail" class="authInput" type="email" placeholder="tu@email.com" autocomplete="email" />
       <input id="authPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="current-password" />
       <div class="authActions">
-        <button class="btn" onclick="authSignup()">Crear cuenta</button>
         <button class="btn primary" onclick="authLogin()">Iniciar sesión</button>
       </div>
       <button class="authLinkBtn" onclick="authReset()">Olvidé mi contraseña</button>
@@ -2767,7 +2766,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } 
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
@@ -2808,19 +2807,6 @@
   });
 
   // Acciones Auth (ligadas a botones)
-  window.authSignup = async () => {
-    const email = document.getElementById("authEmail").value.trim();
-    const pass  = document.getElementById("authPass").value;
-    const msgEl = document.getElementById("authMsg");
-    msgEl.textContent = "";
-    try {
-      await createUserWithEmailAndPassword(auth, email, pass);
-      msgEl.textContent = "Cuenta creada ✔";
-    } catch (e) {
-      msgEl.textContent = humanAuthError(e);
-    }
-  };
-
   window.authLogin = async () => {
     const email = document.getElementById("authEmail").value.trim();
     const pass  = document.getElementById("authPass").value;
