@@ -135,28 +135,29 @@
       display:none;
       align-items:center;
       justify-content:center;
-      padding:20px;
+      padding:clamp(18px, 5vh, 40px) 18px;
       box-sizing:border-box;
     }
 
     .authCard{
-      width:min(420px, 92vw);
+      width:min(420px, 100%);
       background: rgba(255,255,255,.12);
       border: 1px solid rgba(255,255,255,.18);
       border-radius: 20px;
-      padding: 22px;
+      padding: 20px 18px;
       backdrop-filter: blur(12px) saturate(130%);
       -webkit-backdrop-filter: blur(12px) saturate(130%);
       box-shadow: 0 10px 24px rgba(4,28,46,.20);
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:14px;
     }
 
     .authTitle{
       margin:0;
-      font-size:28px;
-      font-weight:800;
+      font-size:24px;
+      font-weight:700;
+      letter-spacing:.01em;
       text-align:center;
       color:rgba(244,252,255,.98);
     }
@@ -168,34 +169,43 @@
       background:rgba(255,255,255,.10);
       color:#fff;
       border-radius:12px;
-      padding:12px;
-      font-size:14px;
+      min-height:48px;
+      padding:12px 14px;
+      font-size:15px;
+      line-height:1.2;
       outline:none;
     }
 
-    .authInput::placeholder{ color:rgba(227,244,255,.7); }
+    .authInput::placeholder{ color:rgba(233,247,255,.82); }
 
     .authActions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
+      width:100%;
     }
 
-    .authLinkBtn{
-      border:0;
-      background:transparent;
-      color:rgba(220,243,255,.92);
-      text-decoration:underline;
-      cursor:pointer;
-      padding:4px;
-      font-size:13px;
+    .authLoginBtn{
+      width:100%;
+      min-height:52px;
+      padding:12px 14px;
+      border-radius:14px;
+      font-size:18px;
+      font-weight:800;
+    }
+
+    .authLoginBtn:disabled{
+      cursor:not-allowed;
+      opacity:.78;
     }
 
     .authMsg{
       min-height:20px;
       font-size:13px;
-      color:rgba(231,248,255,.95);
-      text-align:center;
+      color:rgba(231,248,255,.9);
+      text-align:left;
+      padding:0 2px;
+    }
+
+    .authMsg.error{
+      color:rgba(255, 190, 190, .95);
     }
 
     .userMeta{
@@ -1051,10 +1061,8 @@
       <input id="authEmail" class="authInput" type="email" placeholder="tu@email.com" autocomplete="email" />
       <input id="authPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="current-password" />
       <div class="authActions">
-        <button class="btn" onclick="authSignup()">Crear cuenta</button>
-        <button class="btn primary" onclick="authLogin()">Iniciar sesión</button>
+        <button id="authLoginBtn" class="btn primary authLoginBtn" onclick="authLogin()">Iniciar sesión</button>
       </div>
-      <button class="authLinkBtn" onclick="authReset()">Olvidé mi contraseña</button>
       <div id="authMsg" class="authMsg"></div>
     </div>
   </div>
@@ -2767,7 +2775,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } 
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
@@ -2808,41 +2816,26 @@
   });
 
   // Acciones Auth (ligadas a botones)
-  window.authSignup = async () => {
-    const email = document.getElementById("authEmail").value.trim();
-    const pass  = document.getElementById("authPass").value;
-    const msgEl = document.getElementById("authMsg");
-    msgEl.textContent = "";
-    try {
-      await createUserWithEmailAndPassword(auth, email, pass);
-      msgEl.textContent = "Cuenta creada ✔";
-    } catch (e) {
-      msgEl.textContent = humanAuthError(e);
-    }
-  };
-
   window.authLogin = async () => {
     const email = document.getElementById("authEmail").value.trim();
     const pass  = document.getElementById("authPass").value;
     const msgEl = document.getElementById("authMsg");
+    const loginBtn = document.getElementById("authLoginBtn");
     msgEl.textContent = "";
+    msgEl.classList.remove("error");
+    const defaultBtnLabel = "Iniciar sesión";
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Iniciando…";
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      msgEl.textContent = "Bienvenido ✔";
+      msgEl.textContent = "";
+      msgEl.classList.remove("error");
     } catch (e) {
       msgEl.textContent = humanAuthError(e);
-    }
-  };
-
-  window.authReset = async () => {
-    const email = document.getElementById("authEmail").value.trim();
-    const msgEl = document.getElementById("authMsg");
-    msgEl.textContent = "";
-    try {
-      await sendPasswordResetEmail(auth, email);
-      msgEl.textContent = "Te envié un email para resetear la contraseña ✔";
-    } catch (e) {
-      msgEl.textContent = humanAuthError(e);
+      msgEl.classList.add("error");
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = defaultBtnLabel;
     }
   };
 
