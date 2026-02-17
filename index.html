@@ -127,6 +127,92 @@
       text-overflow:ellipsis;
     }
 
+
+
+    #authRoot{
+      min-height:100dvh;
+      width:100%;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      box-sizing:border-box;
+    }
+
+    .authCard{
+      width:min(420px, 92vw);
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 20px;
+      padding: 22px;
+      backdrop-filter: blur(12px) saturate(130%);
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      box-shadow: 0 10px 24px rgba(4,28,46,.20);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .authTitle{
+      margin:0;
+      font-size:28px;
+      font-weight:800;
+      text-align:center;
+      color:rgba(244,252,255,.98);
+    }
+
+    .authInput{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(255,255,255,.10);
+      color:#fff;
+      border-radius:12px;
+      padding:12px;
+      font-size:14px;
+      outline:none;
+    }
+
+    .authInput::placeholder{ color:rgba(227,244,255,.7); }
+    .authActions{
+      display:flex;
+    }
+
+    .authActions .btn{
+      width:100%;
+      justify-content:center;
+    }
+
+
+    .authMsg{
+      min-height:20px;
+      font-size:13px;
+      color:rgba(231,248,255,.95);
+      text-align:center;
+    }
+
+    .userMeta{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-left:auto;
+    }
+
+    #userEmail{
+      font-size:12px;
+      opacity:.88;
+      max-width:180px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .logoutBtn{
+      font-size:12px;
+      font-weight:700;
+      border-radius:999px;
+      padding:7px 10px;
+    }
     .startHeroTitle{
       font-size:34px;
       line-height:1.05;
@@ -952,6 +1038,19 @@
 </head>
 
 <body>
+  <div id="authRoot">
+    <div class="authCard">
+      <h1 class="authTitle">Inicia sesión</h1>
+      <input id="authEmail" class="authInput" type="email" placeholder="tu@email.com" autocomplete="email" />
+      <input id="authPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="current-password" />
+      <div class="authActions">
+        <button class="btn primary" onclick="authLogin()">Iniciar sesión</button>
+      </div>
+      <div id="authMsg" class="authMsg"></div>
+    </div>
+  </div>
+
+  <div id="appRoot" style="display:none;">
   <div class="wrap">
     <div class="card">
       <div class="appHeader">
@@ -963,6 +1062,10 @@
         <div class="btnrow" id="top_actions">
           <button class="btn profileBtn" id="profile_btn">Perfil</button>
           <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">Idioma</button>
+          <div class="userMeta">
+            <span id="userEmail"></span>
+            <button class="btn logoutBtn" onclick="authLogout()">Cerrar sesión</button>
+          </div>
         </div>
       </div>
 
@@ -1189,6 +1292,8 @@
         </div>
       </div>
     </div>
+  </div>
+
   </div>
 
   <!-- Libraries -->
@@ -2647,6 +2752,89 @@
     renderProgress();
     saveState();
   })();
+</script>
+
+  <!-- Firebase reminder: en Firebase Console > Authentication > Settings > Authorized domains agrega tu dominio de GitHub Pages (tuusuario.github.io). -->
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } 
+    from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDFFcAXi0gs1tielHMTjZXfLxnj6aE4zSU",
+    authDomain: "closeflowtracker.firebaseapp.com",
+    projectId: "closeflowtracker",
+    storageBucket: "closeflowtracker.firebasestorage.app",
+    messagingSenderId: "192350700436",
+    appId: "1:192350700436:web:5469db8ba8bb2db0c78581",
+    measurementId: "G-GRV43R260Q"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const analytics = getAnalytics(app);
+
+  // Exponer para el resto del código si es necesario
+  window.firebaseAuth = auth;
+  window.firebaseDB = db;
+
+  // UI helpers: show/hide
+  function showAuth() { document.getElementById("authRoot").style.display = "flex"; document.getElementById("appRoot").style.display = "none"; const msgEl = document.getElementById("authMsg"); if (msgEl) msgEl.textContent = ""; }
+  function showApp()  { document.getElementById("authRoot").style.display = "none"; document.getElementById("appRoot").style.display = "block"; }
+
+  // Estado de sesión
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      showApp();
+      // Mostrar email o nombre en header si quieres
+      const el = document.getElementById("userEmail");
+      if (el) el.textContent = user.email || "";
+    } else {
+      showAuth();
+    }
+  });
+
+  // Acciones Auth (ligadas a botones)
+
+  window.authLogin = async () => {
+    const email = document.getElementById("authEmail").value.trim();
+    const pass  = document.getElementById("authPass").value;
+    const msgEl = document.getElementById("authMsg");
+    msgEl.textContent = "";
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      msgEl.textContent = "Bienvenido ✔";
+    } catch (e) {
+      msgEl.textContent = humanAuthError(e);
+    }
+  };
+
+  window.authLogout = async () => {
+    await signOut(auth);
+  };
+
+
+  document.getElementById("authEmail")?.addEventListener("input", () => {
+    const msgEl = document.getElementById("authMsg");
+    if (msgEl) msgEl.textContent = "";
+  });
+
+  document.getElementById("authPass")?.addEventListener("input", () => {
+    const msgEl = document.getElementById("authMsg");
+    if (msgEl) msgEl.textContent = "";
+  });
+
+  function humanAuthError(e){
+    const code = e?.code || "";
+    if (code === "auth/invalid-email") return "Email inválido.";
+    if (code === "auth/user-not-found") return "No existe esa cuenta.";
+    if (code === "auth/wrong-password") return "Contraseña incorrecta.";
+    return e?.message || "Error de autenticación.";
+  }
 </script>
 </body>
 </html>
