@@ -1477,7 +1477,7 @@
 
           <div class="sessionActions">
             <button class="btn helpBtn" id="rating_help_btn" aria-label="Ver criterios de clasificación">?</button>
-            <button class="btn primary" id="finish_day">End day</button>
+            <button class="btn primary" id="finish_day">Finalizar día</button>
           </div>
           <div id="finish_result" class="finishResult" style="display:none;"></div>
         </div>
@@ -1579,8 +1579,8 @@
         <div class="reportBox" id="report_box">—</div>
 
         <div class="modalActions" id="report_actions">
-          <button class="btn" id="copy_btn">Copy</button>
-          <button class="btn primary" id="share_btn">Share</button>
+          <button class="btn" id="copy_btn">Copiar</button>
+          <button class="btn primary" id="share_btn">Compartir</button>
           <button class="btn primary" id="end_btn" style="display:none;">End day</button>
         </div>
 
@@ -1618,8 +1618,8 @@
         </div>
 
         <div class="modalActions">
-          <button class="btn" id="day_copy">Copy</button>
-          <button class="btn" id="day_share">Share</button>
+          <button class="btn" id="day_copy">Copiar</button>
+          <button class="btn" id="day_share">Compartir</button>
           <button class="btn" id="day_edit">Editar día</button>
           <button class="btn" id="day_delete">Borrar día</button>
           <button class="btn primary" id="day_save" style="display:none;">Guardar cambios</button>
@@ -1788,6 +1788,8 @@
       qrTitle: "Abrir reporte en el teléfono",
       qrNote: "Escanea el QR y envía el reporte desde tu teléfono.",
       reportHint: "Copia o comparte para terminar el día y resetear.",
+      copyBtn: "Copiar",
+      shareBtn: "Compartir",
       monthDayYear: { month: "long", day: "numeric", year: "numeric" },
       monthDay: { month: "long", day: "numeric" },
       weekRangeJoin: "al"
@@ -1907,6 +1909,8 @@
       qrTitle: "Open report on your phone",
       qrNote: "Scan the QR and send the report from your phone.",
       reportHint: "Copy or share to end the day and reset.",
+      copyBtn: "Copy",
+      shareBtn: "Share",
       monthDayYear: { month: "long", day: "numeric", year: "numeric" },
       monthDay: { month: "long", day: "numeric" },
       weekRangeJoin: "to"
@@ -1951,6 +1955,12 @@
     const b = badgeLabel(badge);
     const base = ratingLabel(rating);
     return b ? `${base} · ${b}` : base;
+  }
+
+  function ratingColor(rating){
+    if (rating === "good") return "#6be795";
+    if (rating === "bad") return "#ff7f7f";
+    return "#f6d867";
   }
 
   const isoDateLocal = (d = new Date()) => {
@@ -2241,6 +2251,10 @@
     document.getElementById("qr_title").textContent = t("qrTitle");
     document.getElementById("qr_note").textContent = t("qrNote");
     document.getElementById("report_hint").textContent = t("reportHint");
+    copyBtn.textContent = t("copyBtn");
+    shareBtn.textContent = t("shareBtn");
+    dayCopyBtn.textContent = t("copyBtn");
+    dayShareBtn.textContent = t("shareBtn");
     document.getElementById("rating_help_body").innerHTML = `
       <div style="font-weight:700; margin-bottom:8px;">${t("quickCriteria")}</div>
       <ul style="margin:0 0 10px 18px; padding:0;">
@@ -2544,7 +2558,6 @@
     }
 
     const X = rec.values?.X ?? 0;
-    const money = (X * MONEY_PER_X);
     const ratingInfo = classifyDay(rec.values || {});
     const rating = rec.dayRating || ratingInfo.dayRating;
     const badge = rec.dayBadge ?? ratingInfo.dayBadge;
@@ -2570,10 +2583,6 @@
           <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
           <div class="p">${t("startLbl")}: ${fmtTime(rec.startTs)} • ${t("endLbl")}: ${fmtTime(rec.endTs)} • ${t("durLbl")}: ${fmtDuration(rec.durationMs || 0)}</div>
           <div class="p">${t("resultLbl")}: ${ratingLine(rating, badge)}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-weight:1000; letter-spacing:.02em;">$${money}</div>
-          <div style="font-size:11px; opacity:.85; letter-spacing:.08em; font-weight:900; margin-top:2px;">EARNED</div>
         </div>
       </div>
     `;
@@ -2891,12 +2900,10 @@
     const weekDays = weekTotals.days || 0;
     const weekAgg = (weekTotals.S||0) ? (((weekTotals.Z||0)/(weekTotals.S||0))*100).toFixed(1) + "%" : "0.0%";
     const weekClose = (weekTotals.Z||0) ? (((weekTotals.X||0)/(weekTotals.Z||0))*100).toFixed(1) + "%" : "0.0%";
-    const weekEarned = (weekTotals.X||0) * MONEY_PER_X;
 
     const monthX = monthTotals.X || 0;
     const monthDays = monthTotals.days || 0;
     const monthAvgX = monthDays ? ((monthX)/monthDays).toFixed(1) : "0.0";
-    const monthEarned = (monthTotals.X||0) * MONEY_PER_X;
 
     const streak = Math.min(3, weekSalesStreak(12));
     const trained = Math.min(3, getTrainedAgentsWithCheck());
@@ -2951,7 +2958,6 @@
           <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${weekDays}</div></div>
           <div class="sumPill"><div class="k">% Agg (Z/S)</div><div class="v">${weekAgg}</div></div>
           <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${weekClose}</div></div>
-          <div class="sumPill"><div class="k">EARNED</div><div class="v">$${weekEarned}</div></div>
         </div>
       </div>
 
@@ -2962,7 +2968,6 @@
         <div class="compactGrid">
           <div class="sumPill"><div class="k">${t("avgXPerDay")}</div><div class="v">${monthAvgX}</div></div>
           <div class="sumPill"><div class="k">${t("days")}</div><div class="v">${monthDays}</div></div>
-          <div class="sumPill"><div class="k">EARNED</div><div class="v">$${monthEarned}</div></div>
           <div class="sumPill"><div class="k">% Close (X/Z)</div><div class="v">${(monthTotals.Z||0) ? (((monthTotals.X||0)/(monthTotals.Z||0))*100).toFixed(1) + "%" : "0.0%"}</div></div>
         </div>
       </div>
@@ -3038,7 +3043,7 @@
     const ratingInfo = classifyDay(state.values || {});
     const result = ratingLine(ratingInfo.dayRating, ratingInfo.dayBadge);
     reportDayRating.style.display = "";
-    reportDayRating.textContent = `${t("dayResult")}: ${result}`;
+    reportDayRating.innerHTML = `${t("dayResult")}: <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:999px;background:${ratingColor(ratingInfo.dayRating)};display:inline-block;"></span><span>${result}</span></span>`;
     reportBox.textContent = text;
     showQRForText(text);
     setReportMode("tablet");
