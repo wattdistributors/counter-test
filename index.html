@@ -1364,26 +1364,6 @@
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
     }
 
-    .fsDebugPanel{
-      position:fixed;
-      right:10px;
-      bottom:10px;
-      z-index:9999;
-      width:min(92vw, 360px);
-      background:rgba(4,22,35,.82);
-      border:1px solid rgba(173,224,250,.28);
-      border-radius:10px;
-      padding:8px 10px;
-      font-size:11px;
-      line-height:1.35;
-      color:rgba(228,245,255,.96);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      box-shadow: 0 8px 20px rgba(0,0,0,.26);
-      white-space:normal;
-      word-break:break-word;
-    }
-    .fsDebugPanel b{ color:#a7e6ff; }
 
   </style>
 </head>
@@ -2526,29 +2506,21 @@
     saveHistory(hist);
 
     const uid = window.firebaseAuth?.currentUser?.uid;
-    if (!uid) {
-      const err = new Error("No authenticated user for Firestore day write");
-      updateFirestoreDebug({ lastError: err.message });
-      throw err;
-    }
-    if (!state.teamId) {
-      const err = new Error("Missing teamId in memory for Firestore day write");
-      updateFirestoreDebug({ uid, lastError: err.message });
-      throw err;
+    if (!uid || !state.teamId) {
+      console.warn("Firestore day save skipped: missing uid/teamId", { uid: !!uid, teamId: !!state.teamId });
+      return { localSaved: true, cloudSaved: false };
     }
 
     try {
-      updateFirestoreDebug({ uid, email: window.firebaseAuth?.currentUser?.email || "-", teamId: state.teamId });
       const res = await window.cloudUpsertDay(state.teamId, uid, state.date, payload);
       console.log("Saved day:", state.date, payload);
       console.log("Saved to Firestore", res?.path || "-");
-      updateFirestoreDebug({ lastPath: res?.path || "-", lastError: "-" });
+      return { localSaved: true, cloudSaved: true, path: res?.path || "" };
     } catch (err) {
       console.error("Firestore save failed", err);
       const reason = `${err?.code || ""} ${err?.message || err}`.trim();
       console.error("Firestore save failed (actionable): check Firestore Rules/Auth/Network.", reason);
-      updateFirestoreDebug({ lastError: reason || "unknown" });
-      throw err;
+      return { localSaved: true, cloudSaved: false, error: err };
     }
   }
 
@@ -3223,7 +3195,11 @@
         }
       }
 
-      await persistCompletedDay(endTs, text);
+      const result = await persistCompletedDay(endTs, text);
+      if (!result?.cloudSaved && state.teamId && window.firebaseAuth?.currentUser?.uid) {
+        alert(currentLang === "en" ? "Could not save to cloud. Please try again." : "No se pudo guardar en la nube. Inténtalo de nuevo.");
+        return;
+      }
       finalizeAndReset();
       history.replaceState(null, "", location.pathname);
     } catch (_) {
@@ -3252,7 +3228,10 @@
     try {
       const endTs = Date.now();
       const text = (reportBox.textContent || "").trim() || buildReport(endTs);
-      await persistCompletedDay(endTs, text);
+      const result = await persistCompletedDay(endTs, text);
+      if (!result?.cloudSaved && state.teamId && window.firebaseAuth?.currentUser?.uid) {
+        throw new Error("cloud-save-failed");
+      }
 
       const saved = loadHistory()[dayISO];
       if (!saved) throw new Error(`Day not found in cache after save: ${dayISO}`);
@@ -3275,7 +3254,7 @@
     } catch (err) {
       console.error("handleEndDay failed", err);
       if (reportSaveStatus) reportSaveStatus.textContent = t("saveError");
-      alert(`${t("saveError")}: ${err?.message || "unknown error"}`);
+      alert(currentLang === "en" ? "Could not save the day. Please try again." : "No se pudo guardar el día. Inténtalo de nuevo.");
       endBtn.textContent = previousLabel || t("endDayNow");
     } finally {
       isEndingDay = false;
@@ -3357,6 +3336,8 @@
   const analytics = getAnalytics(app);
   const TEAM_STORAGE_KEY = "kpi_team_v1";
   const MONEY_PER_X_CENTS = 100;
+  const DEBUG_ENABLED = false;
+  const debugLog = (...args) => { if (DEBUG_ENABLED) console.log(...args); };
 
   // Exponer para el resto del código si es necesario
   window.firebaseAuth = auth;
@@ -3387,25 +3368,6 @@
 
     const data = userSnap.data() || {};
     return sanitizeTeamId(data.teamId || "");
-  }
-
-  async function testFirestoreWrite(uid) {
-    try {
-      await setDoc(doc(db, "debug", uid), { ok: true, time: serverTimestamp() }, { merge: true });
-      console.log("Firestore debug write OK", uid);
-      updateFirestoreDebug({ lastPath: `debug/${uid}`, lastError: "-" });
-    } catch (e) {
-      console.error("Firestore debug write failed", e);
-      updateFirestoreDebug({ lastPath: `debug/${uid}`, lastError: `${e?.code || ""} ${e?.message || e}`.trim() });
-      const authMsg = document.getElementById("authMsg");
-      const msg = `Firestore debug write failed: ${e?.code || ""} ${e?.message || e}`.trim();
-      if (authMsg) {
-        authMsg.textContent = msg;
-        authMsg.classList.add("error");
-      } else {
-        alert(msg);
-      }
-    }
   }
 
   async function cloudUpsertDay(teamId, uid, iso, payload) {
@@ -3442,12 +3404,16 @@
     };
 
     const path = `teams/${safeTeamId}/agents/${uid}/days/${safeIso}`;
-    updateFirestoreDebug({ teamId: safeTeamId, lastPath: path, lastError: "-" });
-    console.log("Saving day to Firestore...", safeTeamId, uid, safeIso);
-    await setDoc(dayRef, flatPayload, { merge: true });
-    console.log("Saved day to Firestore OK");
-    updateFirestoreDebug({ lastPath: path, lastError: "-" });
-    return { path, payload: flatPayload };
+    try {
+      console.log("Saving day to Firestore...", safeTeamId, uid, safeIso);
+      await setDoc(dayRef, flatPayload, { merge: true });
+      console.log("Saved day to Firestore OK");
+      debugLog("Firestore path", path);
+      return { path, payload: flatPayload };
+    } catch (e) {
+      console.error("Firestore day write failed", e);
+      throw e;
+    }
   }
 
   async function cloudDeleteDay(teamId, uid, iso) {
@@ -3474,28 +3440,6 @@
   const authRootEl = document.getElementById("authRoot");
   const appRootEl = document.getElementById("appRoot");
   const authCardEl = document.getElementById("authCard");
-  const firestoreDebugState = {
-    uid: "-",
-    email: "-",
-    teamId: "-",
-    lastPath: "-",
-    lastError: "-",
-  };
-
-  function updateFirestoreDebug(partial = {}) {
-    Object.assign(firestoreDebugState, partial);
-    const panelEl = document.getElementById("firestore_debug_panel");
-    if (!panelEl) return;
-    panelEl.innerHTML = `
-      <div><b>uid:</b> ${firestoreDebugState.uid || "-"}</div>
-      <div><b>email:</b> ${firestoreDebugState.email || "-"}</div>
-      <div><b>teamId:</b> ${firestoreDebugState.teamId || "-"}</div>
-      <div><b>last path:</b> ${firestoreDebugState.lastPath || "-"}</div>
-      <div><b>last error:</b> ${firestoreDebugState.lastError || "-"}</div>
-    `;
-  }
-
-  updateFirestoreDebug();
   let hideAppTimeout = null;
   let hideAuthTimeout = null;
 
@@ -3526,7 +3470,6 @@
 
     if (user) {
       showApp();
-      updateFirestoreDebug({ uid: user.uid, email: user.email || "-", lastError: "-" });
 
       // Si el usuario venía de click en login, limpias estado loading aquí (después del cambio real de sesión)
       if (loginBtn) {
@@ -3561,7 +3504,7 @@
               createdAt: serverTimestamp(),
             }, { merge: true });
             teamId = fallbackTeam || "";
-            console.log("Profile write OK", `users/${user.uid}`);
+            debugLog("Profile write OK", `users/${user.uid}`);
           } else {
             const data = userSnap.data() || {};
             teamId = sanitizeTeamId(data.teamId || "");
@@ -3571,17 +3514,13 @@
               email: user.email || "",
               role: "agent",
             }, { merge: true });
-            console.log("Profile write OK", `users/${user.uid}`);
+            debugLog("Profile write OK", `users/${user.uid}`);
           }
 
           window.setTeamId(teamId);
           console.log("TEAM loaded from /users", teamId || "(empty)");
-          updateFirestoreDebug({ teamId: teamId || "-", lastPath: `users/${user.uid}`, lastError: "-" });
-
-          await testFirestoreWrite(user.uid);
         } catch (err) {
           console.error("TEAM/users bootstrap failed", err);
-          updateFirestoreDebug({ lastError: `${err?.code || ""} ${err?.message || err}`.trim() });
         }
 
         try {
@@ -3594,7 +3533,6 @@
       })();
     } else {
       window.setTeamId("");
-      updateFirestoreDebug({ uid: "-", email: "-", teamId: "-", lastPath: "-", lastError: "-" });
       showAuth();
 
       if (loginBtn) {
@@ -3679,16 +3617,9 @@
         }, { merge: true }),
       ]);
 
-      updateFirestoreDebug({
-        uid: cred.user.uid,
-        email,
-        teamId,
-        lastPath: `users/${cred.user.uid}`,
-        lastError: "-",
-      });
-      console.log("Profile write OK", `users/${cred.user.uid}`);
-      console.log("Profile write OK", `teams/${teamId}`);
-      console.log("Profile write OK", `teams/${teamId}/members/${cred.user.uid}`);
+      debugLog("Profile write OK", `users/${cred.user.uid}`);
+      debugLog("Profile write OK", `teams/${teamId}`);
+      debugLog("Profile write OK", `teams/${teamId}/members/${cred.user.uid}`);
 
       window.setTeamId(teamId);
       state.rep = name;
@@ -3701,9 +3632,6 @@
     } catch (e) {
       msgEl.textContent = humanAuthError(e);
       msgEl.classList.add("error");
-      updateFirestoreDebug({
-        lastError: `${e?.code || ""} ${e?.message || e}`.trim(),
-      });
       console.error("Profile write failed", e);
     } finally {
       createBtn.disabled = false;
@@ -3760,6 +3688,5 @@
   }
 </script>
 
-<div id="firestore_debug_panel" class="fsDebugPanel">Firestore debug: initializing…</div>
 </body>
 </html>
