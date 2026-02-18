@@ -137,19 +137,6 @@
       justify-content:center;
       padding:clamp(22px, 6vh, 52px) 18px;
       box-sizing:border-box;
-      opacity:0;
-      pointer-events:none;
-      transition: opacity .34s ease-out;
-    }
-
-    #authRoot.visible{
-      opacity:1;
-      pointer-events:auto;
-    }
-
-    #authRoot.exiting{
-      opacity:0;
-      pointer-events:none;
     }
 
 
@@ -179,11 +166,6 @@
     }
 
     #appRoot{
-      opacity:0;
-      transition: opacity .34s ease-out;
-    }
-
-    #appRoot.visible{
       opacity:1;
     }
 
@@ -205,27 +187,6 @@
       align-items:center;
       gap:8px;
       color:rgba(242,252,255,.97);
-    }
-
-    .authBrandIcon{
-      width:42px;
-      height:42px;
-      border-radius:12px;
-      border:1px solid rgba(181,228,255,.44);
-      background:linear-gradient(155deg, rgba(166,224,255,.22), rgba(70,145,198,.18));
-      display:grid;
-      place-items:center;
-      box-shadow:0 8px 18px rgba(9,40,68,.2);
-    }
-
-    .authBrandIcon svg{
-      width:21px;
-      height:21px;
-      stroke:rgba(236,250,255,.92);
-      stroke-width:2;
-      fill:none;
-      stroke-linecap:round;
-      stroke-linejoin:round;
     }
 
     .authBrandTitle{
@@ -302,6 +263,31 @@
 
     .authActions{
       width:100%;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .authSecondaryBtn{
+      min-height:52px;
+      border-radius:14px;
+      font-size:16px;
+      font-weight:700;
+    }
+
+    .authTopRow{
+      width:100%;
+      display:flex;
+      justify-content:flex-end;
+      margin-bottom:2px;
+    }
+
+    .authTopLangBtn{
+      min-width:94px;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:700;
     }
 
     .authLoginBtn{
@@ -365,38 +351,53 @@
       margin-top:2px;
     }
 
-    .authEnterBrand,
-    .authEnterCard{
-      opacity:0;
-      transform:translateY(10px);
+    .authSignupOverlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(5,24,40,.42);
+      z-index:30;
+      padding:18px;
+      box-sizing:border-box;
     }
 
-    #authRoot.visible .authEnterBrand{
-      animation: authEnter .38s ease-out forwards;
+    .authSignupOverlay.show{ display:flex; }
+
+    .authSignupModal{
+      width:min(420px, 100%);
+      background: rgba(255,255,255,.13);
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(12px) saturate(130%);
+      -webkit-backdrop-filter: blur(12px) saturate(130%);
+      box-shadow:0 10px 24px rgba(4,28,46,.24);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
 
-    #authRoot.visible .authEnterCard{
-      animation: authEnter .4s ease-out .05s forwards;
+    .authSignupTitle{
+      margin:0;
+      text-align:center;
+      font-size:20px;
+      font-weight:700;
     }
 
-    @keyframes authSpin{
-      to{ transform:rotate(360deg); }
+    .authSignupMsg{
+      min-height:18px;
+      font-size:12px;
+      color:rgba(231,248,255,.9);
     }
 
-    @keyframes authCardPulse{
-      from{ transform:scale(.995); box-shadow:0 10px 24px rgba(4,28,46,.20); }
-      to{ transform:scale(1); box-shadow:0 14px 30px rgba(9,50,84,.26); }
-    }
+    .authSignupMsg.error{ color:rgba(255,190,190,.95); }
 
-    @keyframes authShake{
-      0%,100%{ transform:translateX(0); }
-      30%{ transform:translateX(-2px); }
-      70%{ transform:translateX(2px); }
-    }
-
-    @keyframes authEnter{
-      from{ opacity:0; transform:translateY(10px); }
-      to{ opacity:1; transform:translateY(0); }
+    .authSignupActions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
     }
 
     .userMeta{
@@ -1250,23 +1251,21 @@
     <div class="authBackdropOrb one" aria-hidden="true"></div>
     <div class="authBackdropOrb two" aria-hidden="true"></div>
     <div class="authShell">
-      <div class="authBrand authEnterBrand">
-        <div class="authBrandIcon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 16.5 9 11l3.5 3.5L20 7"></path>
-            <path d="M20 7v5"></path>
-          </svg>
-        </div>
+      <div class="authTopRow">
+        <button class="btn authTopLangBtn" id="auth_lang_toggle" title="Language">Language</button>
+      </div>
+      <div class="authBrand">
         <h1 class="authBrandTitle">RetailFlow Tracker</h1>
         <p class="authBrandSubtitle">Control profesional de ventas retail</p>
       </div>
 
-      <div id="authCard" class="authCard authEnterCard">
+      <div id="authCard" class="authCard">
         <h2 class="authTitle">Inicia sesión</h2>
         <div class="authCardIntro">Accede a tu panel de rendimiento diario</div>
         <input id="authEmail" class="authInput" type="email" placeholder="tu@email.com" autocomplete="email" />
         <input id="authPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="current-password" />
         <div class="authActions">
+          <button id="authSignupOpenBtn" class="btn authSecondaryBtn" onclick="authOpenSignup()">Crear cuenta</button>
           <button id="authLoginBtn" class="btn primary authLoginBtn" onclick="authLogin()">
             <span id="authLoginBtnText">Iniciar sesión</span>
             <span class="authSpinner" aria-hidden="true"></span>
@@ -1277,6 +1276,21 @@
       </div>
 
       <div class="authVersion">v1.0 · RetailFlow</div>
+    </div>
+
+    <div class="authSignupOverlay" id="auth_signup_overlay">
+      <div class="authSignupModal">
+        <h3 class="authSignupTitle">Crear cuenta</h3>
+        <input id="signupName" class="authInput" type="text" placeholder="Nombre completo" autocomplete="name" />
+        <input id="signupEmail" class="authInput" type="email" placeholder="correo@empresa.com" autocomplete="email" />
+        <input id="signupPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="new-password" />
+        <input id="signupPass2" class="authInput" type="password" placeholder="Repite contraseña" autocomplete="new-password" />
+        <div id="signupMsg" class="authSignupMsg"></div>
+        <div class="authSignupActions">
+          <button class="btn" onclick="authCloseSignup()">Cancelar</button>
+          <button class="btn primary" id="signupCreateBtn" onclick="authSignup()">Crear cuenta</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1290,7 +1304,6 @@
           <div class="subtitle" id="today_date"></div>
         </div>
         <div class="btnrow" id="top_actions">
-          <button class="btn profileBtn" id="profile_btn">Perfil</button>
           <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">Idioma</button>
           <div class="userMeta">
             <span id="userEmail"></span>
@@ -1943,8 +1956,8 @@
   const startHint = document.getElementById("start_hint");
   const startDayBtn = document.getElementById("start_day");
   const finishDayBtn = document.getElementById("finish_day");
-  const profileBtn = document.getElementById("profile_btn");
   const langToggleBtn = document.getElementById("lang_toggle");
+  const authLangToggleBtn = document.getElementById("auth_lang_toggle");
   const modalLanguage = document.getElementById("modal_language");
   const langEsBtn = document.getElementById("lang_es");
   const langEnBtn = document.getElementById("lang_en");
@@ -2045,7 +2058,6 @@
     startIntro.textContent = t("startIntro");
     startHint.textContent = t("startHint");
     startDayBtn.textContent = t("startDay");
-    profileBtn.textContent = `${state.rep || t("profileBtn")} ⌄`;
     finishDayBtn.textContent = t("finishDay");
     document.getElementById("start_modal_title").textContent = t("startModalTitle");
     document.getElementById("start_modal_intro").textContent = t("startModalIntro");
@@ -2056,7 +2068,8 @@
     document.getElementById("profile_name_label").textContent = t("nameLabel");
     document.getElementById("profile_save").textContent = t("profileSave");
     document.getElementById("profile_reset").textContent = t("profileReset");
-    langToggleBtn.textContent = "Idioma";
+    langToggleBtn.textContent = t("languageBtn");
+    if (authLangToggleBtn) authLangToggleBtn.textContent = t("languageBtn");
     document.getElementById("lang_modal_title").textContent = t("languageModalTitle");
     document.getElementById("lang_modal_intro").textContent = t("languageModalIntro");
     langEsBtn.textContent = t("languageSpanish");
@@ -2799,12 +2812,9 @@
 
   // ---------- Buttons ----------
   function openStartModal() {
-    if (!state.rep) {
-      alert(t("missingProfile"));
-      openProfileModal();
-      return;
-    }
-    startProfileName.textContent = `${t("profileForDay")}: ${state.rep}`;
+    const currentName = state.rep || (window.firebaseAuth?.currentUser?.displayName || "Usuario");
+    state.rep = currentName;
+    startProfileName.textContent = `${t("profileForDay")}: ${currentName}`;
     startStore.value = "";
     openModal(modalStart);
     setTimeout(() => startStore.focus(), 50);
@@ -2817,7 +2827,6 @@
   }
 
   startDayBtn.addEventListener("click", openStartModal);
-  profileBtn.addEventListener("click", openProfileModal);
 
   document.getElementById("profile_x").addEventListener("click", () => closeModal(modalProfile));
   document.getElementById("profile_save").addEventListener("click", () => {
@@ -2958,6 +2967,7 @@
   }
 
   langToggleBtn.addEventListener("click", () => openModal(modalLanguage));
+  if (authLangToggleBtn) authLangToggleBtn.addEventListener("click", () => openModal(modalLanguage));
   document.getElementById("lang_x").addEventListener("click", () => closeModal(modalLanguage));
   langEsBtn.addEventListener("click", () => setLanguage("es"));
   langEnBtn.addEventListener("click", () => setLanguage("en"));
@@ -2988,7 +2998,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } 
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
@@ -3018,56 +3028,93 @@
   let hideAppTimeout = null;
   let hideAuthTimeout = null;
 
-  // UI helpers: show/hide with subtle transitions (race-safe)
+  // UI helpers: show/hide (sin transiciones para priorizar estabilidad)
   function showAuth() {
     if (hideAppTimeout) clearTimeout(hideAppTimeout);
     if (hideAuthTimeout) clearTimeout(hideAuthTimeout);
-
-    appRootEl.classList.remove("visible");
-    appRootEl.style.opacity = "0";
-    hideAppTimeout = setTimeout(() => {
-      appRootEl.style.display = "none";
-    }, 320);
-
+    appRootEl.style.display = "none";
     authRootEl.style.display = "flex";
-    authRootEl.classList.remove("exiting");
-    authRootEl.classList.remove("visible");
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        authRootEl.classList.add("visible");
-      });
-    });
   }
 
   function showApp()  {
     if (hideAppTimeout) clearTimeout(hideAppTimeout);
     if (hideAuthTimeout) clearTimeout(hideAuthTimeout);
-
+    authRootEl.style.display = "none";
     appRootEl.style.display = "block";
-    appRootEl.style.opacity = "1";
-    appRootEl.classList.add("visible");
-
-    authRootEl.classList.add("exiting");
-    authRootEl.classList.remove("visible");
-    hideAuthTimeout = setTimeout(() => {
-      authRootEl.style.display = "none";
-      authRootEl.classList.remove("exiting");
-    }, 360);
   }
 
   // Estado de sesión
   onAuthStateChanged(auth, (user) => {
     if (user) {
       showApp();
-      // Mostrar email o nombre en header si quieres
+      const repName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
+      state.rep = repName;
+      try { localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep: repName })); } catch {}
+      saveStateNow();
+      applyTranslations();
       const el = document.getElementById("userEmail");
-      if (el) el.textContent = user.email || "";
+      if (el) el.textContent = repName;
     } else {
       showAuth();
     }
   });
 
   // Acciones Auth (ligadas a botones)
+  window.authOpenSignup = () => {
+    const overlay = document.getElementById("auth_signup_overlay");
+    const msgEl = document.getElementById("signupMsg");
+    if (msgEl) { msgEl.textContent = ""; msgEl.classList.remove("error"); }
+    if (overlay) overlay.classList.add("show");
+  };
+
+  window.authCloseSignup = () => {
+    const overlay = document.getElementById("auth_signup_overlay");
+    if (overlay) overlay.classList.remove("show");
+  };
+
+  window.authSignup = async () => {
+    const name = document.getElementById("signupName").value.trim();
+    const email = document.getElementById("signupEmail").value.trim();
+    const pass = document.getElementById("signupPass").value;
+    const pass2 = document.getElementById("signupPass2").value;
+    const msgEl = document.getElementById("signupMsg");
+    const createBtn = document.getElementById("signupCreateBtn");
+
+    msgEl.textContent = "";
+    msgEl.classList.remove("error");
+
+    if (!name || !email || !pass || !pass2) {
+      msgEl.textContent = currentLang === "en" ? "Complete all fields." : "Completa todos los campos.";
+      msgEl.classList.add("error");
+      return;
+    }
+    if (pass !== pass2) {
+      msgEl.textContent = currentLang === "en" ? "Passwords do not match." : "Las contraseñas no coinciden.";
+      msgEl.classList.add("error");
+      return;
+    }
+
+    createBtn.disabled = true;
+    createBtn.textContent = currentLang === "en" ? "Creating…" : "Creando…";
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name });
+      state.rep = name;
+      try { localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep: name })); } catch {}
+      saveStateNow();
+      const nameEl = document.getElementById("userEmail");
+      if (nameEl) nameEl.textContent = name;
+      msgEl.textContent = currentLang === "en" ? "Account created successfully." : "Cuenta creada correctamente.";
+      setTimeout(() => authCloseSignup(), 450);
+    } catch (e) {
+      msgEl.textContent = humanAuthError(e);
+      msgEl.classList.add("error");
+    } finally {
+      createBtn.disabled = false;
+      createBtn.textContent = currentLang === "en" ? "Create account" : "Crear cuenta";
+    }
+  };
+
   window.authLogin = async () => {
     const email = document.getElementById("authEmail").value.trim();
     const pass  = document.getElementById("authPass").value;
