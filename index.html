@@ -1402,8 +1402,8 @@
       <div class="authSignupModal">
         <h3 class="authSignupTitle" id="signup_title">Crear cuenta</h3>
         <input id="signupName" class="authInput" type="text" placeholder="Nombre completo" autocomplete="name" />
+        <input id="signupTeamId" class="authInput" type="text" placeholder="ej: team-closeflow-001" autocomplete="organization" />
         <input id="signupEmail" class="authInput" type="email" placeholder="correo@empresa.com" autocomplete="email" />
-        <input id="signupTeamId" class="authInput" type="text" placeholder="Team ID (ej: team_closeflow_001)" autocomplete="organization" />
         <input id="signupPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="new-password" />
         <input id="signupPass2" class="authInput" type="password" placeholder="Repite contraseña" autocomplete="new-password" />
         <div id="signupMsg" class="authSignupMsg"></div>
@@ -2191,7 +2191,7 @@
   function saveState() { try { saveStateNow(); } catch {} }
 
   function sanitizeTeamId(raw) {
-    return String(raw || "").trim().replace(/[^A-Za-z0-9_-]/g, "");
+    return String(raw || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
   }
 
   function setTeamId(teamId) {
@@ -2506,9 +2506,13 @@
     const uid = window.firebaseAuth?.currentUser?.uid;
     if (uid && state.teamId && typeof window.cloudUpsertDay === "function") {
       try {
+        console.log("Saving day to Firestore...", state.teamId, uid, state.date);
         await window.cloudUpsertDay(state.teamId, uid, state.date, payload);
+        console.log("Saved day to Firestore OK");
       } catch (err) {
-        console.warn("Firestore write failed, using local cache", err);
+        console.error("Firestore save failed", err);
+        const reason = err?.code || err?.message || "unknown";
+        console.error("Firestore save failed (actionable): revisa Firestore Rules/Auth/Network.", reason);
       }
     }
   }
@@ -3324,27 +3328,47 @@
   window.firebaseDB = db;
 
   function normalizeTeamIdOrThrow(teamId) {
-    const clean = String(teamId || "").trim().replace(/[^A-Za-z0-9_-]/g, "");
-    if (!clean || clean.length < 4) throw new Error("Invalid Team ID");
+    const clean = String(teamId || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    if (!clean) throw new Error("Invalid Team ID");
     return clean;
   }
 
   async function resolveTeamIdForUser(uid) {
-    const hintRaw = localStorage.getItem(TEAM_STORAGE_KEY) || "";
-    const hint = hintRaw ? String(hintRaw).trim().replace(/[^A-Za-z0-9_-]/g, "") : "";
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
 
-    if (hint && hint.length >= 4) {
-      const membershipHintRef = doc(db, "teams", hint, "users", uid);
-      const membershipHintSnap = await getDoc(membershipHintRef);
-      if (membershipHintSnap.exists()) return hint;
+    if (!userSnap.exists()) {
+      const fallbackName = auth.currentUser?.displayName || "";
+      const fallbackEmail = auth.currentUser?.email || "";
+      const fallbackTeam = sanitizeTeamId(localStorage.getItem(TEAM_STORAGE_KEY) || "");
+      await setDoc(userRef, {
+        teamId: fallbackTeam || "",
+        name: fallbackName,
+        email: fallbackEmail,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
+      return fallbackTeam || "";
     }
 
-    const userTeamRef = doc(db, "userTeams", uid);
-    const userTeamSnap = await getDoc(userTeamRef);
-    if (!userTeamSnap.exists()) throw new Error("No team membership found for user");
+    const data = userSnap.data() || {};
+    return sanitizeTeamId(data.teamId || "");
+  }
 
-    const teamId = normalizeTeamIdOrThrow(userTeamSnap.data()?.teamId || "");
-    return teamId;
+  async function testFirestoreWrite(uid) {
+    try {
+      await setDoc(doc(db, "debug", uid), { ok: true, time: serverTimestamp() }, { merge: true });
+      console.log("Firestore debug write OK", uid);
+    } catch (e) {
+      console.error("Firestore debug write failed", e);
+      const authMsg = document.getElementById("authMsg");
+      const msg = `Firestore debug write failed: ${e?.code || ""} ${e?.message || e}`.trim();
+      if (authMsg) {
+        authMsg.textContent = msg;
+        authMsg.classList.add("error");
+      } else {
+        alert(msg);
+      }
+    }
   }
 
   async function cloudUpsertDay(teamId, uid, iso, payload) {
@@ -3371,8 +3395,9 @@
       updatedAt: serverTimestamp(),
     }, { merge: true });
 
+    console.log("Saving day to Firestore...", safeTeamId, uid, safeIso);
     await batch.commit();
-    console.log("Saved day to Firestore", safeIso);
+    console.log("Saved day to Firestore OK", safeIso);
   }
 
   async function cloudDeleteDay(teamId, uid, iso) {
@@ -3449,16 +3474,38 @@
       const el = document.getElementById("userEmail");
       if (el) el.textContent = repName;
 
-      // Resolver team y sincronizar cloud SIN bloquear la UI principal
+      // Resolver team desde Firestore (/users/{uid}) y sincronizar cloud SIN bloquear UI
       (async () => {
         try {
-          const cachedTeam = (localStorage.getItem(TEAM_STORAGE_KEY) || "").trim();
-          if (cachedTeam) window.setTeamId(cachedTeam);
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          let teamId = "";
 
-          const teamId = await resolveTeamIdForUser(user.uid);
+          if (!userSnap.exists()) {
+            const fallbackTeam = sanitizeTeamId(localStorage.getItem(TEAM_STORAGE_KEY) || "");
+            await setDoc(userRef, {
+              teamId: fallbackTeam || "",
+              name: user.displayName || "",
+              email: user.email || "",
+              createdAt: serverTimestamp(),
+            }, { merge: true });
+            teamId = fallbackTeam || "";
+          } else {
+            const data = userSnap.data() || {};
+            teamId = sanitizeTeamId(data.teamId || "");
+            // mantiene perfil actualizado
+            await setDoc(userRef, {
+              name: user.displayName || "",
+              email: user.email || "",
+            }, { merge: true });
+          }
+
           window.setTeamId(teamId);
+          console.log("TEAM loaded from /users", teamId || "(empty)");
+
+          await testFirestoreWrite(user.uid);
         } catch (err) {
-          console.warn("TEAM resolve failed", err);
+          console.error("TEAM/users bootstrap failed", err);
         }
 
         try {
@@ -3512,8 +3559,8 @@
       teamId = normalizeTeamIdOrThrow(teamRaw);
     } catch {
       msgEl.textContent = currentLang === "en"
-        ? "Team ID is required (min 4, letters/numbers/-/_ only)."
-        : "Team ID obligatorio (mínimo 4, solo letras/números/-/_).";
+        ? "Team ID is required."
+        : "Team ID es obligatorio.";
       msgEl.classList.add("error");
       return;
     }
@@ -3535,18 +3582,12 @@
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
 
-      await Promise.all([
-        setDoc(doc(db, "teams", teamId, "users", cred.user.uid), {
-          name,
-          email,
-          role: "agent",
-          createdAt: serverTimestamp(),
-        }, { merge: true }),
-        setDoc(doc(db, "userTeams", cred.user.uid), {
-          teamId,
-          createdAt: serverTimestamp(),
-        }, { merge: true }),
-      ]);
+      await setDoc(doc(db, "users", cred.user.uid), {
+        teamId,
+        name,
+        email,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
 
       window.setTeamId(teamId);
       state.rep = name;
