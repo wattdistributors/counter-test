@@ -3422,18 +3422,25 @@
     appRootEl.style.display = "block";
   }
 
-  // Estado de sesión
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      try {
-        const teamId = await resolveTeamIdForUser(user.uid);
-        window.setTeamId(teamId);
-      } catch (err) {
-        console.warn("TEAM resolve failed", err);
-        window.setTeamId("");
-      }
+  // Mostrar auth de inmediato para evitar pantalla vacía/azul mientras Firebase resuelve sesión
+  showAuth();
 
+  // Estado de sesión
+  onAuthStateChanged(auth, (user) => {
+    const loginBtn = document.getElementById("authLoginBtn");
+    const loginBtnText = document.getElementById("authLoginBtnText");
+
+    if (user) {
       showApp();
+
+      // Si el usuario venía de click en login, limpias estado loading aquí (después del cambio real de sesión)
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.classList.remove("loading");
+      }
+      if (authCardEl) authCardEl.classList.remove("loading");
+      if (loginBtnText) loginBtnText.textContent = t("loginBtn");
+
       const repName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
       state.rep = repName;
       try { localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep: repName })); } catch {}
@@ -3442,12 +3449,36 @@
       const el = document.getElementById("userEmail");
       if (el) el.textContent = repName;
 
-      await hydrateCacheFromCloudForVisibleRanges();
-      renderCalendar();
-      renderProgress();
+      // Resolver team y sincronizar cloud SIN bloquear la UI principal
+      (async () => {
+        try {
+          const cachedTeam = (localStorage.getItem(TEAM_STORAGE_KEY) || "").trim();
+          if (cachedTeam) window.setTeamId(cachedTeam);
+
+          const teamId = await resolveTeamIdForUser(user.uid);
+          window.setTeamId(teamId);
+        } catch (err) {
+          console.warn("TEAM resolve failed", err);
+        }
+
+        try {
+          await hydrateCacheFromCloudForVisibleRanges();
+          renderCalendar();
+          renderProgress();
+        } catch (err) {
+          console.warn("Post-login hydrate failed", err);
+        }
+      })();
     } else {
       window.setTeamId("");
       showAuth();
+
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.classList.remove("loading");
+      }
+      if (authCardEl) authCardEl.classList.remove("loading");
+      if (loginBtnText) loginBtnText.textContent = t("loginBtn");
     }
   });
 
@@ -3540,7 +3571,6 @@
     const msgEl = document.getElementById("authMsg");
     const loginBtn = document.getElementById("authLoginBtn");
     const loginBtnText = document.getElementById("authLoginBtnText");
-    const defaultBtnLabel = t("loginBtn");
 
     msgEl.textContent = "";
     msgEl.classList.remove("error");
@@ -3562,14 +3592,11 @@
       setTimeout(() => authCardEl.classList.remove("shake"), 280);
       loginBtn.disabled = false;
       loginBtn.classList.remove("loading");
-      loginBtnText.textContent = defaultBtnLabel;
+      loginBtnText.textContent = t("loginBtn");
       return;
     }
 
-    authCardEl.classList.remove("loading");
-    loginBtn.disabled = false;
-    loginBtn.classList.remove("loading");
-    loginBtnText.textContent = defaultBtnLabel;
+    // El botón se restablece en onAuthStateChanged para evitar estados inconsistentes.
   };
 
   window.authLogout = async () => {
