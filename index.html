@@ -3016,13 +3016,19 @@
   const appRootEl = document.getElementById("appRoot");
   const authCardEl = document.getElementById("authCard");
   let authTransitionToken = 0;
+  let hideAppTimeout = null;
+  let hideAuthTimeout = null;
 
   // UI helpers: show/hide with subtle transitions
   function showAuth() {
-    authTransitionToken += 1;
+    const thisTransition = ++authTransitionToken;
+    if (hideAppTimeout) clearTimeout(hideAppTimeout);
+    if (hideAuthTimeout) clearTimeout(hideAuthTimeout);
+
     appRootEl.classList.remove("visible");
     appRootEl.style.opacity = "0";
-    setTimeout(() => {
+    hideAppTimeout = setTimeout(() => {
+      if (thisTransition !== authTransitionToken) return;
       appRootEl.style.display = "none";
     }, 320);
 
@@ -3030,18 +3036,27 @@
     authRootEl.classList.remove("exiting");
     authRootEl.classList.remove("visible");
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => authRootEl.classList.add("visible"));
+      requestAnimationFrame(() => {
+        if (thisTransition !== authTransitionToken) return;
+        authRootEl.classList.add("visible");
+      });
     });
   }
 
   function showApp()  {
     const thisTransition = ++authTransitionToken;
+    if (hideAppTimeout) clearTimeout(hideAppTimeout);
+    if (hideAuthTimeout) clearTimeout(hideAuthTimeout);
+
     appRootEl.style.display = "block";
-    requestAnimationFrame(() => appRootEl.classList.add("visible"));
+    requestAnimationFrame(() => {
+      if (thisTransition !== authTransitionToken) return;
+      appRootEl.classList.add("visible");
+    });
 
     authRootEl.classList.add("exiting");
     authRootEl.classList.remove("visible");
-    setTimeout(() => {
+    hideAuthTimeout = setTimeout(() => {
       if (thisTransition !== authTransitionToken) return;
       authRootEl.style.display = "none";
       authRootEl.classList.remove("exiting");
