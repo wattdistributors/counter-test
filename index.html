@@ -1588,6 +1588,7 @@
         <div id="report_hint" style="margin-top:10px; opacity:.8; font-size:12px;">
           Copia o comparte para terminar el día y resetear.
         </div>
+        <div id="report_save_status" style="margin-top:6px; min-height:18px; font-size:12px; opacity:.95;"></div>
       </div>
     </div>
   </div>
@@ -1715,6 +1716,10 @@
       missingProfile: "Primero guarda tu nombre en Perfil.",
       missingStore: "Por favor ingresa la tienda del día.",
       endConfirm: "¿Seguro que quieres finalizar el día y resetear?",
+      endDayNow: "Finalizar día",
+      savingDay: "Guardando…",
+      savedOk: "Guardado ✓",
+      saveError: "Error al guardar",
       finishResult: "Resultado",
       dayResult: "Resultado del día",
       weekStatsTitle: "Stats de la semana",
@@ -1836,6 +1841,10 @@
       missingProfile: "Please save your name first in Profile.",
       missingStore: "Please enter today's store.",
       endConfirm: "Are you sure you want to end the day and reset?",
+      endDayNow: "End day",
+      savingDay: "Saving…",
+      savedOk: "Saved ✓",
+      saveError: "Error saving",
       finishResult: "Result",
       dayResult: "Day result",
       weekStatsTitle: "Week stats",
@@ -2149,6 +2158,7 @@
 
   // Report actions
   const reportHint = document.getElementById("report_hint");
+  const reportSaveStatus = document.getElementById("report_save_status");
   const reportDayRating = document.getElementById("report_day_rating");
   const endBtn = document.getElementById("end_btn");
   const copyBtn = document.getElementById("copy_btn");
@@ -2306,6 +2316,7 @@
     document.getElementById("report_hint").textContent = t("reportHint");
     copyBtn.textContent = t("copyBtn");
     shareBtn.textContent = t("shareBtn");
+    endBtn.textContent = t("endDayNow");
     dayCopyBtn.textContent = t("copyBtn");
     dayShareBtn.textContent = t("shareBtn");
     document.getElementById("rating_help_body").innerHTML = `
@@ -2522,10 +2533,12 @@
 
   function setReportMode(mode) {
     const isPhone = mode === "phone";
+    console.log("setReportMode", mode, { isPhone });
     copyBtn.style.display = isPhone ? "" : "none";
     shareBtn.style.display = isPhone ? "" : "none";
     reportHint.style.display = isPhone ? "" : "none";
     endBtn.style.display = isPhone ? "none" : "";
+    if (reportSaveStatus && !isPhone) reportSaveStatus.textContent = "";
   }
 
   // ---------- QR ----------
@@ -3182,17 +3195,56 @@
   copyBtn.addEventListener("click", () => doCopyOrShare("copy"));
   shareBtn.addEventListener("click", () => doCopyOrShare("share"));
 
-  endBtn.addEventListener("click", async () => {
+  let isEndingDay = false;
+
+  async function handleEndDay() {
+    console.log("handleEndDay click", { active: state.active, modeVisible: endBtn.style.display !== "none" });
     const confirmMsg = t("endConfirm");
     if (!confirm(confirmMsg)) return;
+    if (isEndingDay) return;
 
-    const endTs = Date.now();
-    const text = reportBox.textContent || "";
-    await persistCompletedDay(endTs, text);
+    const previousLabel = endBtn.textContent;
+    const dayISO = state.date;
+    isEndingDay = true;
+    endBtn.disabled = true;
+    endBtn.textContent = t("savingDay");
+    if (reportSaveStatus) reportSaveStatus.textContent = t("savingDay");
 
-    finalizeAndReset();
-    history.replaceState(null, "", location.pathname);
-  });
+    try {
+      const endTs = Date.now();
+      const text = (reportBox.textContent || "").trim() || buildReport(endTs);
+      await persistCompletedDay(endTs, text);
+
+      const saved = loadHistory()[dayISO];
+      if (!saved) throw new Error(`Day not found in cache after save: ${dayISO}`);
+      console.log("Saved day:", dayISO, saved);
+      if (state.teamId) console.log("Saved to Firestore", { teamId: state.teamId, uid: window.firebaseAuth?.currentUser?.uid, date: dayISO });
+
+      finalizeAndReset();
+      closeModal(modalReport);
+      if ((location.hash || "").startsWith("#r=")) {
+        history.replaceState(null, "", location.pathname);
+      } else {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+
+      if (reportSaveStatus) reportSaveStatus.textContent = t("savedOk");
+      endBtn.textContent = t("savedOk");
+      setTimeout(() => {
+        endBtn.textContent = t("endDayNow");
+      }, 900);
+    } catch (err) {
+      console.error("handleEndDay failed", err);
+      if (reportSaveStatus) reportSaveStatus.textContent = t("saveError");
+      alert(`${t("saveError")}: ${err?.message || "unknown error"}`);
+      endBtn.textContent = previousLabel || t("endDayNow");
+    } finally {
+      isEndingDay = false;
+      endBtn.disabled = false;
+    }
+  }
+
+  endBtn.addEventListener("click", handleEndDay);
 
   function normalizeHistoryRatings() {
     const hist = loadHistory();
