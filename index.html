@@ -152,6 +152,32 @@
       pointer-events:none;
     }
 
+
+    .authBackdropOrb{
+      position:fixed;
+      z-index:0;
+      pointer-events:none;
+      border-radius:999px;
+      filter:blur(2px);
+      opacity:.35;
+    }
+
+    .authBackdropOrb.one{
+      width:210px;
+      height:210px;
+      background:radial-gradient(circle at 30% 30%, rgba(179,226,255,.42), rgba(120,182,221,.06));
+      top:8vh;
+      left:max(2vw, 8px);
+    }
+
+    .authBackdropOrb.two{
+      width:180px;
+      height:180px;
+      background:radial-gradient(circle at 65% 30%, rgba(175,227,255,.28), rgba(107,167,212,.04));
+      right:max(4vw, 12px);
+      bottom:10vh;
+    }
+
     #appRoot{
       opacity:0;
       transition: opacity .34s ease-out;
@@ -168,6 +194,8 @@
       flex-direction:column;
       align-items:center;
       gap:14px;
+      position:relative;
+      z-index:1;
     }
 
     .authBrand{
@@ -202,7 +230,7 @@
 
     .authBrandTitle{
       margin:0;
-      font-size:31px;
+      font-size:34px;
       font-weight:800;
       letter-spacing:.01em;
       line-height:1.06;
@@ -246,6 +274,14 @@
       letter-spacing:.01em;
       text-align:center;
       color:rgba(244,252,255,.98);
+    }
+
+    .authCardIntro{
+      margin:-6px 0 2px;
+      text-align:center;
+      font-size:12px;
+      color:rgba(228,246,255,.78);
+      letter-spacing:.02em;
     }
 
     .authInput{
@@ -1211,6 +1247,8 @@
 
 <body>
   <div id="authRoot">
+    <div class="authBackdropOrb one" aria-hidden="true"></div>
+    <div class="authBackdropOrb two" aria-hidden="true"></div>
     <div class="authShell">
       <div class="authBrand authEnterBrand">
         <div class="authBrandIcon" aria-hidden="true">
@@ -1225,6 +1263,7 @@
 
       <div id="authCard" class="authCard authEnterCard">
         <h2 class="authTitle">Inicia sesión</h2>
+        <div class="authCardIntro">Accede a tu panel de rendimiento diario</div>
         <input id="authEmail" class="authInput" type="email" placeholder="tu@email.com" autocomplete="email" />
         <input id="authPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="current-password" />
         <div class="authActions">
