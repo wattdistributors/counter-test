@@ -85,7 +85,15 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
+    }
+
+    .topbarRowMain{
+      flex-wrap:nowrap;
+    }
+
+    .topbarRowSub{
       flex-wrap:wrap;
+      row-gap:8px;
     }
 
     .topbarTitle{
@@ -110,6 +118,16 @@
       flex-wrap:wrap;
       justify-content:flex-end;
       margin-left:auto;
+    }
+
+    .topbarLangBtn{
+      min-width:56px;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-align:center;
     }
 
     .btn{
@@ -1298,7 +1316,7 @@
     <div class="authBackdropOrb two" aria-hidden="true"></div>
     <div class="authShell">
       <div class="authTopRow">
-        <button class="btn authTopLangBtn" id="auth_lang_toggle" title="Language">Language</button>
+        <button class="btn authTopLangBtn" id="auth_lang_toggle" title="Language">ES</button>
       </div>
       <div class="authBrand">
         <h1 class="authBrandTitle">RetailFlow Tracker</h1>
@@ -1345,14 +1363,14 @@
     <div class="card">
       <div class="appHeader">
       <div class="topbar">
-        <div class="topbarRow">
+        <div class="topbarRow topbarRowMain">
           <div class="topbarTitle" id="today_title">RetailFlow Tracker</div>
-          <button class="btn langBtn" id="lang_toggle" title="Cambiar idioma / Change language">Idioma</button>
+          <button class="btn topbarLangBtn" id="lang_toggle" title="Cambiar idioma / Change language">ES</button>
         </div>
-        <div class="topbarRow">
+        <div class="topbarRow topbarRowSub">
           <div class="topbarDate" id="today_date"></div>
           <div class="topbarActions" id="top_actions">
-            <div class="userChip"><span class="userChipIcon">👤</span><span id="userEmail"></span></div>
+            <div class="userChip"><span id="userEmail"></span></div>
             <button class="btn logoutBtn" id="logout_btn" onclick="authLogout()">Cerrar sesión</button>
           </div>
         </div>
@@ -1593,7 +1611,8 @@
   const STATE_KEY = "kpi_state_v44";
   const HISTORY_KEY = "kpi_history_v1";
   const PROFILE_KEY = "kpi_profile_v1";
-  const LANG_KEY = "kpi_lang_v1";
+  const LANG_KEY = "app_lang";
+  const LEGACY_LANG_KEY = "kpi_lang_v1";
   const AGGR_MIN_STOPS = 20;
   const MONEY_PER_X = 100;
 
@@ -1996,8 +2015,8 @@
   // ---------- Load session state ----------
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
   const savedProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
-  const savedLang = localStorage.getItem(LANG_KEY);
-  let currentLang = savedLang === "en" ? "en" : "es";
+  const savedLang = localStorage.getItem(LANG_KEY) || localStorage.getItem(LEGACY_LANG_KEY);
+  let currentLang = (savedLang === "en" || savedLang === "es") ? savedLang : "es";
   const state = {
     active: !!saved.active,
     date: saved.date || isoDateLocal(),
@@ -2101,6 +2120,10 @@
     return i18n[currentLang][key] || i18n.es[key] || key;
   }
 
+  function shortLangLabel() {
+    return currentLang === "en" ? "EN" : "ES";
+  }
+
   function saveProfile(rep) {
     try {
       localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep }));
@@ -2145,10 +2168,10 @@
     document.getElementById("profile_name_label").textContent = t("nameLabel");
     document.getElementById("profile_save").textContent = t("profileSave");
     document.getElementById("profile_reset").textContent = t("profileReset");
-    langToggleBtn.textContent = t("languageBtn");
-    if (authLangToggleBtn) authLangToggleBtn.textContent = t("languageBtn");
-    langToggleBtn.title = `${t("languageBtn")}`;
-    if (authLangToggleBtn) authLangToggleBtn.title = `${t("languageBtn")}`;
+    langToggleBtn.textContent = shortLangLabel();
+    if (authLangToggleBtn) authLangToggleBtn.textContent = shortLangLabel();
+    langToggleBtn.title = t("languageBtn");
+    if (authLangToggleBtn) authLangToggleBtn.title = t("languageBtn");
     document.getElementById("lang_modal_title").textContent = t("languageModalTitle");
     document.getElementById("lang_modal_intro").textContent = t("languageModalIntro");
     langEsBtn.textContent = t("languageSpanish");
@@ -2182,6 +2205,7 @@
   function setLanguage(lang) {
     currentLang = lang === "en" ? "en" : "es";
     try { localStorage.setItem(LANG_KEY, currentLang); } catch {}
+    try { localStorage.removeItem(LEGACY_LANG_KEY); } catch {}
     closeModal(modalLanguage);
     applyTranslations();
     renderCalendarStats();
