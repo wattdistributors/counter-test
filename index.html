@@ -1403,6 +1403,7 @@
         <h3 class="authSignupTitle" id="signup_title">Crear cuenta</h3>
         <input id="signupName" class="authInput" type="text" placeholder="Nombre completo" autocomplete="name" />
         <input id="signupEmail" class="authInput" type="email" placeholder="correo@empresa.com" autocomplete="email" />
+        <input id="signupTeamId" class="authInput" type="text" placeholder="Team ID (ej: team_closeflow_001)" autocomplete="organization" />
         <input id="signupPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="new-password" />
         <input id="signupPass2" class="authInput" type="password" placeholder="Repite contraseña" autocomplete="new-password" />
         <div id="signupMsg" class="authSignupMsg"></div>
@@ -1666,6 +1667,7 @@
   const metrics = ["S","Z","CC","C","X"];
   const STATE_KEY = "kpi_state_v44";
   const HISTORY_KEY = "kpi_history_v1";
+  const TEAM_KEY = "kpi_team_v1";
   const PROFILE_KEY = "kpi_profile_v1";
   const LANG_KEY = "app_lang";
   const LEGACY_LANG_KEY = "kpi_lang_v1";
@@ -2090,6 +2092,7 @@
     store: saved.store || "",
     values: saved.values || {},
     sessionStart: saved.sessionStart || null,
+    teamId: (typeof saved.teamId === "string" ? saved.teamId : "") || "",
   };
   metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
 
@@ -2176,6 +2179,56 @@
   // ---------- Save session ----------
   function saveStateNow() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
   function saveState() { try { saveStateNow(); } catch {} }
+
+  function sanitizeTeamId(raw) {
+    return String(raw || "").trim().replace(/[^A-Za-z0-9_-]/g, "");
+  }
+
+  function setTeamId(teamId) {
+    const clean = sanitizeTeamId(teamId);
+    state.teamId = clean;
+    if (clean) {
+      try { localStorage.setItem(TEAM_KEY, clean); } catch {}
+    } else {
+      try { localStorage.removeItem(TEAM_KEY); } catch {}
+    }
+    saveState();
+    console.log("TEAM resolved", clean || "(none)");
+    return clean;
+  }
+
+  async function hydrateCacheFromCloudForVisibleRanges() {
+    const uid = window.firebaseAuth?.currentUser?.uid;
+    if (!uid || !state.teamId || typeof window.cloudGetDaysInRange !== "function") return;
+
+    const now = new Date();
+    const monthStartISO = isoDateLocal(new Date(calCursor.y, calCursor.m, 1));
+    const monthEndISO = isoDateLocal(new Date(calCursor.y, calCursor.m + 1, 0));
+    const weekStartISO = isoDateLocal(startOfWeekMon(now));
+    const weekEndISO = isoDateLocal(endOfWeekSun(now));
+
+    try {
+      const [monthDocs, weekDocs] = await Promise.all([
+        window.cloudGetDaysInRange(state.teamId, uid, monthStartISO, monthEndISO),
+        window.cloudGetDaysInRange(state.teamId, uid, weekStartISO, weekEndISO),
+      ]);
+      const hist = loadHistory();
+      let changed = 0;
+      [...monthDocs, ...weekDocs].forEach((rec) => {
+        if (!rec?.date) return;
+        const prev = JSON.stringify(hist[rec.date] || null);
+        const next = JSON.stringify(rec);
+        if (prev !== next) {
+          hist[rec.date] = rec;
+          changed += 1;
+        }
+      });
+      if (changed > 0) saveHistory(hist);
+      console.log(`Hydrated ${monthDocs.length + weekDocs.length} docs`);
+    } catch (err) {
+      console.warn("Firestore hydrate failed, using local cache", err);
+    }
+  }
 
   window.addEventListener("pagehide", () => { try { saveStateNow(); } catch {} });
   document.addEventListener("visibilitychange", () => {
@@ -2419,7 +2472,7 @@
     ].join("\n");
   }
 
-  function persistCompletedDay(endTs, reportText) {
+  async function persistCompletedDay(endTs, reportText) {
     const startTs = state.sessionStart || endTs;
     const ratingInfo = classifyDay(state.values);
     const payload = {
@@ -2438,6 +2491,15 @@
     const hist = loadHistory();
     hist[state.date] = payload;
     saveHistory(hist);
+
+    const uid = window.firebaseAuth?.currentUser?.uid;
+    if (uid && state.teamId && typeof window.cloudUpsertDay === "function") {
+      try {
+        await window.cloudUpsertDay(state.teamId, uid, state.date, payload);
+      } catch (err) {
+        console.warn("Firestore write failed, using local cache", err);
+      }
+    }
   }
 
   function finalizeAndReset() {
@@ -2641,7 +2703,7 @@
     }
   });
 
-  daySaveBtn.addEventListener("click", () => {
+  daySaveBtn.addEventListener("click", async () => {
     if (!activeDayISO) return;
     const hist = loadHistory();
     const rec = hist[activeDayISO];
@@ -2660,18 +2722,34 @@
     rec.dayRating = ratingInfo.dayRating;
     rec.dayBadge = ratingInfo.dayBadge;
     upsertDayInHistory(activeDayISO, rec);
+    const uid = window.firebaseAuth?.currentUser?.uid;
+    if (uid && state.teamId && typeof window.cloudUpsertDay === "function") {
+      try {
+        await window.cloudUpsertDay(state.teamId, uid, activeDayISO, rec);
+      } catch (err) {
+        console.warn("Firestore write failed, using local cache", err);
+      }
+    }
     renderCalendar();
     renderCalendarStats();
     renderProgress();
     openDayModal(activeDayISO);
   });
 
-  dayDeleteBtn.addEventListener("click", () => {
+  dayDeleteBtn.addEventListener("click", async () => {
     if (!activeDayISO) return;
     if (!confirm(`¿Borrar el día ${activeDayISO}?`)) return;
     const hist = loadHistory();
     delete hist[activeDayISO];
     saveHistory(hist);
+    const uid = window.firebaseAuth?.currentUser?.uid;
+    if (uid && state.teamId && typeof window.cloudDeleteDay === "function") {
+      try {
+        await window.cloudDeleteDay(state.teamId, uid, activeDayISO);
+      } catch (err) {
+        console.warn("Firestore write failed, using local cache", err);
+      }
+    }
     closeModal(modalDay);
     renderCalendar();
     renderCalendarStats();
@@ -2855,6 +2933,7 @@
   }
 
   function renderCalendarStats() {
+    hydrateCacheFromCloudForVisibleRanges();
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
@@ -2890,6 +2969,7 @@
   }
 
   function renderProgress() {
+    hydrateCacheFromCloudForVisibleRanges();
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
@@ -3091,7 +3171,7 @@
         }
       }
 
-      persistCompletedDay(endTs, text);
+      await persistCompletedDay(endTs, text);
       finalizeAndReset();
       history.replaceState(null, "", location.pathname);
     } catch (_) {
@@ -3102,13 +3182,13 @@
   copyBtn.addEventListener("click", () => doCopyOrShare("copy"));
   shareBtn.addEventListener("click", () => doCopyOrShare("share"));
 
-  endBtn.addEventListener("click", () => {
+  endBtn.addEventListener("click", async () => {
     const confirmMsg = t("endConfirm");
     if (!confirm(confirmMsg)) return;
 
     const endTs = Date.now();
     const text = reportBox.textContent || "";
-    persistCompletedDay(endTs, text);
+    await persistCompletedDay(endTs, text);
 
     finalizeAndReset();
     history.replaceState(null, "", location.pathname);
@@ -3153,6 +3233,10 @@
 
     renderCalendar();
     renderProgress();
+    hydrateCacheFromCloudForVisibleRanges().then(() => {
+      renderCalendar();
+      renderProgress();
+    });
     saveState();
   })();
 </script>
@@ -3163,7 +3247,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 
   const firebaseConfig = {
@@ -3180,10 +3264,88 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const analytics = getAnalytics(app);
+  const TEAM_STORAGE_KEY = "kpi_team_v1";
+  const MONEY_PER_X_CENTS = 100;
 
   // Exponer para el resto del código si es necesario
   window.firebaseAuth = auth;
   window.firebaseDB = db;
+
+  function normalizeTeamIdOrThrow(teamId) {
+    const clean = String(teamId || "").trim().replace(/[^A-Za-z0-9_-]/g, "");
+    if (!clean || clean.length < 4) throw new Error("Invalid Team ID");
+    return clean;
+  }
+
+  async function resolveTeamIdForUser(uid) {
+    const hintRaw = localStorage.getItem(TEAM_STORAGE_KEY) || "";
+    const hint = hintRaw ? String(hintRaw).trim().replace(/[^A-Za-z0-9_-]/g, "") : "";
+
+    if (hint && hint.length >= 4) {
+      const membershipHintRef = doc(db, "teams", hint, "users", uid);
+      const membershipHintSnap = await getDoc(membershipHintRef);
+      if (membershipHintSnap.exists()) return hint;
+    }
+
+    const userTeamRef = doc(db, "userTeams", uid);
+    const userTeamSnap = await getDoc(userTeamRef);
+    if (!userTeamSnap.exists()) throw new Error("No team membership found for user");
+
+    const teamId = normalizeTeamIdOrThrow(userTeamSnap.data()?.teamId || "");
+    return teamId;
+  }
+
+  async function cloudUpsertDay(teamId, uid, iso, payload) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const safeIso = String(iso || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(safeIso)) throw new Error("Invalid day ISO");
+
+    const dayRef = doc(db, "teams", safeTeamId, "agents", uid, "days", safeIso);
+    const summaryRef = doc(db, "teams", safeTeamId, "days", safeIso, "agents", uid);
+    const batch = writeBatch(db);
+
+    batch.set(dayRef, {
+      ...payload,
+      date: safeIso,
+      money: (payload?.values?.X || 0) * MONEY_PER_X_CENTS,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+
+    batch.set(summaryRef, {
+      X: payload?.values?.X || 0,
+      S: payload?.values?.S || 0,
+      Z: payload?.values?.Z || 0,
+      money: (payload?.values?.X || 0) * MONEY_PER_X_CENTS,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+
+    await batch.commit();
+    console.log("Saved day to Firestore", safeIso);
+  }
+
+  async function cloudDeleteDay(teamId, uid, iso) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const safeIso = String(iso || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(safeIso)) throw new Error("Invalid day ISO");
+
+    await Promise.all([
+      deleteDoc(doc(db, "teams", safeTeamId, "agents", uid, "days", safeIso)),
+      deleteDoc(doc(db, "teams", safeTeamId, "days", safeIso, "agents", uid)),
+    ]);
+  }
+
+  async function cloudGetDaysInRange(teamId, uid, startISO, endISO) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const colRef = collection(db, "teams", safeTeamId, "agents", uid, "days");
+    const q = query(colRef, where("date", ">=", startISO), where("date", "<=", endISO));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ ...d.data(), date: d.id }));
+  }
+
+  window.resolveTeamIdForUser = resolveTeamIdForUser;
+  window.cloudUpsertDay = cloudUpsertDay;
+  window.cloudDeleteDay = cloudDeleteDay;
+  window.cloudGetDaysInRange = cloudGetDaysInRange;
 
   const authRootEl = document.getElementById("authRoot");
   const appRootEl = document.getElementById("appRoot");
@@ -3209,8 +3371,16 @@
   }
 
   // Estado de sesión
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
+      try {
+        const teamId = await resolveTeamIdForUser(user.uid);
+        window.setTeamId(teamId);
+      } catch (err) {
+        console.warn("TEAM resolve failed", err);
+        window.setTeamId("");
+      }
+
       showApp();
       const repName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
       state.rep = repName;
@@ -3219,7 +3389,12 @@
       applyTranslations();
       const el = document.getElementById("userEmail");
       if (el) el.textContent = repName;
+
+      await hydrateCacheFromCloudForVisibleRanges();
+      renderCalendar();
+      renderProgress();
     } else {
+      window.setTeamId("");
       showAuth();
     }
   });
@@ -3240,6 +3415,7 @@
   window.authSignup = async () => {
     const name = document.getElementById("signupName").value.trim();
     const email = document.getElementById("signupEmail").value.trim();
+    const teamRaw = document.getElementById("signupTeamId").value;
     const pass = document.getElementById("signupPass").value;
     const pass2 = document.getElementById("signupPass2").value;
     const msgEl = document.getElementById("signupMsg");
@@ -3247,6 +3423,17 @@
 
     msgEl.textContent = "";
     msgEl.classList.remove("error");
+
+    let teamId = "";
+    try {
+      teamId = normalizeTeamIdOrThrow(teamRaw);
+    } catch {
+      msgEl.textContent = currentLang === "en"
+        ? "Team ID is required (min 4, letters/numbers/-/_ only)."
+        : "Team ID obligatorio (mínimo 4, solo letras/números/-/_).";
+      msgEl.classList.add("error");
+      return;
+    }
 
     if (!name || !email || !pass || !pass2) {
       msgEl.textContent = currentLang === "en" ? "Complete all fields." : "Completa todos los campos.";
@@ -3264,6 +3451,21 @@
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
+
+      await Promise.all([
+        setDoc(doc(db, "teams", teamId, "users", cred.user.uid), {
+          name,
+          email,
+          role: "agent",
+          createdAt: serverTimestamp(),
+        }, { merge: true }),
+        setDoc(doc(db, "userTeams", cred.user.uid), {
+          teamId,
+          createdAt: serverTimestamp(),
+        }, { merge: true }),
+      ]);
+
+      window.setTeamId(teamId);
       state.rep = name;
       try { localStorage.setItem(PROFILE_KEY, JSON.stringify({ rep: name })); } catch {}
       saveStateNow();
