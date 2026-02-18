@@ -508,10 +508,23 @@
     }
 
     .logoutBtn{
-      font-size:12px;
-      font-weight:700;
+      min-height:36px;
+      font-size:11px;
+      font-weight:650;
       border-radius:999px;
-      padding:7px 10px;
+      padding:6px 10px;
+      background:rgba(255,255,255,.06);
+      border-color:rgba(255,255,255,.14);
+      color:rgba(234,247,255,.92);
+    }
+
+    .sessionActions{
+      margin-top:12px;
+      width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:8px;
     }
     .startHeroTitle{
       font-size:34px;
@@ -1462,11 +1475,11 @@
             </div>
           </div>
 
-          <div class="btnrow" style="margin-top:12px; justify-content:center;">
+          <div class="sessionActions">
             <button class="btn helpBtn" id="rating_help_btn" aria-label="Ver criterios de clasificación">?</button>
             <button class="btn primary" id="finish_day">End day</button>
           </div>
-          <div id="finish_result" class="finishResult"></div>
+          <div id="finish_result" class="finishResult" style="display:none;"></div>
         </div>
       </div>
 
@@ -3024,7 +3037,6 @@
     const text = buildReport(endTs);
     const ratingInfo = classifyDay(state.values || {});
     const result = ratingLine(ratingInfo.dayRating, ratingInfo.dayBadge);
-    finishResult.textContent = `${t("finishResult")}: ${result}`;
     reportDayRating.style.display = "";
     reportDayRating.textContent = `${t("dayResult")}: ${result}`;
     reportBox.textContent = text;
