@@ -135,28 +135,115 @@
       display:none;
       align-items:center;
       justify-content:center;
-      padding:20px;
+      padding:clamp(22px, 6vh, 52px) 18px;
       box-sizing:border-box;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .34s ease-out;
+    }
+
+    #authRoot.visible{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    #authRoot.exiting{
+      opacity:0;
+      pointer-events:none;
+    }
+
+    #appRoot{
+      opacity:0;
+      transition: opacity .34s ease-out;
+    }
+
+    #appRoot.visible{
+      opacity:1;
+    }
+
+    .authShell{
+      width:min(420px, 100%);
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+    }
+
+    .authBrand{
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      color:rgba(242,252,255,.97);
+    }
+
+    .authBrandIcon{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(181,228,255,.44);
+      background:linear-gradient(155deg, rgba(166,224,255,.22), rgba(70,145,198,.18));
+      display:grid;
+      place-items:center;
+      box-shadow:0 8px 18px rgba(9,40,68,.2);
+    }
+
+    .authBrandIcon svg{
+      width:21px;
+      height:21px;
+      stroke:rgba(236,250,255,.92);
+      stroke-width:2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .authBrandTitle{
+      margin:0;
+      font-size:31px;
+      font-weight:800;
+      letter-spacing:.01em;
+      line-height:1.06;
+    }
+
+    .authBrandSubtitle{
+      margin:0;
+      font-size:13px;
+      color:rgba(224,244,255,.82);
+      font-weight:500;
+      letter-spacing:.02em;
     }
 
     .authCard{
-      width:min(420px, 92vw);
+      width:100%;
       background: rgba(255,255,255,.12);
       border: 1px solid rgba(255,255,255,.18);
       border-radius: 20px;
-      padding: 22px;
+      padding: 20px 18px;
       backdrop-filter: blur(12px) saturate(130%);
       -webkit-backdrop-filter: blur(12px) saturate(130%);
       box-shadow: 0 10px 24px rgba(4,28,46,.20);
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:14px;
+      transition: transform .22s ease, box-shadow .22s ease;
+    }
+
+    .authCard.loading{
+      animation: authCardPulse .7s ease-in-out infinite alternate;
+    }
+
+    .authCard.shake{
+      animation: authShake .24s ease;
     }
 
     .authTitle{
       margin:0;
-      font-size:28px;
-      font-weight:800;
+      font-size:24px;
+      font-weight:700;
+      letter-spacing:.01em;
       text-align:center;
       color:rgba(244,252,255,.98);
     }
@@ -168,34 +255,112 @@
       background:rgba(255,255,255,.10);
       color:#fff;
       border-radius:12px;
-      padding:12px;
-      font-size:14px;
+      min-height:48px;
+      padding:12px 14px;
+      font-size:15px;
+      line-height:1.2;
       outline:none;
     }
 
-    .authInput::placeholder{ color:rgba(227,244,255,.7); }
+    .authInput::placeholder{ color:rgba(233,247,255,.82); }
 
     .authActions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
+      width:100%;
     }
 
-    .authLinkBtn{
-      border:0;
-      background:transparent;
-      color:rgba(220,243,255,.92);
-      text-decoration:underline;
-      cursor:pointer;
-      padding:4px;
-      font-size:13px;
+    .authLoginBtn{
+      width:100%;
+      min-height:52px;
+      padding:12px 14px;
+      border-radius:14px;
+      font-size:18px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .authLoginBtn:disabled{
+      cursor:not-allowed;
+      opacity:.84;
+    }
+
+    .authSpinner{
+      width:16px;
+      height:16px;
+      border-radius:999px;
+      border:2px solid rgba(255,255,255,.35);
+      border-top-color:rgba(255,255,255,.95);
+      animation: authSpin .72s linear infinite;
+      display:none;
+      flex:0 0 auto;
+    }
+
+    .authLoginBtn.loading .authSpinner{
+      display:inline-block;
     }
 
     .authMsg{
       min-height:20px;
       font-size:13px;
-      color:rgba(231,248,255,.95);
+      color:rgba(231,248,255,.9);
+      text-align:left;
+      padding:0 2px;
+    }
+
+    .authMsg.error{
+      color:rgba(255, 190, 190, .95);
+    }
+
+    .authSecureText{
       text-align:center;
+      font-size:12px;
+      color:rgba(228,246,255,.72);
+      margin-top:2px;
+      letter-spacing:.01em;
+    }
+
+    .authVersion{
+      text-align:center;
+      font-size:11px;
+      color:rgba(227,245,255,.46);
+      letter-spacing:.04em;
+      margin-top:2px;
+    }
+
+    .authEnterBrand,
+    .authEnterCard{
+      opacity:0;
+      transform:translateY(10px);
+    }
+
+    #authRoot.visible .authEnterBrand{
+      animation: authEnter .38s ease-out forwards;
+    }
+
+    #authRoot.visible .authEnterCard{
+      animation: authEnter .4s ease-out .05s forwards;
+    }
+
+    @keyframes authSpin{
+      to{ transform:rotate(360deg); }
+    }
+
+    @keyframes authCardPulse{
+      from{ transform:scale(.995); box-shadow:0 10px 24px rgba(4,28,46,.20); }
+      to{ transform:scale(1); box-shadow:0 14px 30px rgba(9,50,84,.26); }
+    }
+
+    @keyframes authShake{
+      0%,100%{ transform:translateX(0); }
+      30%{ transform:translateX(-2px); }
+      70%{ transform:translateX(2px); }
+    }
+
+    @keyframes authEnter{
+      from{ opacity:0; transform:translateY(10px); }
+      to{ opacity:1; transform:translateY(0); }
     }
 
     .userMeta{
@@ -1046,16 +1211,33 @@
 
 <body>
   <div id="authRoot">
-    <div class="authCard">
-      <h1 class="authTitle">Inicia sesión</h1>
-      <input id="authEmail" class="authInput" type="email" placeholder="tu@email.com" autocomplete="email" />
-      <input id="authPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="current-password" />
-      <div class="authActions">
-        <button class="btn" onclick="authSignup()">Crear cuenta</button>
-        <button class="btn primary" onclick="authLogin()">Iniciar sesión</button>
+    <div class="authShell">
+      <div class="authBrand authEnterBrand">
+        <div class="authBrandIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 16.5 9 11l3.5 3.5L20 7"></path>
+            <path d="M20 7v5"></path>
+          </svg>
+        </div>
+        <h1 class="authBrandTitle">RetailFlow Tracker</h1>
+        <p class="authBrandSubtitle">Control profesional de ventas retail</p>
       </div>
-      <button class="authLinkBtn" onclick="authReset()">Olvidé mi contraseña</button>
-      <div id="authMsg" class="authMsg"></div>
+
+      <div id="authCard" class="authCard authEnterCard">
+        <h2 class="authTitle">Inicia sesión</h2>
+        <input id="authEmail" class="authInput" type="email" placeholder="tu@email.com" autocomplete="email" />
+        <input id="authPass" class="authInput" type="password" placeholder="Contraseña" autocomplete="current-password" />
+        <div class="authActions">
+          <button id="authLoginBtn" class="btn primary authLoginBtn" onclick="authLogin()">
+            <span id="authLoginBtnText">Iniciar sesión</span>
+            <span class="authSpinner" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div id="authMsg" class="authMsg"></div>
+        <div class="authSecureText">Tus datos se guardan de forma segura en la nube</div>
+      </div>
+
+      <div class="authVersion">v1.0 · RetailFlow</div>
     </div>
   </div>
 
@@ -2767,7 +2949,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } 
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
@@ -2791,9 +2973,41 @@
   window.firebaseAuth = auth;
   window.firebaseDB = db;
 
-  // UI helpers: show/hide
-  function showAuth() { document.getElementById("authRoot").style.display = "flex"; document.getElementById("appRoot").style.display = "none"; }
-  function showApp()  { document.getElementById("authRoot").style.display = "none"; document.getElementById("appRoot").style.display = "block"; }
+  const authRootEl = document.getElementById("authRoot");
+  const appRootEl = document.getElementById("appRoot");
+  const authCardEl = document.getElementById("authCard");
+  let authTransitionToken = 0;
+
+  // UI helpers: show/hide with subtle transitions
+  function showAuth() {
+    authTransitionToken += 1;
+    appRootEl.classList.remove("visible");
+    appRootEl.style.opacity = "0";
+    setTimeout(() => {
+      appRootEl.style.display = "none";
+    }, 320);
+
+    authRootEl.style.display = "flex";
+    authRootEl.classList.remove("exiting");
+    authRootEl.classList.remove("visible");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => authRootEl.classList.add("visible"));
+    });
+  }
+
+  function showApp()  {
+    const thisTransition = ++authTransitionToken;
+    appRootEl.style.display = "block";
+    requestAnimationFrame(() => appRootEl.classList.add("visible"));
+
+    authRootEl.classList.add("exiting");
+    authRootEl.classList.remove("visible");
+    setTimeout(() => {
+      if (thisTransition !== authTransitionToken) return;
+      authRootEl.style.display = "none";
+      authRootEl.classList.remove("exiting");
+    }, 360);
+  }
 
   // Estado de sesión
   onAuthStateChanged(auth, (user) => {
@@ -2808,42 +3022,42 @@
   });
 
   // Acciones Auth (ligadas a botones)
-  window.authSignup = async () => {
-    const email = document.getElementById("authEmail").value.trim();
-    const pass  = document.getElementById("authPass").value;
-    const msgEl = document.getElementById("authMsg");
-    msgEl.textContent = "";
-    try {
-      await createUserWithEmailAndPassword(auth, email, pass);
-      msgEl.textContent = "Cuenta creada ✔";
-    } catch (e) {
-      msgEl.textContent = humanAuthError(e);
-    }
-  };
-
   window.authLogin = async () => {
     const email = document.getElementById("authEmail").value.trim();
     const pass  = document.getElementById("authPass").value;
     const msgEl = document.getElementById("authMsg");
+    const loginBtn = document.getElementById("authLoginBtn");
+    const loginBtnText = document.getElementById("authLoginBtnText");
+    const defaultBtnLabel = "Iniciar sesión";
+
     msgEl.textContent = "";
+    msgEl.classList.remove("error");
+    loginBtn.disabled = true;
+    loginBtn.classList.add("loading");
+    loginBtnText.textContent = "Iniciando…";
+    authCardEl.classList.remove("shake");
+    authCardEl.classList.add("loading");
+
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      msgEl.textContent = "Bienvenido ✔";
+      msgEl.textContent = "";
+      msgEl.classList.remove("error");
     } catch (e) {
       msgEl.textContent = humanAuthError(e);
+      msgEl.classList.add("error");
+      authCardEl.classList.remove("loading");
+      authCardEl.classList.add("shake");
+      setTimeout(() => authCardEl.classList.remove("shake"), 280);
+      loginBtn.disabled = false;
+      loginBtn.classList.remove("loading");
+      loginBtnText.textContent = defaultBtnLabel;
+      return;
     }
-  };
 
-  window.authReset = async () => {
-    const email = document.getElementById("authEmail").value.trim();
-    const msgEl = document.getElementById("authMsg");
-    msgEl.textContent = "";
-    try {
-      await sendPasswordResetEmail(auth, email);
-      msgEl.textContent = "Te envié un email para resetear la contraseña ✔";
-    } catch (e) {
-      msgEl.textContent = humanAuthError(e);
-    }
+    authCardEl.classList.remove("loading");
+    loginBtn.disabled = false;
+    loginBtn.classList.remove("loading");
+    loginBtnText.textContent = defaultBtnLabel;
   };
 
   window.authLogout = async () => {
