@@ -3021,6 +3021,15 @@
       row.style.textAlign = "left";
       row.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">${agent.email || ""}</div><div style="opacity:.82; font-size:12px;">${t("weekXLabel")}: ${rowData.weekX} • ${t("monthXLabel")}: ${rowData.monthX}</div>`;
       row.addEventListener("click", async () => {
+        const isSameAgentOpen = managerState.selectedAgentUid === agent.uid && managerAgentDetailEl.style.display !== "none";
+        if (isSameAgentOpen) {
+          managerState.selectedAgentUid = "";
+          managerState.selectedAgentName = "";
+          managerState.selectedAgentEmail = "";
+          managerAgentDetailEl.style.display = "none";
+          agentsBreadcrumbEl.textContent = t("agentTrail");
+          return;
+        }
         managerState.selectedAgentUid = agent.uid;
         managerState.selectedAgentName = agent.displayName || agent.email || agent.uid;
         managerState.selectedAgentEmail = agent.email || "";
