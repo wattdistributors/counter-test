@@ -2526,6 +2526,9 @@
     }
 
     try {
+      if (typeof window.ensureTeamMembership === "function") {
+        await window.ensureTeamMembership(state.teamId, uid);
+      }
       const res = await window.cloudUpsertDay(state.teamId, uid, state.date, payload);
       console.log("Saved day:", state.date, payload);
       console.log("Saved to Firestore", res?.path || "-");
@@ -3384,6 +3387,35 @@
     return sanitizeTeamId(data.teamId || "");
   }
 
+  async function ensureTeamMembership(teamId, uid) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const safeUid = String(uid || "").trim();
+    if (!safeUid) return;
+
+    const user = auth.currentUser;
+    const name = user?.displayName || state.rep || "";
+    const email = user?.email || "";
+
+    await Promise.all([
+      setDoc(doc(db, "teams", safeTeamId), {
+        createdAt: serverTimestamp(),
+      }, { merge: true }),
+      setDoc(doc(db, "teams", safeTeamId, "members", safeUid), {
+        teamId: safeTeamId,
+        name,
+        email,
+        role: "agent",
+        createdAt: serverTimestamp(),
+      }, { merge: true }),
+      setDoc(doc(db, "users", safeUid), {
+        teamId: safeTeamId,
+        name,
+        email,
+        role: "agent",
+      }, { merge: true }),
+    ]);
+  }
+
   async function cloudUpsertDay(teamId, uid, iso, payload) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
     const safeIso = String(iso || "").trim();
@@ -3427,6 +3459,7 @@
       return { path, payload: flatPayload };
     } catch (e) {
       console.error("Firestore day write failed", e);
+      console.error("Firestore day write failed (actionable): verify Firestore Rules allow teams/{teamId}/agents/{uid}/days writes for this user/team.", e?.code || e?.message || e);
       throw e;
     }
   }
@@ -3448,6 +3481,7 @@
   }
 
   window.resolveTeamIdForUser = resolveTeamIdForUser;
+  window.ensureTeamMembership = ensureTeamMembership;
   window.cloudUpsertDay = cloudUpsertDay;
   window.cloudDeleteDay = cloudDeleteDay;
   window.cloudGetDaysInRange = cloudGetDaysInRange;
@@ -3534,6 +3568,9 @@
 
           window.setTeamId(teamId);
           console.log("TEAM loaded from /users", teamId || "(empty)");
+          if (teamId) {
+            await ensureTeamMembership(teamId, user.uid);
+          }
         } catch (err) {
           console.error("TEAM/users bootstrap failed", err);
         }
