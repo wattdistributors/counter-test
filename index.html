@@ -2506,9 +2506,23 @@
     saveHistory(hist);
 
     const uid = window.firebaseAuth?.currentUser?.uid;
-    if (!uid || !state.teamId) {
-      console.warn("Firestore day save skipped: missing uid/teamId", { uid: !!uid, teamId: !!state.teamId });
-      return { localSaved: true, cloudSaved: false };
+    if (!uid) {
+      console.warn("Firestore day save skipped: missing uid");
+      return { localSaved: true, cloudSaved: false, reason: "missing-uid" };
+    }
+
+    if (!state.teamId && typeof window.resolveTeamIdForUser === "function") {
+      try {
+        const resolvedTeamId = await window.resolveTeamIdForUser(uid);
+        if (resolvedTeamId) setTeamId(resolvedTeamId);
+      } catch (e) {
+        console.warn("Unable to resolve teamId before day write", e);
+      }
+    }
+
+    if (!state.teamId) {
+      console.warn("Firestore day save skipped: missing teamId", { uid, teamId: state.teamId });
+      return { localSaved: true, cloudSaved: false, reason: "missing-team" };
     }
 
     try {
@@ -3196,7 +3210,7 @@
       }
 
       const result = await persistCompletedDay(endTs, text);
-      if (!result?.cloudSaved && state.teamId && window.firebaseAuth?.currentUser?.uid) {
+      if (!result?.cloudSaved && window.firebaseAuth?.currentUser?.uid) {
         alert(currentLang === "en" ? "Could not save to cloud. Please try again." : "No se pudo guardar en la nube. Inténtalo de nuevo.");
         return;
       }
@@ -3229,7 +3243,7 @@
       const endTs = Date.now();
       const text = (reportBox.textContent || "").trim() || buildReport(endTs);
       const result = await persistCompletedDay(endTs, text);
-      if (!result?.cloudSaved && state.teamId && window.firebaseAuth?.currentUser?.uid) {
+      if (!result?.cloudSaved && window.firebaseAuth?.currentUser?.uid) {
         throw new Error("cloud-save-failed");
       }
 
@@ -3386,6 +3400,7 @@
 
     const flatPayload = {
       dateISO: safeIso,
+      date: safeIso,
       rep: payload?.rep || "",
       store: payload?.store || "",
       startTs: Number(payload?.startTs || 0),
