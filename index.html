@@ -1193,6 +1193,7 @@
     }
     #modal_add_day .modal{
       width:min(560px, 100%);
+      max-width: calc(100vw - 24px);
       max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px);
       display:flex;
       flex-direction:column;
@@ -1202,14 +1203,18 @@
     #modal_add_day .modalBody{
       margin-top: 2px;
       overflow-y:auto;
+      overflow-x:hidden;
       padding-right: 2px;
       min-width:0;
     }
     #modal_add_day .grid2{
       gap:12px;
       margin-top:8px;
+      min-width:0;
+      overflow-x:hidden;
     }
-    #modal_add_day .grid2 .field{ min-width:0; }
+    #modal_add_day .grid2 .field{ min-width:0; overflow:hidden; }
+    #modal_add_day .field input{ min-width:0; max-width:100%; }
     #modal_add_day .modalActions{
       margin-top: 10px;
       padding-top: 8px;
@@ -2328,6 +2333,7 @@
     search: "",
     monthCache: new Map(),
     records: {},
+    listRenderToken: 0,
     calCursor: (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })(),
   };
 
@@ -3154,8 +3160,18 @@
   }
 
   async function renderManagerAgentsList() {
+    const renderToken = ++managerState.listRenderToken;
+    const uniqueByUid = new Map();
+    managerState.list.forEach((agent) => {
+      const uid = String(agent?.uid || "").trim();
+      if (!uid) return;
+      if (!uniqueByUid.has(uid)) uniqueByUid.set(uid, { ...agent, uid });
+    });
+    const uniqueList = Array.from(uniqueByUid.values());
+    if (uniqueList.length !== managerState.list.length) managerState.list = uniqueList;
+
     const q = (managerState.search || "").toLowerCase();
-    const filtered = managerState.list.filter((a) => (a.displayName || "").toLowerCase().includes(q) || (a.email || "").toLowerCase().includes(q) || (a.uid || "").toLowerCase().includes(q));
+    const filtered = uniqueList.filter((a) => (a.displayName || "").toLowerCase().includes(q) || (a.email || "").toLowerCase().includes(q) || (a.uid || "").toLowerCase().includes(q));
     agentsListEl.innerHTML = "";
     if (!filtered.length) {
       agentsListEl.innerHTML = `<div class="statCard">${t("agentsEmpty")}</div>`;
@@ -3165,13 +3181,18 @@
     const rowsData = [];
     for (const agent of filtered) {
       await ensureManagerAgentMonth(agent.uid, now.getFullYear(), now.getMonth());
+      if (renderToken !== managerState.listRenderToken) return;
       const weekTotals = sumRecords(recordsInRangeForAgent(agent.uid, startOfWeekMon(now), endOfWeekSun(now)));
       const monthTotals = sumRecords(recordsInMonthForAgent(agent.uid, now.getFullYear(), now.getMonth()));
       rowsData.push({ agent, weekX: weekTotals.X || 0, monthX: monthTotals.X || 0 });
     }
+    if (renderToken !== managerState.listRenderToken) return;
     rowsData.sort((a,b) => b.monthX - a.monthX);
+    const seen = new Set();
     for (const rowData of rowsData) {
       const agent = rowData.agent;
+      if (seen.has(agent.uid)) continue;
+      seen.add(agent.uid);
       const row = document.createElement("button");
       row.className = "btn";
       row.style.textAlign = "left";
