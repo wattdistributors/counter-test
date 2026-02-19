@@ -2457,32 +2457,51 @@
     startTimerLoop();
   }
 
-  function buildReport(endTs) {
-    const S = state.values.S, Z = state.values.Z, CC = state.values.CC, C = state.values.C, X = state.values.X;
+  function buildReportText(dayData) {
+    const values = dayData?.values || {};
+    const S = Number(values.S || 0);
+    const Z = Number(values.Z || 0);
+    const CC = Number(values.CC || 0);
+    const C = Number(values.C || 0);
+    const X = Number(values.X || 0);
 
     const aggr = (S >= AGGR_MIN_STOPS && S > 0) ? (Z / S) : null;
-    const close = (Z > 0) ? (X / Z) : 0;
-
-    const startTs = state.sessionStart || endTs;
-    const duration = fmtDuration(endTs - startTs);
+    const close = (Z > 0) ? (X / Z) : null;
 
     const aggrLine = (aggr !== null)
       ? `% Aggressiveness (Z/S): ${fmtPct(aggr)}`
       : `% Aggressiveness (Z/S): — (min ${AGGR_MIN_STOPS} S)`;
 
+    const closeLine = (close !== null)
+      ? `% Close (X/Z): ${fmtPct(close)}`
+      : `% Close (X/Z): —`;
+
     return [
-      `Name: ${state.rep || "-"}`,
-      `Store: ${state.store || "-"}`,
-      `Date: ${prettyDateFromISO(state.date)}`,
+      `Name: ${dayData?.rep || "-"}`,
+      `Store: ${dayData?.store || "-"}`,
+      `Date: ${prettyDateFromISO(dayData?.date || "-")}`,
       ``,
-      `Start: ${fmtTime(startTs)}`,
-      `End: ${fmtTime(endTs)}`,
-      `Duration: ${duration}`,
+      `Start: ${fmtTime(dayData?.startTs)}`,
+      `End: ${fmtTime(dayData?.endTs)}`,
+      `Duration: ${fmtDuration(dayData?.durationMs || 0)}`,
       ``,
       `S: ${S} | Z: ${Z} | CC: ${CC} | C: ${C} | X: ${X}`,
       aggrLine,
-      `% Close (X/Z): ${fmtPct(close)}`
+      closeLine
     ].join("\n");
+  }
+
+  function buildReport(endTs) {
+    const startTs = state.sessionStart || endTs;
+    return buildReportText({
+      date: state.date,
+      rep: state.rep || "",
+      store: state.store || "",
+      startTs,
+      endTs,
+      durationMs: Math.max(0, endTs - startTs),
+      values: { ...state.values },
+    });
   }
 
   async function persistCompletedDay(endTs, reportText) {
@@ -2602,34 +2621,7 @@
   // ---------- Day details modal logic ----------
   function buildFullReportFromRecord(rec){
     if (!rec) return "No data for this day.";
-    if (rec.reportText) return rec.reportText;
-
-    const S = rec.values?.S ?? 0;
-    const Z = rec.values?.Z ?? 0;
-    const CC = rec.values?.CC ?? 0;
-    const C = rec.values?.C ?? 0;
-    const X = rec.values?.X ?? 0;
-
-    const aggr = (S >= AGGR_MIN_STOPS && S > 0) ? (Z / S) : null;
-    const close = (Z > 0) ? (X / Z) : 0;
-
-    const aggrLine = (aggr !== null)
-      ? `% Aggressiveness (Z/S): ${fmtPct(aggr)}`
-      : `% Aggressiveness (Z/S): — (min ${AGGR_MIN_STOPS} S)`;
-
-    return [
-      `Name: ${rec.rep || "-"}`,
-      `Store: ${rec.store || "-"}`,
-      `Date: ${prettyDateFromISO(rec.date || "-")}`,
-      ``,
-      `Start: ${fmtTime(rec.startTs)}`,
-      `End: ${fmtTime(rec.endTs)}`,
-      `Duration: ${fmtDuration(rec.durationMs || 0)}`,
-      ``,
-      `S: ${S} | Z: ${Z} | CC: ${CC} | C: ${C} | X: ${X}`,
-      aggrLine,
-      `% Close (X/Z): ${fmtPct(close)}`
-    ].join("\n");
+    return buildReportText(rec);
   }
 
   function openDayModal(iso){
@@ -3427,36 +3419,30 @@
     const CC = Number(payload?.values?.CC || 0);
     const C = Number(payload?.values?.C || 0);
     const X = Number(payload?.values?.X || 0);
-    const aggrPct = S > 0 ? Number(((Z / S) * 100).toFixed(2)) : 0;
-    const closePct = Z > 0 ? Number(((X / Z) * 100).toFixed(2)) : 0;
 
-    const flatPayload = {
-      dateISO: safeIso,
+    const cleanPayload = {
       date: safeIso,
       rep: payload?.rep || "",
       store: payload?.store || "",
       startTs: Number(payload?.startTs || 0),
       endTs: Number(payload?.endTs || 0),
       durationMs: Number(payload?.durationMs || 0),
-      money: Number(payload?.money || (X * MONEY_PER_X_CENTS)),
-      S, Z, CC, C, X,
-      aggrPct,
-      closePct,
+      values: { S, Z, CC, C, X },
+      money: X * MONEY_PER_X_CENTS,
       dayRating: payload?.dayRating || "",
       dayBadge: payload?.dayBadge || "",
-      reportText: payload?.reportText || "",
-      values: { S, Z, CC, C, X },
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
+    console.log("Firestore payload (clean):", cleanPayload);
 
     const path = `teams/${safeTeamId}/agents/${uid}/days/${safeIso}`;
     try {
       console.log("Saving day to Firestore...", safeTeamId, uid, safeIso);
-      await setDoc(dayRef, flatPayload, { merge: true });
+      await setDoc(dayRef, cleanPayload, { merge: true });
       console.log("Saved day to Firestore OK");
       debugLog("Firestore path", path);
-      return { path, payload: flatPayload };
+      return { path, payload: cleanPayload };
     } catch (e) {
       console.error("Firestore day write failed", e);
       console.error("Firestore day write failed (actionable): verify Firestore Rules allow teams/{teamId}/agents/{uid}/days writes for this user/team.", e?.code || e?.message || e);
@@ -3477,7 +3463,28 @@
     const colRef = collection(db, "teams", safeTeamId, "agents", uid, "days");
     const q = query(colRef, where("date", ">=", startISO), where("date", "<=", endISO));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ ...d.data(), date: d.id }));
+    return snap.docs.map((d) => {
+      const data = d.data() || {};
+      const values = {
+        S: Number(data?.values?.S ?? data?.S ?? 0),
+        Z: Number(data?.values?.Z ?? data?.Z ?? 0),
+        CC: Number(data?.values?.CC ?? data?.CC ?? 0),
+        C: Number(data?.values?.C ?? data?.C ?? 0),
+        X: Number(data?.values?.X ?? data?.X ?? 0),
+      };
+      return {
+        date: data?.date || d.id,
+        rep: data?.rep || "",
+        store: data?.store || "",
+        startTs: Number(data?.startTs || 0),
+        endTs: Number(data?.endTs || 0),
+        durationMs: Number(data?.durationMs || 0),
+        values,
+        money: Number(data?.money ?? (values.X * MONEY_PER_X_CENTS)),
+        dayRating: data?.dayRating || "",
+        dayBadge: data?.dayBadge || "",
+      };
+    });
   }
 
   window.resolveTeamIdForUser = resolveTeamIdForUser;
