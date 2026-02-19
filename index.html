@@ -2024,6 +2024,7 @@
     const startTs = state.sessionStart || endTs;
     const ratingInfo = classifyDay(state.values);
     const payload = {
+      schemaVersion: 1,
       date: state.date,
       rep: state.rep || "",
       store: state.store || "",
@@ -2039,6 +2040,12 @@
     const hist = loadHistory();
     hist[state.date] = payload;
     saveHistory(hist);
+
+    if (typeof window.saveDayToFirestore === "function") {
+      window.saveDayToFirestore(payload).catch((err) => {
+        console.error("Error saving day to Firestore:", err);
+      });
+    }
   }
 
   function finalizeAndReset() {
@@ -2777,7 +2784,15 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+  import {
+    getFirestore,
+    collection,
+    doc,
+    getDocs,
+    setDoc,
+    updateDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 
   const firebaseConfig = {
@@ -2794,10 +2809,63 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const analytics = getAnalytics(app);
+  const DAY_SCHEMA_VERSION = 1;
 
   // Exponer para el resto del código si es necesario
   window.firebaseAuth = auth;
   window.firebaseDB = db;
+
+  window.saveDayToFirestore = async (dayPayload) => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.warn("Skipping Firestore day write: no authenticated user.");
+      return;
+    }
+
+    const teamId = (window.currentTeamId || localStorage.getItem("kpi_team_id") || "default").trim();
+    const dayId = (dayPayload?.date || "").trim();
+    if (!dayId) {
+      console.warn("Skipping Firestore day write: missing day date.");
+      return;
+    }
+
+    const dayRef = doc(db, "teams", teamId, "agents", user.uid, "days", dayId);
+    const payload = {
+      ...dayPayload,
+      schemaVersion: DAY_SCHEMA_VERSION,
+      updatedAt: serverTimestamp()
+    };
+
+    console.log("Firestore day payload:", payload);
+    await setDoc(dayRef, payload, { merge: true });
+  };
+
+  window.migrateAddSchemaVersion = async (teamId, agentUid) => {
+    const resolvedTeamId = (teamId || "").trim();
+    const resolvedAgentUid = (agentUid || auth.currentUser?.uid || "").trim();
+
+    if (!resolvedTeamId || !resolvedAgentUid) {
+      throw new Error("migrateAddSchemaVersion(teamId, agentUid) requires both values.");
+    }
+
+    const daysColRef = collection(db, "teams", resolvedTeamId, "agents", resolvedAgentUid, "days");
+    const snap = await getDocs(daysColRef);
+    let updated = 0;
+
+    for (const dayDoc of snap.docs) {
+      const data = dayDoc.data() || {};
+      if (data.schemaVersion === undefined) {
+        await updateDoc(dayDoc.ref, {
+          schemaVersion: DAY_SCHEMA_VERSION,
+          updatedAt: serverTimestamp()
+        });
+        updated += 1;
+      }
+    }
+
+    console.log(`Schema migration completed. Updated ${updated} day docs.`);
+    return { scanned: snap.size, updated };
+  };
 
   // UI helpers: show/hide
   function showAuth() { document.getElementById("authRoot").style.display = "flex"; document.getElementById("appRoot").style.display = "none"; }
