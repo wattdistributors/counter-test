@@ -1186,6 +1186,59 @@
       flex-wrap: wrap;
     }
 
+
+    #modal_add_day{
+      align-items:flex-start;
+      padding: max(10px, env(safe-area-inset-top, 0px)) 12px max(10px, env(safe-area-inset-bottom, 0px));
+    }
+    #modal_add_day .modal{
+      width:min(560px, 100%);
+      max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px);
+      display:flex;
+      flex-direction:column;
+      margin: 0 auto;
+      overflow:hidden;
+    }
+    #modal_add_day .modalBody{
+      margin-top: 2px;
+      overflow-y:auto;
+      padding-right: 2px;
+      min-width:0;
+    }
+    #modal_add_day .grid2{
+      gap:12px;
+      margin-top:8px;
+    }
+    #modal_add_day .grid2 .field{ min-width:0; }
+    #modal_add_day .modalActions{
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      position: sticky;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(14,58,88,.42), rgba(14,58,88,0));
+    }
+
+    .managerDetailActions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:8px;
+    }
+    .btnSubtleDanger{
+      min-height:30px;
+      padding:4px 10px;
+      font-size:11px;
+      font-weight:700;
+      opacity:.8;
+      border-color: rgba(255,130,130,.34);
+      background: rgba(255,95,95,.08);
+    }
+    .btnSubtleDanger:hover{
+      opacity:1;
+      background: rgba(255,95,95,.14);
+      border-color: rgba(255,155,155,.45);
+    }
+
     .reportBox{
       width:100%;
       box-sizing:border-box;
@@ -1350,6 +1403,8 @@
       .appHeader{ padding:4px 0 4px; }
       .pill{ width: 290px; }
       .grid2{ grid-template-columns: 1fr; }
+      #modal_add_day{ padding: max(8px, env(safe-area-inset-top, 0px)) 8px max(8px, env(safe-area-inset-bottom, 0px)); }
+      #modal_add_day .modal{ border-radius: 14px; }
       .timerBox{ flex-basis: 112px; }
 
       /* tighter calendar on small screens so it NEVER overflows */
@@ -1515,7 +1570,7 @@
         <div class="calSurface" style="display:flex; flex-direction:column; gap:10px;">
           <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
             <div id="agents_breadcrumb" class="statsMiniTitle">Agentes</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn" id="agents_add_btn">Agregar agente</button><button class="btn" id="agents_add_day_btn">Agregar día</button></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn" id="agents_add_btn">Agregar agente</button></div>
           </div>
           <input id="agents_search" class="authInput" style="width:100%;" placeholder="Buscar agente" />
           <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
@@ -1531,6 +1586,9 @@
             <div class="statsPanel">
               <div class="statCard" id="mgr_week_stats"></div>
               <div class="statCard" id="mgr_month_stats"></div>
+            </div>
+            <div class="managerDetailActions">
+              <button class="btn btnSubtleDanger" id="manager_remove_agent_btn" style="display:none;">Eliminar agente</button>
             </div>
           </div>
         </div>
@@ -2319,6 +2377,7 @@
   const agentsErrorEl = document.getElementById("agents_error");
   const agentsBreadcrumbEl = document.getElementById("agents_breadcrumb");
   const managerAgentDetailEl = document.getElementById("manager_agent_detail");
+  const managerRemoveAgentBtn = document.getElementById("manager_remove_agent_btn");
 
   // Summary
   const sumWrap = document.getElementById("sum_wrap");
@@ -2513,8 +2572,6 @@
     if (addAgentCancelEl) addAgentCancelEl.textContent = t("cancel");
     const addAgentConfirmEl = document.getElementById("add_agent_confirm");
     if (addAgentConfirmEl) addAgentConfirmEl.textContent = t("assignAgentBtn");
-    const agentsAddDayBtnEl = document.getElementById("agents_add_day_btn");
-    if (agentsAddDayBtnEl) agentsAddDayBtnEl.textContent = t("addDay");
     const addDayTitleEl = document.getElementById("add_day_title");
     if (addDayTitleEl) addDayTitleEl.textContent = t("addDayTitle");
     const addDayDateLabelEl = document.getElementById("add_day_date_label");
@@ -2535,6 +2592,7 @@
     dayCopyBtn.textContent = t("copyBtn");
     dayShareBtn.textContent = t("shareBtn");
     if (dayAddMissingBtn) dayAddMissingBtn.textContent = t("addDay");
+    if (managerRemoveAgentBtn) managerRemoveAgentBtn.textContent = t("removeAgent");
     document.getElementById("rating_help_body").innerHTML = `
       <div style="font-weight:700; margin-bottom:8px;">${t("quickCriteria")}</div>
       <ul style="margin:0 0 10px 18px; padding:0;">
@@ -3114,25 +3172,19 @@
     rowsData.sort((a,b) => b.monthX - a.monthX);
     for (const rowData of rowsData) {
       const agent = rowData.agent;
-      const row = document.createElement("div");
-      row.className = "statCard";
-      row.style.display = "flex";
-      row.style.alignItems = "center";
-      row.style.justifyContent = "space-between";
-      row.style.gap = "8px";
-
-      const openBtn = document.createElement("button");
-      openBtn.className = "btn";
-      openBtn.style.textAlign = "left";
-      openBtn.style.flex = "1 1 auto";
-      openBtn.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">${agent.email || ""}</div><div style="opacity:.82; font-size:12px;">${t("weekXLabel")}: ${rowData.weekX} • ${t("monthXLabel")}: ${rowData.monthX}</div>`;
-      openBtn.addEventListener("click", async () => {
+      const row = document.createElement("button");
+      row.className = "btn";
+      row.style.textAlign = "left";
+      row.style.width = "100%";
+      row.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">${agent.email || ""}</div><div style="opacity:.82; font-size:12px;">${t("weekXLabel")}: ${rowData.weekX} • ${t("monthXLabel")}: ${rowData.monthX}</div>`;
+      row.addEventListener("click", async () => {
         const isSameAgentOpen = managerState.selectedAgentUid === agent.uid && managerAgentDetailEl.style.display !== "none";
         if (isSameAgentOpen) {
           managerState.selectedAgentUid = "";
           managerState.selectedAgentName = "";
           managerState.selectedAgentEmail = "";
           managerAgentDetailEl.style.display = "none";
+          if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "none";
           agentsBreadcrumbEl.textContent = t("agentTrail");
           return;
         }
@@ -3141,35 +3193,9 @@
         managerState.selectedAgentEmail = agent.email || "";
         agentsBreadcrumbEl.textContent = `${t("agentTrail")} > ${managerState.selectedAgentName}`;
         managerAgentDetailEl.style.display = "";
+        if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "";
         await renderManagerAgentCalendar();
       });
-
-      const removeBtn = document.createElement("button");
-      removeBtn.className = "btn";
-      removeBtn.textContent = t("removeAgent");
-      removeBtn.addEventListener("click", async () => {
-        if (!confirm(t("removeAgentConfirm"))) return;
-        try {
-          await window.cloudRemoveAssignedAgent(state.teamId, state.uid, agent.uid);
-          managerState.list = managerState.list.filter((a) => a.uid !== agent.uid);
-          delete managerState.records[agent.uid];
-          managerState.monthCache = new Map(Array.from(managerState.monthCache.entries()).filter(([k]) => !k.startsWith(`${agent.uid}:`)));
-          if (managerState.selectedAgentUid === agent.uid) {
-            managerState.selectedAgentUid = "";
-            managerState.selectedAgentName = "";
-            managerState.selectedAgentEmail = "";
-            managerAgentDetailEl.style.display = "none";
-            agentsBreadcrumbEl.textContent = t("agentTrail");
-          }
-          agentsErrorEl.textContent = t("removeAgentSaved");
-          renderManagerAgentsList();
-        } catch (err) {
-          agentsErrorEl.textContent = `${t("removeAgentError")} ${String(err?.message || err)}`;
-        }
-      });
-
-      row.appendChild(openBtn);
-      row.appendChild(removeBtn);
       agentsListEl.appendChild(row);
     }
   }
@@ -3234,6 +3260,30 @@
     managerState.search = e.target.value || "";
     renderManagerAgentsList();
   });
+  async function removeSelectedManagerAgent() {
+    const agentUid = managerState.selectedAgentUid;
+    if (!agentUid) return;
+    if (!confirm(t("removeAgentConfirm"))) return;
+    try {
+      await window.cloudRemoveAssignedAgent(state.teamId, state.uid, agentUid);
+      managerState.list = managerState.list.filter((a) => a.uid !== agentUid);
+      delete managerState.records[agentUid];
+      managerState.monthCache = new Map(Array.from(managerState.monthCache.entries()).filter(([k]) => !k.startsWith(`${agentUid}:`)));
+      managerState.selectedAgentUid = "";
+      managerState.selectedAgentName = "";
+      managerState.selectedAgentEmail = "";
+      managerAgentDetailEl.style.display = "none";
+      if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "none";
+      agentsBreadcrumbEl.textContent = t("agentTrail");
+      agentsErrorEl.textContent = t("removeAgentSaved");
+      await renderManagerAgentsList();
+    } catch (err) {
+      agentsErrorEl.textContent = `${t("removeAgentError")} ${String(err?.message || err)}`;
+    }
+  }
+
+  managerRemoveAgentBtn?.addEventListener("click", removeSelectedManagerAgent);
+
   document.getElementById("agents_add_btn")?.addEventListener("click", () => openModal(modalAddAgent));
   document.getElementById("add_agent_x")?.addEventListener("click", () => closeModal(modalAddAgent));
   document.getElementById("add_agent_cancel")?.addEventListener("click", () => closeModal(modalAddAgent));
@@ -3250,9 +3300,6 @@
     }
   });
 
-  document.getElementById("agents_add_day_btn")?.addEventListener("click", () => {
-    openManagerAddDayModal(isoDateLocal());
-  });
   document.getElementById("add_day_x")?.addEventListener("click", () => closeModal(modalAddDay));
   document.getElementById("add_day_cancel")?.addEventListener("click", () => closeModal(modalAddDay));
   document.getElementById("add_day_confirm")?.addEventListener("click", async () => {
