@@ -1440,6 +1440,7 @@
         <div class="tab active" data-tab="counter" id="tab_counter_label">Contador</div>
         <div class="tab" data-tab="calendar" id="tab_calendar_label">Calendario</div>
         <div class="tab" data-tab="summary" id="tab_summary_label">Progreso</div>
+        <div class="tab" data-tab="agents" id="tab_agents_label" style="display:none;">Agentes</div>
       </div>
       </div>
 
@@ -1508,6 +1509,33 @@
       <div id="tab_summary" style="display:none;">
         <div class="sumWrap" id="sum_wrap"></div>
       </div>
+
+      <!-- ============ TAB: AGENTS (MANAGER) ============ -->
+      <div id="tab_agents" style="display:none;">
+        <div class="calSurface" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+            <div id="agents_breadcrumb" class="statsMiniTitle">Agentes</div>
+            <button class="btn" id="agents_add_btn">Agregar agente</button>
+          </div>
+          <input id="agents_search" class="authInput" style="width:100%;" placeholder="Buscar agente" />
+          <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
+          <div id="agents_list" class="statsPanel" style="display:flex; flex-direction:column; gap:8px;"></div>
+
+          <div id="manager_agent_detail" style="display:none;">
+            <div class="calHeader">
+              <div class="iconBtn" id="mgr_cal_prev" aria-label="Previous month">‹</div>
+              <div class="calTitle" id="mgr_cal_title">—</div>
+              <div class="iconBtn" id="mgr_cal_next" aria-label="Next month">›</div>
+            </div>
+            <div class="calGrid" id="mgr_cal_grid"></div>
+            <div class="statsPanel">
+              <div class="statCard" id="mgr_week_stats"></div>
+              <div class="statCard" id="mgr_month_stats"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       </div>
     </div>
@@ -1627,6 +1655,28 @@
           <button class="btn" id="day_edit">Editar día</button>
           <button class="btn" id="day_delete">Borrar día</button>
           <button class="btn primary" id="day_save" style="display:none;">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="overlay" id="modal_add_agent">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Add agent">
+      <div class="modalHeader">
+        <div class="modalTitle" id="add_agent_title">Agregar agente</div>
+        <button class="xbtn" id="add_agent_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody">
+        <div class="field">
+          <label id="add_agent_uid_label">UID del agente</label>
+          <input id="add_agent_uid" placeholder="uid" />
+        </div>
+        <div id="add_agent_msg" style="min-height:18px; font-size:12px;"></div>
+        <div class="modalActions">
+          <button class="btn" id="add_agent_cancel">Cancelar</button>
+          <button class="btn primary" id="add_agent_confirm">Agregar</button>
         </div>
       </div>
     </div>
@@ -1801,7 +1851,18 @@
       shareBtn: "Compartir",
       monthDayYear: { month: "long", day: "numeric", year: "numeric" },
       monthDay: { month: "long", day: "numeric" },
-      weekRangeJoin: "al"
+      weekRangeJoin: "al",
+      tabAgents: "Agentes",
+      agentsTitle: "Agentes",
+      agentsSearchPlaceholder: "Buscar agente",
+      addAgent: "Agregar agente",
+      addAgentByUid: "UID del agente",
+      addAgentSaved: "Agente asignado correctamente.",
+      addAgentError: "No se pudo agregar el agente.",
+      agentsEmpty: "No hay agentes asignados.",
+      agentTrail: "Agentes",
+      readOnlyManager: "Solo lectura (manager)",
+      managerRulesNote: "Reglas sugeridas: agents solo escriben sus días; managers leen solo agentes asignados en su team; assignments sólo bajo su managerUid; acceso aislado por team."
     },
     en: {
       tabCounter: "Counter",
@@ -1926,7 +1987,18 @@
       shareBtn: "Share",
       monthDayYear: { month: "long", day: "numeric", year: "numeric" },
       monthDay: { month: "long", day: "numeric" },
-      weekRangeJoin: "to"
+      weekRangeJoin: "to",
+      tabAgents: "Agents",
+      agentsTitle: "Agents",
+      agentsSearchPlaceholder: "Search agent",
+      addAgent: "Add agent",
+      addAgentByUid: "Agent UID",
+      addAgentSaved: "Agent assigned successfully.",
+      addAgentError: "Could not add agent.",
+      agentsEmpty: "No assigned agents.",
+      agentTrail: "Agents",
+      readOnlyManager: "Read-only (manager)",
+      managerRulesNote: "Suggested rules: agents can write only own days; managers can read only assigned agents within team; assignments only under own managerUid; team data isolation required."
     }
   };
 
@@ -2091,6 +2163,27 @@
     return recordsInRange(start, end);
   }
 
+  function historyForAgent(agentUid) {
+    if (!agentUid || agentUid === state.uid) return loadHistory();
+    return managerState.records[agentUid] || {};
+  }
+
+  function recordsInRangeForAgent(agentUid, startDate, endDate) {
+    const hist = historyForAgent(agentUid);
+    const out = [];
+    const startISO = isoDateLocal(startDate);
+    const endISO = isoDateLocal(endDate);
+    Object.keys(hist).forEach((iso) => { if (iso >= startISO && iso <= endISO) out.push(hist[iso]); });
+    out.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+    return out;
+  }
+
+  function recordsInMonthForAgent(agentUid, year, monthIdx) {
+    const start = new Date(year, monthIdx, 1);
+    const end = new Date(year, monthIdx + 1, 0);
+    return recordsInRangeForAgent(agentUid, start, end);
+  }
+
   // ---------- Load session state ----------
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
   const savedProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
@@ -2104,8 +2197,21 @@
     values: saved.values || {},
     sessionStart: saved.sessionStart || null,
     teamId: (typeof saved.teamId === "string" ? saved.teamId : "") || "",
+    role: saved.role || "agent",
+    uid: "",
   };
   metrics.forEach(k => { if (typeof state.values[k] !== "number") state.values[k] = 0; });
+  const managerState = {
+    selectedAgentUid: "",
+    selectedAgentName: "",
+    selectedAgentEmail: "",
+    list: [],
+    search: "",
+    monthCache: new Map(),
+    records: {},
+    calCursor: (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })(),
+  };
+
 
   // ---------- DOM ----------
   const todayDateEl = document.getElementById("today_date");
@@ -2125,6 +2231,8 @@
   const tabCounter = document.getElementById("tab_counter");
   const tabCalendar = document.getElementById("tab_calendar");
   const tabSummary = document.getElementById("tab_summary");
+  const tabAgents = document.getElementById("tab_agents");
+  const tabAgentsLabel = document.getElementById("tab_agents_label");
 
   // Counter
   const startScreen = document.getElementById("start_screen");
@@ -2141,6 +2249,15 @@
   const calGrid = document.getElementById("cal_grid");
   const weekStatsEl = document.getElementById("week_stats");
   const monthStatsEl = document.getElementById("month_stats");
+  const mgrCalTitle = document.getElementById("mgr_cal_title");
+  const mgrCalGrid = document.getElementById("mgr_cal_grid");
+  const mgrWeekStatsEl = document.getElementById("mgr_week_stats");
+  const mgrMonthStatsEl = document.getElementById("mgr_month_stats");
+  const agentsListEl = document.getElementById("agents_list");
+  const agentsSearchEl = document.getElementById("agents_search");
+  const agentsErrorEl = document.getElementById("agents_error");
+  const agentsBreadcrumbEl = document.getElementById("agents_breadcrumb");
+  const managerAgentDetailEl = document.getElementById("manager_agent_detail");
 
   // Summary
   const sumWrap = document.getElementById("sum_wrap");
@@ -2149,6 +2266,7 @@
   const modalStart = document.getElementById("modal_start");
   const modalProfile = document.getElementById("modal_profile");
   const modalReport = document.getElementById("modal_report");
+  const modalAddAgent = document.getElementById("modal_add_agent");
   const startStore = document.getElementById("start_store");
   const startProfileName = document.getElementById("start_profile_name");
   const profileNameInput = document.getElementById("profile_name");
@@ -2266,6 +2384,7 @@
     document.getElementById("tab_counter_label").textContent = t("tabCounter");
     document.getElementById("tab_calendar_label").textContent = t("tabCalendar");
     document.getElementById("tab_summary_label").textContent = t("tabSummary");
+    document.getElementById("tab_agents_label").textContent = t("tabAgents");
     document.getElementById("today_title").textContent = t("appTitle");
     const loginTitleEl = document.getElementById("auth_login_title");
     if (loginTitleEl) loginTitleEl.textContent = t("loginTitle");
@@ -2318,6 +2437,19 @@
     document.getElementById("report_hint").textContent = t("reportHint");
     copyBtn.textContent = t("copyBtn");
     shareBtn.textContent = t("shareBtn");
+
+    const agentsAddBtnEl = document.getElementById("agents_add_btn");
+    if (agentsAddBtnEl) agentsAddBtnEl.textContent = t("addAgent");
+    if (agentsSearchEl) agentsSearchEl.placeholder = t("agentsSearchPlaceholder");
+    if (agentsBreadcrumbEl && !managerState.selectedAgentUid) agentsBreadcrumbEl.textContent = t("agentTrail");
+    const addAgentTitleEl = document.getElementById("add_agent_title");
+    if (addAgentTitleEl) addAgentTitleEl.textContent = t("addAgent");
+    const addAgentUidLabelEl = document.getElementById("add_agent_uid_label");
+    if (addAgentUidLabelEl) addAgentUidLabelEl.textContent = t("addAgentByUid");
+    const addAgentCancelEl = document.getElementById("add_agent_cancel");
+    if (addAgentCancelEl) addAgentCancelEl.textContent = t("cancel");
+    const addAgentConfirmEl = document.getElementById("add_agent_confirm");
+    if (addAgentConfirmEl) addAgentConfirmEl.textContent = t("addAgent");
     endBtn.textContent = t("endDayNow");
     dayCopyBtn.textContent = t("copyBtn");
     dayShareBtn.textContent = t("shareBtn");
@@ -2436,6 +2568,7 @@
   clickOutsideToClose(modalStart, true);
   clickOutsideToClose(modalProfile, true);
   clickOutsideToClose(modalReport, false);
+  clickOutsideToClose(modalAddAgent, true);
   clickOutsideToClose(modalDay, true);
   clickOutsideToClose(modalRatingHelp, true);
   dayX.addEventListener("click", () => closeModal(modalDay));
@@ -2624,15 +2757,17 @@
     return buildReportText(rec);
   }
 
-  function openDayModal(iso){
-    const hist = loadHistory();
+  function openDayModal(iso, agentUid = state.uid){
+    const hist = historyForAgent(agentUid);
     const rec = hist[iso];
     activeDayISO = iso;
+    activeDayAgentUid = agentUid || state.uid;
 
     dayModalTitle.textContent = rec ? `${t("dayDetailsTitle")} • ${prettyDateFromISO(iso)}` : `${t("dayNoDataTitle")} • ${prettyDateFromISO(iso)}`;
     dayEditGrid.style.display = "none";
     daySaveBtn.style.display = "none";
     dayEditBtn.textContent = "Editar día";
+    const isReadOnly = agentUid !== state.uid;
 
     if (!rec){
       dayModalRating.innerHTML = "";
@@ -2691,8 +2826,9 @@
     dayModalReport.textContent = buildFullReportFromRecord(rec);
     dayCopyBtn.style.display = "";
     dayShareBtn.style.display = "";
-    dayEditBtn.style.display = "";
-    dayDeleteBtn.style.display = "";
+    dayEditBtn.style.display = isReadOnly ? "none" : "";
+    dayDeleteBtn.style.display = isReadOnly ? "none" : "";
+    if (isReadOnly) dayModalMeta.innerHTML += `<div class="p" style="margin-top:6px;">${t("readOnlyManager")}</div>`;
     openModal(modalDay);
   }
 
@@ -2737,7 +2873,7 @@
   });
 
   daySaveBtn.addEventListener("click", async () => {
-    if (!activeDayISO) return;
+    if (!activeDayISO || activeDayAgentUid !== state.uid) return;
     const hist = loadHistory();
     const rec = hist[activeDayISO];
     if (!rec) return;
@@ -2770,7 +2906,7 @@
   });
 
   dayDeleteBtn.addEventListener("click", async () => {
-    if (!activeDayISO) return;
+    if (!activeDayISO || activeDayAgentUid !== state.uid) return;
     if (!confirm(`¿Borrar el día ${activeDayISO}?`)) return;
     const hist = loadHistory();
     delete hist[activeDayISO];
@@ -2825,15 +2961,100 @@
   window.addEventListener("blur", stopHold);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") stopHold(); });
 
+
+  async function loadManagerAgents() {
+    const managerUid = state.uid;
+    if (!state.teamId || !managerUid || state.role !== "manager" || typeof window.cloudListAssignedAgents !== "function") return;
+    try {
+      managerState.list = await window.cloudListAssignedAgents(state.teamId, managerUid);
+      console.log("agents list loaded", managerState.list.length);
+      renderManagerAgentsList();
+    } catch (err) {
+      agentsErrorEl.textContent = String(err?.message || err);
+    }
+  }
+
+  async function ensureManagerAgentMonth(agentUid, y, m) {
+    if (!agentUid || typeof window.cloudGetDaysInRange !== "function") return;
+    const key = `${agentUid}:${y}-${m}`;
+    if (managerState.monthCache.has(key)) return;
+    const startISO = isoDateLocal(new Date(y, m, 1));
+    const endISO = isoDateLocal(new Date(y, m + 1, 0));
+    const docs = await window.cloudGetDaysInRange(state.teamId, agentUid, startISO, endISO);
+    managerState.records[agentUid] = managerState.records[agentUid] || {};
+    docs.forEach((d) => { if (d?.date) managerState.records[agentUid][d.date] = d; });
+    managerState.monthCache.set(key, true);
+    console.log("agent month days fetched", { agentUid, startISO, endISO, count: docs.length });
+  }
+
+  async function renderManagerAgentsList() {
+    const q = (managerState.search || "").toLowerCase();
+    const filtered = managerState.list.filter((a) => (a.displayName || "").toLowerCase().includes(q) || (a.email || "").toLowerCase().includes(q) || (a.uid || "").toLowerCase().includes(q));
+    agentsListEl.innerHTML = "";
+    if (!filtered.length) {
+      agentsListEl.innerHTML = `<div class="statCard">${t("agentsEmpty")}</div>`;
+      return;
+    }
+    for (const agent of filtered) {
+      const now = new Date();
+      await ensureManagerAgentMonth(agent.uid, now.getFullYear(), now.getMonth());
+      const weekTotals = sumRecords(recordsInRangeForAgent(agent.uid, startOfWeekMon(now), endOfWeekSun(now)));
+      const sevenStart = new Date(); sevenStart.setDate(sevenStart.getDate() - 6);
+      const last7 = sumRecords(recordsInRangeForAgent(agent.uid, sevenStart, now));
+      const row = document.createElement("button");
+      row.className = "btn";
+      row.style.textAlign = "left";
+      row.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">7d X: ${last7.X || 0} • ${t("weekLabel")} X: ${weekTotals.X || 0}</div>`;
+      row.addEventListener("click", async () => {
+        managerState.selectedAgentUid = agent.uid;
+        managerState.selectedAgentName = agent.displayName || agent.email || agent.uid;
+        managerState.selectedAgentEmail = agent.email || "";
+        agentsBreadcrumbEl.textContent = `${t("agentTrail")} > ${managerState.selectedAgentName}`;
+        managerAgentDetailEl.style.display = "";
+        await renderManagerAgentCalendar();
+      });
+      agentsListEl.appendChild(row);
+    }
+  }
+
+  async function renderManagerAgentCalendar() {
+    if (!managerState.selectedAgentUid) return;
+    await ensureManagerAgentMonth(managerState.selectedAgentUid, managerState.calCursor.y, managerState.calCursor.m);
+    renderCalendarCore({
+      y: managerState.calCursor.y,
+      m: managerState.calCursor.m,
+      titleEl: mgrCalTitle,
+      gridEl: mgrCalGrid,
+      selectedISO: selectedDayISO,
+      agentUid: managerState.selectedAgentUid,
+      onClick: (iso) => { selectedDayISO = iso; openDayModal(iso, managerState.selectedAgentUid); renderManagerAgentCalendar(); },
+    });
+    const now = new Date();
+    const weekTotals = sumRecords(recordsInRangeForAgent(managerState.selectedAgentUid, startOfWeekMon(now), endOfWeekSun(now)));
+    const monthTotals = sumRecords(recordsInMonthForAgent(managerState.selectedAgentUid, managerState.calCursor.y, managerState.calCursor.m));
+    renderCompactStatCard(mgrWeekStatsEl, t("weekStatsTitle"), weekTotals);
+    renderCompactStatCard(mgrMonthStatsEl, t("monthStatsTitle"), monthTotals);
+  }
+
+  function renderManagerAgentsTab() {
+    if (state.role !== "manager") return;
+    renderManagerAgentsList();
+  }
+
   // ---------- Tabs logic ----------
   function setActiveTab(tabName) {
     tabEls.forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
     tabCounter.style.display = (tabName === "counter") ? "" : "none";
     tabCalendar.style.display = (tabName === "calendar") ? "" : "none";
     tabSummary.style.display = (tabName === "summary") ? "" : "none";
+    if (tabAgents) tabAgents.style.display = (tabName === "agents") ? "" : "none";
     if (tabName === "calendar") renderCalendar();
     if (tabName === "summary") renderProgress();
+    if (tabName === "agents") renderManagerAgentsTab();
   }
+
+  window.setActiveTab = setActiveTab;
+  window.loadManagerAgents = loadManagerAgents;
 
   document.getElementById("tabs").addEventListener("click", (e) => {
     const t = e.target.closest(".tab");
@@ -2841,9 +3062,41 @@
     setActiveTab(t.dataset.tab);
   });
 
+
+  document.getElementById("mgr_cal_prev")?.addEventListener("click", async () => {
+    managerState.calCursor.m -= 1;
+    if (managerState.calCursor.m < 0) { managerState.calCursor.m = 11; managerState.calCursor.y -= 1; }
+    await renderManagerAgentCalendar();
+  });
+  document.getElementById("mgr_cal_next")?.addEventListener("click", async () => {
+    managerState.calCursor.m += 1;
+    if (managerState.calCursor.m > 11) { managerState.calCursor.m = 0; managerState.calCursor.y += 1; }
+    await renderManagerAgentCalendar();
+  });
+  agentsSearchEl?.addEventListener("input", (e) => {
+    managerState.search = e.target.value || "";
+    renderManagerAgentsList();
+  });
+  document.getElementById("agents_add_btn")?.addEventListener("click", () => openModal(modalAddAgent));
+  document.getElementById("add_agent_x")?.addEventListener("click", () => closeModal(modalAddAgent));
+  document.getElementById("add_agent_cancel")?.addEventListener("click", () => closeModal(modalAddAgent));
+  document.getElementById("add_agent_confirm")?.addEventListener("click", async () => {
+    const uid = (document.getElementById("add_agent_uid")?.value || "").trim();
+    const msg = document.getElementById("add_agent_msg");
+    if (!uid) { if (msg) msg.textContent = t("addAgentError"); return; }
+    try {
+      await window.cloudAssignAgentToManager(state.teamId, state.uid, uid);
+      if (msg) msg.textContent = t("addAgentSaved");
+      await loadManagerAgents();
+    } catch (e) {
+      if (msg) msg.textContent = `${t("addAgentError")} ${e?.message || e}`;
+    }
+  });
+
   // ---------- Calendar rendering ----------
   let selectedDayISO = null;
   let activeDayISO = null;
+  let activeDayAgentUid = "";
 
   let calCursor = (() => {
     const d = new Date();
@@ -2860,84 +3113,49 @@
     if (calCursor.m > 11) { calCursor.m = 0; calCursor.y += 1; }
     renderCalendar();
   });
-  calGrid.addEventListener("click", (e) => {
-    const cell = e.target.closest(".dayCell");
-    if (!cell) return;
-    const iso = cell.dataset.iso;
-    if (!iso) return;
-    selectedDayISO = iso;
-    renderCalendar();
-    openDayModal(iso);
-  });
-
-  function renderCalendar() {
-    const y = calCursor.y, m = calCursor.m;
-    calTitle.textContent = monthName(y, m);
-
-    calGrid.innerHTML = "";
+  function renderCalendarCore({ y, m, titleEl, gridEl, selectedISO, agentUid, onClick }) {
+    titleEl.textContent = monthName(y, m);
+    gridEl.innerHTML = "";
     const dows = t("calendarWeekdays") || ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    dows.forEach(s => {
+    dows.forEach((s) => {
       const el = document.createElement("div");
       el.className = "dow";
       el.textContent = s.toUpperCase();
-      calGrid.appendChild(el);
+      gridEl.appendChild(el);
     });
-
     const first = new Date(y, m, 1);
     const firstDow = first.getDay();
     const offset = (firstDow === 0) ? 6 : (firstDow - 1);
     const gridStart = new Date(y, m, 1);
     gridStart.setDate(gridStart.getDate() - offset);
-
-    const hist = loadHistory();
+    const hist = historyForAgent(agentUid);
     const todayISO = isoDateLocal();
-
     for (let i = 0; i < 42; i++) {
       const day = new Date(gridStart);
       day.setDate(gridStart.getDate() + i);
       const iso = isoDateLocal(day);
-      const inMonth = (day.getMonth() === m);
+      const inMonth = day.getMonth() === m;
       const rec = hist[iso];
-
       const S = rec?.values?.S ?? 0;
       const Z = rec?.values?.Z ?? 0;
       const X = rec?.values?.X ?? 0;
       const ratingInfo = rec ? classifyDay(rec.values || {}) : null;
       const dayRating = rec ? (rec.dayRating || ratingInfo.dayRating) : "";
-
-      const isToday = (iso === todayISO);
+      const isToday = iso === todayISO;
       const badgeText = isToday ? "HOY" : "";
       const badgeHtml = badgeText ? `<div class="badge ${isToday ? "today" : ""}">${badgeText}</div>` : "";
       const dotHtml = dayRating ? `<span class="dayDot ${dayRating}"></span>` : "";
-
       const cell = document.createElement("div");
-      cell.className =
-        "dayCell" +
-        (inMonth ? "" : " muted") +
-        (rec ? " hasData" : "") +
-                (isToday ? " today" : "") +
-        (selectedDayISO === iso ? " selected" : "");
-
+      cell.className = "dayCell" + (inMonth ? "" : " muted") + (rec ? " hasData" : "") + (isToday ? " today" : "") + (selectedISO === iso ? " selected" : "");
       cell.dataset.iso = iso;
-
-      cell.innerHTML = `
-        <div class="dayContent">
-          <div class="dayTop">
-            <div class="dayNum">${day.getDate()}</div>
-            ${badgeHtml}
-            ${dotHtml}
-          </div>
-
-          <div class="miniClean">
-            <span class="kpiInline">S ${S}</span>
-            <span class="kpiInline">Z ${Z}</span>
-            <span class="kpiInline">X ${X}</span>
-          </div>
-        </div>
-      `;
-      calGrid.appendChild(cell);
+      cell.innerHTML = `<div class="dayContent"><div class="dayTop"><div class="dayNum">${day.getDate()}</div>${badgeHtml}${dotHtml}</div><div class="miniClean"><span class="kpiInline">S ${S}</span><span class="kpiInline">Z ${Z}</span><span class="kpiInline">X ${X}</span></div></div>`;
+      if (typeof onClick === "function") cell.addEventListener("click", () => onClick(iso));
+      gridEl.appendChild(cell);
     }
+  }
 
+  function renderCalendar() {
+    renderCalendarCore({ y: calCursor.y, m: calCursor.m, titleEl: calTitle, gridEl: calGrid, selectedISO: selectedDayISO, agentUid: state.uid, onClick: (iso) => { selectedDayISO = iso; openDayModal(iso, state.uid); renderCalendar(); } });
     renderCalendarStats();
   }
 
@@ -2970,9 +3188,9 @@
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
-    const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
+    const weekTotals = sumRecords(recordsInRangeForAgent(state.uid, weekStart, weekEnd));
 
-    const monthTotals = sumRecords(recordsInMonth(calCursor.y, calCursor.m));
+    const monthTotals = sumRecords(recordsInMonthForAgent(state.uid, calCursor.y, calCursor.m));
 
     renderCompactStatCard(weekStatsEl, t("weekStatsTitle"), weekTotals);
     renderCompactStatCard(monthStatsEl, t("monthStatsTitle"), monthTotals);
@@ -2989,7 +3207,7 @@
       const ws = new Date(thisWeekStart);
       ws.setDate(thisWeekStart.getDate() - (i * 7));
       const we = endOfWeekSun(ws);
-      const totals = sumRecords(recordsInRange(ws, we));
+      const totals = sumRecords(recordsInRangeForAgent(state.uid, ws, we));
       if ((totals.X || 0) >= minSales) streak += 1;
       else break;
     }
@@ -3006,8 +3224,8 @@
     const now = new Date();
     const weekStart = startOfWeekMon(now);
     const weekEnd = endOfWeekSun(now);
-    const weekTotals = sumRecords(recordsInRange(weekStart, weekEnd));
-    const monthTotals = sumRecords(recordsInMonth(now.getFullYear(), now.getMonth()));
+    const weekTotals = sumRecords(recordsInRangeForAgent(state.uid, weekStart, weekEnd));
+    const monthTotals = sumRecords(recordsInMonthForAgent(state.uid, now.getFullYear(), now.getMonth()));
 
     const weekX = weekTotals.X || 0;
     const weekDays = weekTotals.days || 0;
@@ -3326,7 +3544,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc, updateDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 
   const firebaseConfig = {
@@ -3368,7 +3586,7 @@
       const fallbackTeam = sanitizeTeamId(localStorage.getItem(TEAM_STORAGE_KEY) || "");
       await setDoc(userRef, {
         teamId: fallbackTeam || "",
-        name: fallbackName,
+        displayName: fallbackName,
         email: fallbackEmail,
         createdAt: serverTimestamp(),
       }, { merge: true });
@@ -3385,7 +3603,7 @@
     if (!safeUid) return;
 
     const user = auth.currentUser;
-    const name = user?.displayName || state.rep || "";
+    const displayName = user?.displayName || state.rep || "";
     const email = user?.email || "";
 
     await Promise.all([
@@ -3394,55 +3612,55 @@
       }, { merge: true }),
       setDoc(doc(db, "teams", safeTeamId, "members", safeUid), {
         teamId: safeTeamId,
-        name,
+        displayName,
         email,
-        role: "agent",
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       }, { merge: true }),
       setDoc(doc(db, "users", safeUid), {
         teamId: safeTeamId,
-        name,
+        displayName,
         email,
-        role: "agent",
+        updatedAt: serverTimestamp(),
       }, { merge: true }),
     ]);
   }
 
-  async function cloudUpsertDay(teamId, uid, iso, payload) {
+  async function cloudUpsertDay(teamId, uid, iso, dayData) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
     const safeIso = String(iso || "").trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(safeIso)) throw new Error("Invalid day ISO");
 
     const dayRef = doc(db, "teams", safeTeamId, "agents", uid, "days", safeIso);
-    const S = Number(payload?.values?.S || 0);
-    const Z = Number(payload?.values?.Z || 0);
-    const CC = Number(payload?.values?.CC || 0);
-    const C = Number(payload?.values?.C || 0);
-    const X = Number(payload?.values?.X || 0);
+    const S = Number(dayData?.values?.S || 0);
+    const Z = Number(dayData?.values?.Z || 0);
+    const CC = Number(dayData?.values?.CC || 0);
+    const C = Number(dayData?.values?.C || 0);
+    const X = Number(dayData?.values?.X || 0);
 
-    const cleanPayload = {
+    const payload = {
       date: safeIso,
-      rep: payload?.rep || "",
-      store: payload?.store || "",
-      startTs: Number(payload?.startTs || 0),
-      endTs: Number(payload?.endTs || 0),
-      durationMs: Number(payload?.durationMs || 0),
+      rep: dayData?.rep || "",
+      store: dayData?.store || "",
+      startTs: Number(dayData?.startTs || 0),
+      endTs: Number(dayData?.endTs || 0),
+      durationMs: Number(dayData?.durationMs || 0),
       values: { S, Z, CC, C, X },
       money: X * MONEY_PER_X_CENTS,
-      dayRating: payload?.dayRating || "",
-      dayBadge: payload?.dayBadge || "",
+      dayRating: dayData?.dayRating || "",
+      dayBadge: dayData?.dayBadge || "",
+      schemaVersion: 1,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    console.log("Firestore payload (clean):", cleanPayload);
-
     const path = `teams/${safeTeamId}/agents/${uid}/days/${safeIso}`;
     try {
+      console.log("Firestore day payload:", payload);
       console.log("Saving day to Firestore...", safeTeamId, uid, safeIso);
-      await setDoc(dayRef, cleanPayload, { merge: true });
+      await setDoc(dayRef, payload, { merge: true });
       console.log("Saved day to Firestore OK");
       debugLog("Firestore path", path);
-      return { path, payload: cleanPayload };
+      return { path, payload };
     } catch (e) {
       console.error("Firestore day write failed", e);
       console.error("Firestore day write failed (actionable): verify Firestore Rules allow teams/{teamId}/agents/{uid}/days writes for this user/team.", e?.code || e?.message || e);
@@ -3457,6 +3675,32 @@
 
     await deleteDoc(doc(db, "teams", safeTeamId, "agents", uid, "days", safeIso));
   }
+
+  async function migrateAddSchemaVersion(teamId, agentUid) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const safeUid = String(agentUid || "").trim();
+    if (!safeUid) throw new Error("Invalid agent uid");
+
+    const colRef = collection(db, "teams", safeTeamId, "agents", safeUid, "days");
+    const snap = await getDocs(colRef);
+    let updated = 0;
+
+    for (const dayDoc of snap.docs) {
+      const data = dayDoc.data() || {};
+      if (data.schemaVersion == null) {
+        await updateDoc(dayDoc.ref, {
+          schemaVersion: 1,
+          updatedAt: serverTimestamp(),
+        });
+        updated += 1;
+      }
+    }
+
+    const summary = { checked: snap.size, updated, teamId: safeTeamId, agentUid: safeUid };
+    console.log("migrateAddSchemaVersion summary:", summary);
+    return summary;
+  }
+
 
   async function cloudGetDaysInRange(teamId, uid, startISO, endISO) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
@@ -3487,11 +3731,54 @@
     });
   }
 
+
+
+  // SECURITY RULES (prototype guidance):
+  // 1) Agents can read/write only /teams/{teamId}/agents/{uid}/days/{dayId} where uid == request.auth.uid.
+  // 2) Managers can read assigned agents' days only when /teams/{teamId}/managers/{managerUid}/agents/{agentUid} exists.
+  // 3) Managers can create assignments only at /teams/{teamId}/managers/{request.auth.uid}/agents/{agentUid}.
+  // 4) Deny cross-team reads/writes: all access must match user's teamId.
+
+  async function cloudListAssignedAgents(teamId, managerUid) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const colRef = collection(db, "teams", safeTeamId, "managers", managerUid, "agents");
+    const snap = await getDocs(query(colRef, orderBy("displayName"), limit(200)));
+    return snap.docs.map((d) => ({ uid: d.id, ...(d.data() || {}) }));
+  }
+
+  async function cloudAssignAgentToManager(teamId, managerUid, agentUid) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const targetUid = String(agentUid || "").trim();
+    if (!targetUid) throw new Error("Agent UID is required");
+    const memberRef = doc(db, "teams", safeTeamId, "members", targetUid);
+    const memberSnap = await getDoc(memberRef);
+    if (!memberSnap.exists()) throw new Error("Agent not found in team members");
+    const member = memberSnap.data() || {};
+    await setDoc(doc(db, "teams", safeTeamId, "managers", managerUid, "agents", targetUid), {
+      displayName: member.displayName || "",
+      email: member.email || "",
+      addedAt: serverTimestamp(),
+    }, { merge: true });
+  }
+
+  async function promoteToManager(targetUid, teamId) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    await Promise.all([
+      setDoc(doc(db, "users", targetUid), { role: "manager", updatedAt: serverTimestamp() }, { merge: true }),
+      setDoc(doc(db, "teams", safeTeamId, "members", targetUid), { role: "manager", updatedAt: serverTimestamp() }, { merge: true }),
+    ]);
+    return true;
+  }
+
   window.resolveTeamIdForUser = resolveTeamIdForUser;
   window.ensureTeamMembership = ensureTeamMembership;
   window.cloudUpsertDay = cloudUpsertDay;
   window.cloudDeleteDay = cloudDeleteDay;
   window.cloudGetDaysInRange = cloudGetDaysInRange;
+  window.migrateAddSchemaVersion = migrateAddSchemaVersion;
+  window.cloudListAssignedAgents = cloudListAssignedAgents;
+  window.cloudAssignAgentToManager = cloudAssignAgentToManager;
+  window.promoteToManager = promoteToManager;
 
   const authRootEl = document.getElementById("authRoot");
   const appRootEl = document.getElementById("appRoot");
@@ -3554,10 +3841,11 @@
             const fallbackTeam = sanitizeTeamId(localStorage.getItem(TEAM_STORAGE_KEY) || "");
             await setDoc(userRef, {
               teamId: fallbackTeam || "",
-              name: user.displayName || "",
+              displayName: user.displayName || "",
               email: user.email || "",
               role: "agent",
               createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
             }, { merge: true });
             teamId = fallbackTeam || "";
             debugLog("Profile write OK", `users/${user.uid}`);
@@ -3566,17 +3854,29 @@
             teamId = sanitizeTeamId(data.teamId || "");
             // mantiene perfil actualizado
             await setDoc(userRef, {
-              name: user.displayName || "",
+              displayName: user.displayName || "",
               email: user.email || "",
-              role: "agent",
+              updatedAt: serverTimestamp(),
             }, { merge: true });
             debugLog("Profile write OK", `users/${user.uid}`);
           }
 
           window.setTeamId(teamId);
-          console.log("TEAM loaded from /users", teamId || "(empty)");
+          state.uid = user.uid;
+          let role = (userSnap.exists() ? (userSnap.data()?.role || "agent") : "agent");
           if (teamId) {
             await ensureTeamMembership(teamId, user.uid);
+            const memberSnap = await getDoc(doc(db, "teams", teamId, "members", user.uid));
+            if (memberSnap.exists()) role = memberSnap.data()?.role || role;
+          }
+          state.role = role;
+          saveStateNow();
+          console.log("role/team loaded", { teamId: teamId || "", role, uid: user.uid });
+          const agentsTabLabel = document.getElementById("tab_agents_label");
+          if (agentsTabLabel) agentsTabLabel.style.display = role === "manager" ? "" : "none";
+          if (role === "manager") {
+            if (typeof window.loadManagerAgents === "function") await window.loadManagerAgents();
+            if (typeof window.setActiveTab === "function") window.setActiveTab("agents");
           }
         } catch (err) {
           console.error("TEAM/users bootstrap failed", err);
@@ -3592,6 +3892,10 @@
       })();
     } else {
       window.setTeamId("");
+      state.role = "agent";
+      state.uid = "";
+      const agentsTabLabel = document.getElementById("tab_agents_label");
+      if (agentsTabLabel) agentsTabLabel.style.display = "none";
       showAuth();
 
       if (loginBtn) {
@@ -3659,20 +3963,22 @@
       await Promise.all([
         setDoc(doc(db, "users", cred.user.uid), {
           teamId,
-          name,
+          displayName: name,
           email,
           role: "agent",
           createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         }, { merge: true }),
         setDoc(doc(db, "teams", teamId), {
           createdAt: serverTimestamp(),
         }, { merge: true }),
         setDoc(doc(db, "teams", teamId, "members", cred.user.uid), {
           teamId,
-          name,
+          displayName: name,
           email,
           role: "agent",
           createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         }, { merge: true }),
       ]);
 
