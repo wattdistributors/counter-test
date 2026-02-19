@@ -3326,7 +3326,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 
   const firebaseConfig = {
@@ -3408,41 +3408,41 @@
     ]);
   }
 
-  async function cloudUpsertDay(teamId, uid, iso, payload) {
+  async function cloudUpsertDay(teamId, uid, iso, dayData) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
     const safeIso = String(iso || "").trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(safeIso)) throw new Error("Invalid day ISO");
 
     const dayRef = doc(db, "teams", safeTeamId, "agents", uid, "days", safeIso);
-    const S = Number(payload?.values?.S || 0);
-    const Z = Number(payload?.values?.Z || 0);
-    const CC = Number(payload?.values?.CC || 0);
-    const C = Number(payload?.values?.C || 0);
-    const X = Number(payload?.values?.X || 0);
+    const S = Number(dayData?.values?.S || 0);
+    const Z = Number(dayData?.values?.Z || 0);
+    const CC = Number(dayData?.values?.CC || 0);
+    const C = Number(dayData?.values?.C || 0);
+    const X = Number(dayData?.values?.X || 0);
 
-    const cleanPayload = {
+    const payload = {
       date: safeIso,
-      rep: payload?.rep || "",
-      store: payload?.store || "",
-      startTs: Number(payload?.startTs || 0),
-      endTs: Number(payload?.endTs || 0),
-      durationMs: Number(payload?.durationMs || 0),
+      rep: dayData?.rep || "",
+      store: dayData?.store || "",
+      startTs: Number(dayData?.startTs || 0),
+      endTs: Number(dayData?.endTs || 0),
+      durationMs: Number(dayData?.durationMs || 0),
       values: { S, Z, CC, C, X },
       money: X * MONEY_PER_X_CENTS,
-      dayRating: payload?.dayRating || "",
-      dayBadge: payload?.dayBadge || "",
+      dayRating: dayData?.dayRating || "",
+      dayBadge: dayData?.dayBadge || "",
+      schemaVersion: 1,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    console.log("Firestore payload (clean):", cleanPayload);
-
     const path = `teams/${safeTeamId}/agents/${uid}/days/${safeIso}`;
     try {
+      console.log("Firestore day payload:", payload);
       console.log("Saving day to Firestore...", safeTeamId, uid, safeIso);
-      await setDoc(dayRef, cleanPayload, { merge: true });
+      await setDoc(dayRef, payload, { merge: true });
       console.log("Saved day to Firestore OK");
       debugLog("Firestore path", path);
-      return { path, payload: cleanPayload };
+      return { path, payload };
     } catch (e) {
       console.error("Firestore day write failed", e);
       console.error("Firestore day write failed (actionable): verify Firestore Rules allow teams/{teamId}/agents/{uid}/days writes for this user/team.", e?.code || e?.message || e);
@@ -3457,6 +3457,32 @@
 
     await deleteDoc(doc(db, "teams", safeTeamId, "agents", uid, "days", safeIso));
   }
+
+  async function migrateAddSchemaVersion(teamId, agentUid) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const safeUid = String(agentUid || "").trim();
+    if (!safeUid) throw new Error("Invalid agent uid");
+
+    const colRef = collection(db, "teams", safeTeamId, "agents", safeUid, "days");
+    const snap = await getDocs(colRef);
+    let updated = 0;
+
+    for (const dayDoc of snap.docs) {
+      const data = dayDoc.data() || {};
+      if (data.schemaVersion == null) {
+        await updateDoc(dayDoc.ref, {
+          schemaVersion: 1,
+          updatedAt: serverTimestamp(),
+        });
+        updated += 1;
+      }
+    }
+
+    const summary = { checked: snap.size, updated, teamId: safeTeamId, agentUid: safeUid };
+    console.log("migrateAddSchemaVersion summary:", summary);
+    return summary;
+  }
+
 
   async function cloudGetDaysInRange(teamId, uid, startISO, endISO) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
@@ -3492,6 +3518,7 @@
   window.cloudUpsertDay = cloudUpsertDay;
   window.cloudDeleteDay = cloudDeleteDay;
   window.cloudGetDaysInRange = cloudGetDaysInRange;
+  window.migrateAddSchemaVersion = migrateAddSchemaVersion;
 
   const authRootEl = document.getElementById("authRoot");
   const appRootEl = document.getElementById("appRoot");
