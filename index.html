@@ -1670,13 +1670,13 @@
       </div>
       <div class="modalBody">
         <div class="field">
-          <label id="add_agent_uid_label">UID del agente</label>
-          <input id="add_agent_uid" placeholder="uid" />
+          <label id="add_agent_email_label">Email del agente</label>
+          <input id="add_agent_email" type="email" placeholder="agente@empresa.com" />
         </div>
         <div id="add_agent_msg" style="min-height:18px; font-size:12px;"></div>
         <div class="modalActions">
           <button class="btn" id="add_agent_cancel">Cancelar</button>
-          <button class="btn primary" id="add_agent_confirm">Agregar</button>
+          <button class="btn primary" id="add_agent_confirm">Asignar</button>
         </div>
       </div>
     </div>
@@ -1856,7 +1856,12 @@
       agentsTitle: "Agentes",
       agentsSearchPlaceholder: "Buscar agente",
       addAgent: "Agregar agente",
-      addAgentByUid: "UID del agente",
+      addAgentByEmail: "Email del agente",
+      assignAgentBtn: "Asignar",
+      userNotFoundInTeam: "Usuario no encontrado en este equipo",
+      agentAlreadyAssigned: "Este agente ya está asignado.",
+      weekXLabel: "Semana X",
+      monthXLabel: "Mes X",
       addAgentSaved: "Agente asignado correctamente.",
       addAgentError: "No se pudo agregar el agente.",
       agentsEmpty: "No hay agentes asignados.",
@@ -1992,7 +1997,12 @@
       agentsTitle: "Agents",
       agentsSearchPlaceholder: "Search agent",
       addAgent: "Add agent",
-      addAgentByUid: "Agent UID",
+      addAgentByEmail: "Agent email",
+      assignAgentBtn: "Assign",
+      userNotFoundInTeam: "User not found in this team",
+      agentAlreadyAssigned: "This agent is already assigned.",
+      weekXLabel: "Week X",
+      monthXLabel: "Month X",
       addAgentSaved: "Agent assigned successfully.",
       addAgentError: "Could not add agent.",
       agentsEmpty: "No assigned agents.",
@@ -2444,12 +2454,12 @@
     if (agentsBreadcrumbEl && !managerState.selectedAgentUid) agentsBreadcrumbEl.textContent = t("agentTrail");
     const addAgentTitleEl = document.getElementById("add_agent_title");
     if (addAgentTitleEl) addAgentTitleEl.textContent = t("addAgent");
-    const addAgentUidLabelEl = document.getElementById("add_agent_uid_label");
-    if (addAgentUidLabelEl) addAgentUidLabelEl.textContent = t("addAgentByUid");
+    const addAgentEmailLabelEl = document.getElementById("add_agent_email_label");
+    if (addAgentEmailLabelEl) addAgentEmailLabelEl.textContent = t("addAgentByEmail");
     const addAgentCancelEl = document.getElementById("add_agent_cancel");
     if (addAgentCancelEl) addAgentCancelEl.textContent = t("cancel");
     const addAgentConfirmEl = document.getElementById("add_agent_confirm");
-    if (addAgentConfirmEl) addAgentConfirmEl.textContent = t("addAgent");
+    if (addAgentConfirmEl) addAgentConfirmEl.textContent = t("assignAgentBtn");
     endBtn.textContent = t("endDayNow");
     dayCopyBtn.textContent = t("copyBtn");
     dayShareBtn.textContent = t("shareBtn");
@@ -2995,16 +3005,21 @@
       agentsListEl.innerHTML = `<div class="statCard">${t("agentsEmpty")}</div>`;
       return;
     }
+    const now = new Date();
+    const rowsData = [];
     for (const agent of filtered) {
-      const now = new Date();
       await ensureManagerAgentMonth(agent.uid, now.getFullYear(), now.getMonth());
       const weekTotals = sumRecords(recordsInRangeForAgent(agent.uid, startOfWeekMon(now), endOfWeekSun(now)));
-      const sevenStart = new Date(); sevenStart.setDate(sevenStart.getDate() - 6);
-      const last7 = sumRecords(recordsInRangeForAgent(agent.uid, sevenStart, now));
+      const monthTotals = sumRecords(recordsInMonthForAgent(agent.uid, now.getFullYear(), now.getMonth()));
+      rowsData.push({ agent, weekX: weekTotals.X || 0, monthX: monthTotals.X || 0 });
+    }
+    rowsData.sort((a,b) => b.monthX - a.monthX);
+    for (const rowData of rowsData) {
+      const agent = rowData.agent;
       const row = document.createElement("button");
       row.className = "btn";
       row.style.textAlign = "left";
-      row.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">7d X: ${last7.X || 0} • ${t("weekLabel")} X: ${weekTotals.X || 0}</div>`;
+      row.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">${agent.email || ""}</div><div style="opacity:.82; font-size:12px;">${t("weekXLabel")}: ${rowData.weekX} • ${t("monthXLabel")}: ${rowData.monthX}</div>`;
       row.addEventListener("click", async () => {
         managerState.selectedAgentUid = agent.uid;
         managerState.selectedAgentName = agent.displayName || agent.email || agent.uid;
@@ -3081,12 +3096,12 @@
   document.getElementById("add_agent_x")?.addEventListener("click", () => closeModal(modalAddAgent));
   document.getElementById("add_agent_cancel")?.addEventListener("click", () => closeModal(modalAddAgent));
   document.getElementById("add_agent_confirm")?.addEventListener("click", async () => {
-    const uid = (document.getElementById("add_agent_uid")?.value || "").trim();
+    const email = (document.getElementById("add_agent_email")?.value || "").trim().toLowerCase();
     const msg = document.getElementById("add_agent_msg");
-    if (!uid) { if (msg) msg.textContent = t("addAgentError"); return; }
+    if (!email) { if (msg) msg.textContent = t("addAgentError"); return; }
     try {
-      await window.cloudAssignAgentToManager(state.teamId, state.uid, uid);
-      if (msg) msg.textContent = t("addAgentSaved");
+      const result = await window.cloudAssignAgentToManagerByEmail(state.teamId, state.uid, email);
+      if (msg) msg.textContent = result?.alreadyAssigned ? t("agentAlreadyAssigned") : t("addAgentSaved");
       await loadManagerAgents();
     } catch (e) {
       if (msg) msg.textContent = `${t("addAgentError")} ${e?.message || e}`;
@@ -3733,11 +3748,16 @@
 
 
 
-  // SECURITY RULES (prototype guidance):
-  // 1) Agents can read/write only /teams/{teamId}/agents/{uid}/days/{dayId} where uid == request.auth.uid.
-  // 2) Managers can read assigned agents' days only when /teams/{teamId}/managers/{managerUid}/agents/{agentUid} exists.
-  // 3) Managers can create assignments only at /teams/{teamId}/managers/{request.auth.uid}/agents/{agentUid}.
-  // 4) Deny cross-team reads/writes: all access must match user's teamId.
+  // FIRESTORE RULES SNIPPET (prototype):
+  // match /teams/{teamId}/agents/{uid}/days/{dayId} {
+  //   allow read, write: if request.auth != null && request.auth.uid == uid;
+  //   allow read: if request.auth != null
+  //     && exists(/databases/$(database)/documents/teams/$(teamId)/managers/$(request.auth.uid)/agents/$(uid));
+  // }
+  // match /teams/{teamId}/managers/{managerUid}/agents/{agentUid} {
+  //   allow create, update, delete, read: if request.auth != null && request.auth.uid == managerUid;
+  // }
+  // No cross-team access: always scope reads/writes under the same teamId the user belongs to.
 
   async function cloudListAssignedAgents(teamId, managerUid) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
@@ -3746,23 +3766,35 @@
     return snap.docs.map((d) => ({ uid: d.id, ...(d.data() || {}) }));
   }
 
-  async function cloudAssignAgentToManager(teamId, managerUid, agentUid) {
+  async function cloudAssignAgentToManagerByEmail(teamId, managerUid, email) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
-    const targetUid = String(agentUid || "").trim();
-    if (!targetUid) throw new Error("Agent UID is required");
-    const memberRef = doc(db, "teams", safeTeamId, "members", targetUid);
-    const memberSnap = await getDoc(memberRef);
-    if (!memberSnap.exists()) throw new Error("Agent not found in team members");
-    const member = memberSnap.data() || {};
-    await setDoc(doc(db, "teams", safeTeamId, "managers", managerUid, "agents", targetUid), {
+    const safeEmail = String(email || "").trim().toLowerCase();
+    if (!safeEmail) throw new Error("Email is required");
+
+    const membersRef = collection(db, "teams", safeTeamId, "members");
+    const membersQ = query(membersRef, where("email", "==", safeEmail), limit(1));
+    const membersSnap = await getDocs(membersQ);
+    if (membersSnap.empty) throw new Error(t("userNotFoundInTeam"));
+
+    const memberDoc = membersSnap.docs[0];
+    const targetUid = memberDoc.id;
+    const member = memberDoc.data() || {};
+    const assignmentRef = doc(db, "teams", safeTeamId, "managers", managerUid, "agents", targetUid);
+    const assignmentSnap = await getDoc(assignmentRef);
+    if (assignmentSnap.exists()) {
+      return { alreadyAssigned: true, uid: targetUid };
+    }
+
+    await setDoc(assignmentRef, {
       displayName: member.displayName || "",
-      email: member.email || "",
+      email: member.email || safeEmail,
       addedAt: serverTimestamp(),
     }, { merge: true });
+    return { alreadyAssigned: false, uid: targetUid };
   }
 
-  async function promoteToManager(targetUid, teamId) {
-    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+  async function promoteToManager(targetUid) {
+    const safeTeamId = normalizeTeamIdOrThrow(state.teamId);
     await Promise.all([
       setDoc(doc(db, "users", targetUid), { role: "manager", updatedAt: serverTimestamp() }, { merge: true }),
       setDoc(doc(db, "teams", safeTeamId, "members", targetUid), { role: "manager", updatedAt: serverTimestamp() }, { merge: true }),
@@ -3777,7 +3809,7 @@
   window.cloudGetDaysInRange = cloudGetDaysInRange;
   window.migrateAddSchemaVersion = migrateAddSchemaVersion;
   window.cloudListAssignedAgents = cloudListAssignedAgents;
-  window.cloudAssignAgentToManager = cloudAssignAgentToManager;
+  window.cloudAssignAgentToManagerByEmail = cloudAssignAgentToManagerByEmail;
   window.promoteToManager = promoteToManager;
 
   const authRootEl = document.getElementById("authRoot");
