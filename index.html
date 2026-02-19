@@ -1515,7 +1515,7 @@
         <div class="calSurface" style="display:flex; flex-direction:column; gap:10px;">
           <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
             <div id="agents_breadcrumb" class="statsMiniTitle">Agentes</div>
-            <button class="btn" id="agents_add_btn">Agregar agente</button>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn" id="agents_add_btn">Agregar agente</button><button class="btn" id="agents_add_day_btn">Agregar día</button></div>
           </div>
           <input id="agents_search" class="authInput" style="width:100%;" placeholder="Buscar agente" />
           <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
@@ -1677,6 +1677,36 @@
         <div class="modalActions">
           <button class="btn" id="add_agent_cancel">Cancelar</button>
           <button class="btn primary" id="add_agent_confirm">Asignar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="overlay" id="modal_add_day">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Add day">
+      <div class="modalHeader">
+        <div class="modalTitle" id="add_day_title">Agregar día</div>
+        <button class="xbtn" id="add_day_x" aria-label="Close">×</button>
+      </div>
+      <div class="modalBody">
+        <div class="grid2">
+          <div class="field"><label id="add_day_date_label">Fecha</label><input id="add_day_date" type="date" /></div>
+          <div class="field"><label id="add_day_rep_label">Nombre</label><input id="add_day_rep" type="text" /></div>
+          <div class="field" style="grid-column:1/-1;"><label id="add_day_store_label">Tienda</label><input id="add_day_store" type="text" /></div>
+          <div class="field"><label id="add_day_start_label">Inicio (opcional)</label><input id="add_day_start" type="time" /></div>
+          <div class="field"><label id="add_day_end_label">Fin (opcional)</label><input id="add_day_end" type="time" /></div>
+          <div class="field"><label>S</label><input id="add_day_s" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>Z</label><input id="add_day_z" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>CC</label><input id="add_day_cc" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>C</label><input id="add_day_c" type="number" min="0" inputmode="numeric" /></div>
+          <div class="field"><label>X</label><input id="add_day_xv" type="number" min="0" inputmode="numeric" /></div>
+        </div>
+        <div id="add_day_msg" style="min-height:18px; font-size:12px;"></div>
+        <div class="modalActions">
+          <button class="btn" id="add_day_cancel">Cancelar</button>
+          <button class="btn primary" id="add_day_confirm">Guardar día</button>
         </div>
       </div>
     </div>
@@ -1867,7 +1897,13 @@
       agentsEmpty: "No hay agentes asignados.",
       agentTrail: "Agentes",
       readOnlyManager: "Solo lectura (manager)",
-      managerRulesNote: "Reglas sugeridas: agents solo escriben sus días; managers leen solo agentes asignados en su team; assignments sólo bajo su managerUid; acceso aislado por team."
+      managerRulesNote: "Reglas sugeridas: agents solo escriben sus días; managers leen solo agentes asignados en su team; assignments sólo bajo su managerUid; acceso aislado por team.",
+      addDay: "Agregar día",
+      addDayTitle: "Agregar día",
+      addDaySave: "Guardar día",
+      addDayNeedAgent: "Primero selecciona un agente.",
+      addDaySaved: "Día agregado correctamente.",
+      optionalTime: "(opcional)"
     },
     en: {
       tabCounter: "Counter",
@@ -2008,7 +2044,13 @@
       agentsEmpty: "No assigned agents.",
       agentTrail: "Agents",
       readOnlyManager: "Read-only (manager)",
-      managerRulesNote: "Suggested rules: agents can write only own days; managers can read only assigned agents within team; assignments only under own managerUid; team data isolation required."
+      managerRulesNote: "Suggested rules: agents can write only own days; managers can read only assigned agents within team; assignments only under own managerUid; team data isolation required.",
+      addDay: "Add day",
+      addDayTitle: "Add day",
+      addDaySave: "Save day",
+      addDayNeedAgent: "Select an agent first.",
+      addDaySaved: "Day added successfully.",
+      optionalTime: "(optional)"
     }
   };
 
@@ -2277,6 +2319,7 @@
   const modalProfile = document.getElementById("modal_profile");
   const modalReport = document.getElementById("modal_report");
   const modalAddAgent = document.getElementById("modal_add_agent");
+  const modalAddDay = document.getElementById("modal_add_day");
   const startStore = document.getElementById("start_store");
   const startProfileName = document.getElementById("start_profile_name");
   const profileNameInput = document.getElementById("profile_name");
@@ -2460,6 +2503,24 @@
     if (addAgentCancelEl) addAgentCancelEl.textContent = t("cancel");
     const addAgentConfirmEl = document.getElementById("add_agent_confirm");
     if (addAgentConfirmEl) addAgentConfirmEl.textContent = t("assignAgentBtn");
+    const agentsAddDayBtnEl = document.getElementById("agents_add_day_btn");
+    if (agentsAddDayBtnEl) agentsAddDayBtnEl.textContent = t("addDay");
+    const addDayTitleEl = document.getElementById("add_day_title");
+    if (addDayTitleEl) addDayTitleEl.textContent = t("addDayTitle");
+    const addDayDateLabelEl = document.getElementById("add_day_date_label");
+    if (addDayDateLabelEl) addDayDateLabelEl.textContent = t("date");
+    const addDayRepLabelEl = document.getElementById("add_day_rep_label");
+    if (addDayRepLabelEl) addDayRepLabelEl.textContent = t("nameLabel");
+    const addDayStoreLabelEl = document.getElementById("add_day_store_label");
+    if (addDayStoreLabelEl) addDayStoreLabelEl.textContent = t("storeLabel");
+    const addDayStartLabelEl = document.getElementById("add_day_start_label");
+    if (addDayStartLabelEl) addDayStartLabelEl.textContent = `${t("startLbl")} ${t("optionalTime")}`;
+    const addDayEndLabelEl = document.getElementById("add_day_end_label");
+    if (addDayEndLabelEl) addDayEndLabelEl.textContent = `${t("endLbl")} ${t("optionalTime")}`;
+    const addDayCancelEl = document.getElementById("add_day_cancel");
+    if (addDayCancelEl) addDayCancelEl.textContent = t("cancel");
+    const addDayConfirmEl = document.getElementById("add_day_confirm");
+    if (addDayConfirmEl) addDayConfirmEl.textContent = t("addDaySave");
     endBtn.textContent = t("endDayNow");
     dayCopyBtn.textContent = t("copyBtn");
     dayShareBtn.textContent = t("shareBtn");
@@ -2579,6 +2640,7 @@
   clickOutsideToClose(modalProfile, true);
   clickOutsideToClose(modalReport, false);
   clickOutsideToClose(modalAddAgent, true);
+  clickOutsideToClose(modalAddDay, true);
   clickOutsideToClose(modalDay, true);
   clickOutsideToClose(modalRatingHelp, true);
   dayX.addEventListener("click", () => closeModal(modalDay));
@@ -2619,15 +2681,17 @@
       ? `% Close (X/Z): ${fmtPct(close)}`
       : `% Close (X/Z): —`;
 
+    const hasTime = Number(dayData?.startTs || 0) > 0 || Number(dayData?.endTs || 0) > 0 || Number(dayData?.durationMs || 0) > 0;
+    const timeLines = hasTime
+      ? [`Start: ${fmtTime(dayData?.startTs)}`, `End: ${fmtTime(dayData?.endTs)}`, `Duration: ${fmtDuration(dayData?.durationMs || 0)}`, ``]
+      : [];
+
     return [
       `Name: ${dayData?.rep || "-"}`,
       `Store: ${dayData?.store || "-"}`,
       `Date: ${prettyDateFromISO(dayData?.date || "-")}`,
       ``,
-      `Start: ${fmtTime(dayData?.startTs)}`,
-      `End: ${fmtTime(dayData?.endTs)}`,
-      `Duration: ${fmtDuration(dayData?.durationMs || 0)}`,
-      ``,
+      ...timeLines,
       `S: ${S} | Z: ${Z} | CC: ${CC} | C: ${C} | X: ${X}`,
       aggrLine,
       closeLine
@@ -2817,11 +2881,15 @@
       </div>
     `).join("");
 
+    const hasTimeMeta = Number(rec.startTs || 0) > 0 || Number(rec.endTs || 0) > 0 || Number(rec.durationMs || 0) > 0;
+    const timeMetaLine = hasTimeMeta
+      ? `<div class="p">${t("startLbl")}: ${fmtTime(rec.startTs)} • ${t("endLbl")}: ${fmtTime(rec.endTs)} • ${t("durLbl")}: ${fmtDuration(rec.durationMs || 0)}</div>`
+      : "";
     dayModalMeta.innerHTML = `
       <div class="statHead">
         <div>
           <div class="h">${rec.rep || "—"} • ${rec.store || "—"}</div>
-          <div class="p">${t("startLbl")}: ${fmtTime(rec.startTs)} • ${t("endLbl")}: ${fmtTime(rec.endTs)} • ${t("durLbl")}: ${fmtDuration(rec.durationMs || 0)}</div>
+          ${timeMetaLine}
           <div class="p">${t("resultLbl")}: ${ratingLine(rating, badge)}</div>
         </div>
       </div>
@@ -3116,6 +3184,58 @@
       if (msg) msg.textContent = `${t("addAgentError")} ${e?.message || e}`;
     }
   });
+
+  document.getElementById("agents_add_day_btn")?.addEventListener("click", () => {
+    const msg = document.getElementById("add_day_msg");
+    if (msg) msg.textContent = "";
+    document.getElementById("add_day_date").value = isoDateLocal();
+    document.getElementById("add_day_rep").value = managerState.selectedAgentName || "";
+    document.getElementById("add_day_store").value = "";
+    document.getElementById("add_day_start").value = "";
+    document.getElementById("add_day_end").value = "";
+    ["s","z","cc","c","xv"].forEach((k) => { const el = document.getElementById(`add_day_${k}`); if (el) el.value = "0"; });
+    openModal(modalAddDay);
+  });
+  document.getElementById("add_day_x")?.addEventListener("click", () => closeModal(modalAddDay));
+  document.getElementById("add_day_cancel")?.addEventListener("click", () => closeModal(modalAddDay));
+  document.getElementById("add_day_confirm")?.addEventListener("click", async () => {
+    const msg = document.getElementById("add_day_msg");
+    const agentUid = managerState.selectedAgentUid;
+    if (!agentUid) { if (msg) msg.textContent = t("addDayNeedAgent"); return; }
+    const date = (document.getElementById("add_day_date")?.value || "").trim();
+    if (!date) { if (msg) msg.textContent = t("addAgentError"); return; }
+    const rep = (document.getElementById("add_day_rep")?.value || "").trim() || managerState.selectedAgentName || "";
+    const store = (document.getElementById("add_day_store")?.value || "").trim();
+    const startT = (document.getElementById("add_day_start")?.value || "").trim();
+    const endT = (document.getElementById("add_day_end")?.value || "").trim();
+    const n = (id) => Math.max(0, parseInt(document.getElementById(id)?.value || 0, 10) || 0);
+    const values = { S: n("add_day_s"), Z: n("add_day_z"), CC: n("add_day_cc"), C: n("add_day_c"), X: n("add_day_xv") };
+    const startTs = toTsFromDateAndTime(date, startT);
+    const endTs = toTsFromDateAndTime(date, endT);
+    const durationMs = (startTs && endTs && endTs >= startTs) ? (endTs - startTs) : 0;
+    const ratingInfo = classifyDay(values);
+    const payload = { date, rep, store, startTs, endTs, durationMs, values, money: values.X * MONEY_PER_X, dayRating: ratingInfo.dayRating, dayBadge: ratingInfo.dayBadge };
+    try {
+      await window.cloudUpsertDay(state.teamId, agentUid, date, payload);
+      managerState.records[agentUid] = managerState.records[agentUid] || {};
+      managerState.records[agentUid][date] = payload;
+      managerState.monthCache.delete(`${agentUid}:${managerState.calCursor.y}-${managerState.calCursor.m}`);
+      if (msg) msg.textContent = t("addDaySaved");
+      await renderManagerAgentCalendar();
+      await renderManagerAgentsList();
+      closeModal(modalAddDay);
+    } catch (e) {
+      if (msg) msg.textContent = `${t("addAgentError")} ${e?.message || e}`;
+    }
+  });
+
+
+  function toTsFromDateAndTime(dateISO, hhmm) {
+    if (!dateISO || !hhmm) return 0;
+    const d = new Date(`${dateISO}T${hhmm}:00`);
+    const ts = d.getTime();
+    return Number.isFinite(ts) ? ts : 0;
+  }
 
   // ---------- Calendar rendering ----------
   let selectedDayISO = null;
