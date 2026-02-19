@@ -1652,6 +1652,7 @@
         <div class="modalActions">
           <button class="btn" id="day_copy">Copiar</button>
           <button class="btn" id="day_share">Compartir</button>
+          <button class="btn primary" id="day_add_missing" style="display:none;">Agregar día</button>
           <button class="btn" id="day_edit">Editar día</button>
           <button class="btn" id="day_delete">Borrar día</button>
           <button class="btn primary" id="day_save" style="display:none;">Guardar cambios</button>
@@ -1895,6 +1896,10 @@
       addAgentSaved: "Agente asignado correctamente.",
       addAgentError: "No se pudo agregar el agente.",
       agentsEmpty: "No hay agentes asignados.",
+      removeAgent: "Eliminar agente",
+      removeAgentConfirm: "¿Eliminar este agente de tu lista?",
+      removeAgentSaved: "Agente eliminado correctamente.",
+      removeAgentError: "No se pudo eliminar el agente.",
       agentTrail: "Agentes",
       readOnlyManager: "Solo lectura (manager)",
       managerRulesNote: "Reglas sugeridas: agents solo escriben sus días; managers leen solo agentes asignados en su team; assignments sólo bajo su managerUid; acceso aislado por team.",
@@ -2042,6 +2047,10 @@
       addAgentSaved: "Agent assigned successfully.",
       addAgentError: "Could not add agent.",
       agentsEmpty: "No assigned agents.",
+      removeAgent: "Remove agent",
+      removeAgentConfirm: "Remove this agent from your list?",
+      removeAgentSaved: "Agent removed successfully.",
+      removeAgentError: "Could not remove the agent.",
       agentTrail: "Agents",
       readOnlyManager: "Read-only (manager)",
       managerRulesNote: "Suggested rules: agents can write only own days; managers can read only assigned agents within team; assignments only under own managerUid; team data isolation required.",
@@ -2347,6 +2356,7 @@
   const dayModalReport = document.getElementById("day_modal_report");
   const dayCopyBtn = document.getElementById("day_copy");
   const dayShareBtn = document.getElementById("day_share");
+  const dayAddMissingBtn = document.getElementById("day_add_missing");
   const dayEditBtn = document.getElementById("day_edit");
   const dayDeleteBtn = document.getElementById("day_delete");
   const daySaveBtn = document.getElementById("day_save");
@@ -2524,6 +2534,7 @@
     endBtn.textContent = t("endDayNow");
     dayCopyBtn.textContent = t("copyBtn");
     dayShareBtn.textContent = t("shareBtn");
+    if (dayAddMissingBtn) dayAddMissingBtn.textContent = t("addDay");
     document.getElementById("rating_help_body").innerHTML = `
       <div style="font-weight:700; margin-bottom:8px;">${t("quickCriteria")}</div>
       <ul style="margin:0 0 10px 18px; padding:0;">
@@ -2831,6 +2842,18 @@
     return buildReportText(rec);
   }
 
+  function openManagerAddDayModal(dateISO = isoDateLocal()) {
+    const msg = document.getElementById("add_day_msg");
+    if (msg) msg.textContent = "";
+    document.getElementById("add_day_date").value = dateISO;
+    document.getElementById("add_day_rep").value = managerState.selectedAgentName || "";
+    document.getElementById("add_day_store").value = "";
+    document.getElementById("add_day_start").value = "";
+    document.getElementById("add_day_end").value = "";
+    ["s","z","cc","c","xv"].forEach((k) => { const el = document.getElementById(`add_day_${k}`); if (el) el.value = "0"; });
+    openModal(modalAddDay);
+  }
+
   function openDayModal(iso, agentUid = state.uid){
     const hist = historyForAgent(agentUid);
     const rec = hist[iso];
@@ -2855,6 +2878,7 @@
       dayModalReport.textContent = "—";
       dayCopyBtn.style.display = "none";
       dayShareBtn.style.display = "none";
+      if (dayAddMissingBtn) dayAddMissingBtn.style.display = isReadOnly ? "" : "none";
       dayEditBtn.style.display = "none";
       dayDeleteBtn.style.display = "none";
       openModal(modalDay);
@@ -2904,6 +2928,7 @@
     dayModalReport.textContent = buildFullReportFromRecord(rec);
     dayCopyBtn.style.display = "";
     dayShareBtn.style.display = "";
+    if (dayAddMissingBtn) dayAddMissingBtn.style.display = "none";
     dayEditBtn.style.display = isReadOnly ? "none" : "";
     dayDeleteBtn.style.display = isReadOnly ? "none" : "";
     if (isReadOnly) dayModalMeta.innerHTML += `<div class="p" style="margin-top:6px;">${t("readOnlyManager")}</div>`;
@@ -2934,6 +2959,11 @@
 
   dayCopyBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "copy"); } catch {} });
   dayShareBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {} });
+  dayAddMissingBtn?.addEventListener("click", () => {
+    if (!activeDayISO || !activeDayAgentUid || activeDayAgentUid === state.uid) return;
+    closeModal(modalDay);
+    openManagerAddDayModal(activeDayISO);
+  });
 
   dayEditBtn.addEventListener("click", () => {
     const detailsPanel = document.getElementById("day_details_panel");
@@ -3084,11 +3114,19 @@
     rowsData.sort((a,b) => b.monthX - a.monthX);
     for (const rowData of rowsData) {
       const agent = rowData.agent;
-      const row = document.createElement("button");
-      row.className = "btn";
-      row.style.textAlign = "left";
-      row.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">${agent.email || ""}</div><div style="opacity:.82; font-size:12px;">${t("weekXLabel")}: ${rowData.weekX} • ${t("monthXLabel")}: ${rowData.monthX}</div>`;
-      row.addEventListener("click", async () => {
+      const row = document.createElement("div");
+      row.className = "statCard";
+      row.style.display = "flex";
+      row.style.alignItems = "center";
+      row.style.justifyContent = "space-between";
+      row.style.gap = "8px";
+
+      const openBtn = document.createElement("button");
+      openBtn.className = "btn";
+      openBtn.style.textAlign = "left";
+      openBtn.style.flex = "1 1 auto";
+      openBtn.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">${agent.email || ""}</div><div style="opacity:.82; font-size:12px;">${t("weekXLabel")}: ${rowData.weekX} • ${t("monthXLabel")}: ${rowData.monthX}</div>`;
+      openBtn.addEventListener("click", async () => {
         const isSameAgentOpen = managerState.selectedAgentUid === agent.uid && managerAgentDetailEl.style.display !== "none";
         if (isSameAgentOpen) {
           managerState.selectedAgentUid = "";
@@ -3105,6 +3143,33 @@
         managerAgentDetailEl.style.display = "";
         await renderManagerAgentCalendar();
       });
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "btn";
+      removeBtn.textContent = t("removeAgent");
+      removeBtn.addEventListener("click", async () => {
+        if (!confirm(t("removeAgentConfirm"))) return;
+        try {
+          await window.cloudRemoveAssignedAgent(state.teamId, state.uid, agent.uid);
+          managerState.list = managerState.list.filter((a) => a.uid !== agent.uid);
+          delete managerState.records[agent.uid];
+          managerState.monthCache = new Map(Array.from(managerState.monthCache.entries()).filter(([k]) => !k.startsWith(`${agent.uid}:`)));
+          if (managerState.selectedAgentUid === agent.uid) {
+            managerState.selectedAgentUid = "";
+            managerState.selectedAgentName = "";
+            managerState.selectedAgentEmail = "";
+            managerAgentDetailEl.style.display = "none";
+            agentsBreadcrumbEl.textContent = t("agentTrail");
+          }
+          agentsErrorEl.textContent = t("removeAgentSaved");
+          renderManagerAgentsList();
+        } catch (err) {
+          agentsErrorEl.textContent = `${t("removeAgentError")} ${String(err?.message || err)}`;
+        }
+      });
+
+      row.appendChild(openBtn);
+      row.appendChild(removeBtn);
       agentsListEl.appendChild(row);
     }
   }
@@ -3186,15 +3251,7 @@
   });
 
   document.getElementById("agents_add_day_btn")?.addEventListener("click", () => {
-    const msg = document.getElementById("add_day_msg");
-    if (msg) msg.textContent = "";
-    document.getElementById("add_day_date").value = isoDateLocal();
-    document.getElementById("add_day_rep").value = managerState.selectedAgentName || "";
-    document.getElementById("add_day_store").value = "";
-    document.getElementById("add_day_start").value = "";
-    document.getElementById("add_day_end").value = "";
-    ["s","z","cc","c","xv"].forEach((k) => { const el = document.getElementById(`add_day_${k}`); if (el) el.value = "0"; });
-    openModal(modalAddDay);
+    openManagerAddDayModal(isoDateLocal());
   });
   document.getElementById("add_day_x")?.addEventListener("click", () => closeModal(modalAddDay));
   document.getElementById("add_day_cancel")?.addEventListener("click", () => closeModal(modalAddDay));
@@ -3922,6 +3979,14 @@
     return { alreadyAssigned: false, uid: targetUid };
   }
 
+  async function cloudRemoveAssignedAgent(teamId, managerUid, agentUid) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const safeAgentUid = String(agentUid || "").trim();
+    if (!safeAgentUid) throw new Error("Agent uid is required");
+    await deleteDoc(doc(db, "teams", safeTeamId, "managers", managerUid, "agents", safeAgentUid));
+    return true;
+  }
+
   async function promoteToManager(targetUid) {
     const safeTeamId = normalizeTeamIdOrThrow(state.teamId);
     await Promise.all([
@@ -3939,6 +4004,7 @@
   window.migrateAddSchemaVersion = migrateAddSchemaVersion;
   window.cloudListAssignedAgents = cloudListAssignedAgents;
   window.cloudAssignAgentToManagerByEmail = cloudAssignAgentToManagerByEmail;
+  window.cloudRemoveAssignedAgent = cloudRemoveAssignedAgent;
   window.promoteToManager = promoteToManager;
 
   const authRootEl = document.getElementById("authRoot");
@@ -4028,7 +4094,8 @@
           if (teamId) {
             await ensureTeamMembership(teamId, user.uid);
             const memberSnap = await getDoc(doc(db, "teams", teamId, "members", user.uid));
-            if (memberSnap.exists()) role = memberSnap.data()?.role || role;
+            const memberRole = memberSnap.exists() ? (memberSnap.data()?.role || "") : "";
+            role = (role === "manager" || memberRole === "manager") ? "manager" : (memberRole || role);
           }
           state.role = role;
           saveStateNow();
