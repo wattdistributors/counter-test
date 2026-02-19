@@ -3326,7 +3326,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } 
     from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 
   const firebaseConfig = {
@@ -3431,13 +3431,13 @@
       money: X * MONEY_PER_X_CENTS,
       dayRating: payload?.dayRating || "",
       dayBadge: payload?.dayBadge || "",
+      schemaVersion: 1,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    console.log("Firestore payload (clean):", cleanPayload);
-
     const path = `teams/${safeTeamId}/agents/${uid}/days/${safeIso}`;
     try {
+      console.log("Firestore day payload:", cleanPayload);
       console.log("Saving day to Firestore...", safeTeamId, uid, safeIso);
       await setDoc(dayRef, cleanPayload, { merge: true });
       console.log("Saved day to Firestore OK");
@@ -3457,6 +3457,32 @@
 
     await deleteDoc(doc(db, "teams", safeTeamId, "agents", uid, "days", safeIso));
   }
+
+  async function migrateAddSchemaVersion(teamId, agentUid) {
+    const safeTeamId = normalizeTeamIdOrThrow(teamId);
+    const safeUid = String(agentUid || "").trim();
+    if (!safeUid) throw new Error("Invalid agent uid");
+
+    const colRef = collection(db, "teams", safeTeamId, "agents", safeUid, "days");
+    const snap = await getDocs(colRef);
+    let updated = 0;
+
+    for (const dayDoc of snap.docs) {
+      const data = dayDoc.data() || {};
+      if (data.schemaVersion == null) {
+        await updateDoc(dayDoc.ref, {
+          schemaVersion: 1,
+          updatedAt: serverTimestamp(),
+        });
+        updated += 1;
+      }
+    }
+
+    const summary = { checked: snap.size, updated, teamId: safeTeamId, agentUid: safeUid };
+    console.log("migrateAddSchemaVersion summary:", summary);
+    return summary;
+  }
+
 
   async function cloudGetDaysInRange(teamId, uid, startISO, endISO) {
     const safeTeamId = normalizeTeamIdOrThrow(teamId);
@@ -3492,6 +3518,7 @@
   window.cloudUpsertDay = cloudUpsertDay;
   window.cloudDeleteDay = cloudDeleteDay;
   window.cloudGetDaysInRange = cloudGetDaysInRange;
+  window.migrateAddSchemaVersion = migrateAddSchemaVersion;
 
   const authRootEl = document.getElementById("authRoot");
   const appRootEl = document.getElementById("appRoot");
