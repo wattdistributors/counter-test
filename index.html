@@ -1578,8 +1578,7 @@
             <div id="agents_breadcrumb" class="statsMiniTitle">Agentes</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn" id="agents_add_btn">Agregar agente</button></div>
           </div>
-          <input id="agents_search" class="authInput" style="width:100%;" placeholder="Buscar agente" />
-          <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
+                    <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
           <div id="agents_list" class="statsPanel" style="display:flex; flex-direction:column; gap:8px;"></div>
 
           <div id="manager_agent_detail" style="display:none;">
@@ -2330,6 +2329,8 @@
     selectedAgentUid: "",
     selectedAgentName: "",
     selectedAgentEmail: "",
+    addDayTargetUid: "",
+    addDayTargetName: "",
     list: [],
     search: "",
     monthCache: new Map(),
@@ -2379,7 +2380,6 @@
   const mgrWeekStatsEl = document.getElementById("mgr_week_stats");
   const mgrMonthStatsEl = document.getElementById("mgr_month_stats");
   const agentsListEl = document.getElementById("agents_list");
-  const agentsSearchEl = document.getElementById("agents_search");
   const agentsErrorEl = document.getElementById("agents_error");
   const agentsBreadcrumbEl = document.getElementById("agents_breadcrumb");
   const managerAgentDetailEl = document.getElementById("manager_agent_detail");
@@ -2568,7 +2568,6 @@
 
     const agentsAddBtnEl = document.getElementById("agents_add_btn");
     if (agentsAddBtnEl) agentsAddBtnEl.textContent = t("addAgent");
-    if (agentsSearchEl) agentsSearchEl.placeholder = t("agentsSearchPlaceholder");
     if (agentsBreadcrumbEl && !managerState.selectedAgentUid) agentsBreadcrumbEl.textContent = t("agentTrail");
     const addAgentTitleEl = document.getElementById("add_agent_title");
     if (addAgentTitleEl) addAgentTitleEl.textContent = t("addAgent");
@@ -2906,13 +2905,15 @@
     return buildReportText(rec);
   }
 
-  function openManagerAddDayModal(dateISO = isoDateLocal()) {
+  function openManagerAddDayModal({ dateISO = isoDateLocal(), agentUid = "", agentName = "" } = {}) {
     const msg = document.getElementById("add_day_msg");
     const modalBody = document.querySelector("#modal_add_day .modalBody");
+    managerState.addDayTargetUid = agentUid || managerState.selectedAgentUid || state.uid;
+    managerState.addDayTargetName = agentName || managerState.selectedAgentName || state.rep || "";
     if (msg) msg.textContent = "";
     if (modalBody) modalBody.scrollTop = 0;
     document.getElementById("add_day_date").value = dateISO;
-    document.getElementById("add_day_rep").value = managerState.selectedAgentName || "";
+    document.getElementById("add_day_rep").value = managerState.addDayTargetName || "";
     document.getElementById("add_day_store").value = "";
     document.getElementById("add_day_start").value = "";
     document.getElementById("add_day_end").value = "";
@@ -2944,7 +2945,7 @@
       dayModalReport.textContent = "—";
       dayCopyBtn.style.display = "none";
       dayShareBtn.style.display = "none";
-      if (dayAddMissingBtn) dayAddMissingBtn.style.display = isReadOnly ? "" : "none";
+      if (dayAddMissingBtn) dayAddMissingBtn.style.display = state.role === "manager" ? "" : "none";
       dayEditBtn.style.display = "none";
       dayDeleteBtn.style.display = "none";
       openModal(modalDay);
@@ -3026,9 +3027,14 @@
   dayCopyBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "copy"); } catch {} });
   dayShareBtn.addEventListener("click", async () => { try { await copyOrShareText(dayModalReport.textContent, "share"); } catch {} });
   dayAddMissingBtn?.addEventListener("click", () => {
-    if (!activeDayISO || !activeDayAgentUid || activeDayAgentUid === state.uid) return;
+    if (!activeDayISO || !activeDayAgentUid || state.role !== "manager") return;
     closeModal(modalDay);
-    openManagerAddDayModal(activeDayISO);
+    const isOwnDay = activeDayAgentUid === state.uid;
+    openManagerAddDayModal({
+      dateISO: activeDayISO,
+      agentUid: activeDayAgentUid,
+      agentName: isOwnDay ? (state.rep || "") : (managerState.selectedAgentName || ""),
+    });
   });
 
   dayEditBtn.addEventListener("click", () => {
@@ -3199,6 +3205,8 @@
         managerState.selectedAgentUid = agent.uid;
         managerState.selectedAgentName = agent.displayName || agent.email || agent.uid;
         managerState.selectedAgentEmail = agent.email || "";
+        managerState.addDayTargetUid = agent.uid;
+        managerState.addDayTargetName = managerState.selectedAgentName;
         agentsBreadcrumbEl.textContent = `${t("agentTrail")} > ${managerState.selectedAgentName}`;
         managerAgentDetailEl.style.display = "";
         if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "";
@@ -3270,10 +3278,6 @@
     if (managerState.calCursor.m > 11) { managerState.calCursor.m = 0; managerState.calCursor.y += 1; }
     await renderManagerAgentCalendar();
   });
-  agentsSearchEl?.addEventListener("input", (e) => {
-    managerState.search = e.target.value || "";
-    renderManagerAgentsList();
-  });
   async function removeSelectedManagerAgent() {
     const agentUid = managerState.selectedAgentUid;
     if (!agentUid) return;
@@ -3318,11 +3322,11 @@
   document.getElementById("add_day_cancel")?.addEventListener("click", () => closeModal(modalAddDay));
   document.getElementById("add_day_confirm")?.addEventListener("click", async () => {
     const msg = document.getElementById("add_day_msg");
-    const agentUid = managerState.selectedAgentUid;
+    const agentUid = managerState.addDayTargetUid || managerState.selectedAgentUid;
     if (!agentUid) { if (msg) msg.textContent = t("addDayNeedAgent"); return; }
     const date = (document.getElementById("add_day_date")?.value || "").trim();
     if (!date) { if (msg) msg.textContent = t("addAgentError"); return; }
-    const rep = (document.getElementById("add_day_rep")?.value || "").trim() || managerState.selectedAgentName || "";
+    const rep = (document.getElementById("add_day_rep")?.value || "").trim() || managerState.addDayTargetName || managerState.selectedAgentName || state.rep || "";
     const store = (document.getElementById("add_day_store")?.value || "").trim();
     const startT = (document.getElementById("add_day_start")?.value || "").trim();
     const endT = (document.getElementById("add_day_end")?.value || "").trim();
@@ -3339,8 +3343,14 @@
       managerState.records[agentUid][date] = payload;
       managerState.monthCache.delete(`${agentUid}:${managerState.calCursor.y}-${managerState.calCursor.m}`);
       if (msg) msg.textContent = t("addDaySaved");
-      await renderManagerAgentCalendar();
-      await renderManagerAgentsList();
+      if (agentUid === state.uid) {
+        renderCalendar();
+        renderCalendarStats();
+        renderProgress();
+      } else {
+        await renderManagerAgentCalendar();
+        await renderManagerAgentsList();
+      }
       closeModal(modalAddDay);
     } catch (e) {
       if (msg) msg.textContent = `${t("addAgentError")} ${e?.message || e}`;
