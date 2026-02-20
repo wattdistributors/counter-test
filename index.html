@@ -1229,6 +1229,125 @@
       justify-content:flex-end;
       margin-top:8px;
     }
+
+    .managerAgentsTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .managerPrimaryBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      margin-left:auto;
+      min-width:170px;
+      background: rgba(210,239,255,.3);
+      border-color: rgba(219,243,255,.72);
+      box-shadow: 0 10px 20px rgba(6,36,61,.24);
+    }
+    .managerPrimaryBtn .plus{
+      font-size:18px;
+      font-weight:900;
+      line-height:1;
+    }
+    .managerKpiGrid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:2px;
+    }
+    .managerKpiCard{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.12);
+      padding:12px;
+      box-shadow: 0 10px 24px rgba(6,34,58,.22);
+    }
+    .managerKpiLabel{
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+      color: rgba(220,242,255,.88);
+    }
+    .managerKpiValue{
+      margin-top:8px;
+      font-size:clamp(32px, 6vw, 46px);
+      line-height:1;
+      font-weight:1000;
+      color: rgba(246,253,255,.98);
+    }
+    .managerAgentsList{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .managerAgentCard{
+      width:100%;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.09);
+      padding:12px;
+      text-align:left;
+      cursor:pointer;
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .managerAgentCard:hover{
+      background: rgba(255,255,255,.15);
+      border-color: rgba(228,246,255,.38);
+      transform: translateY(-1px);
+    }
+    .managerAgentCard.active{
+      background: rgba(222,244,255,.2);
+      border-color: rgba(230,248,255,.46);
+    }
+    .managerAgentName{
+      font-size:20px;
+      font-weight:900;
+      line-height:1.15;
+      color: rgba(246,253,255,.98);
+    }
+    .managerAgentEmail{
+      margin-top:4px;
+      font-size:12px;
+      color: rgba(209,236,252,.86);
+    }
+    .managerAgentMetrics{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:8px;
+      align-items:end;
+    }
+    .managerMetricLabel{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color: rgba(202,232,249,.82);
+      font-weight:800;
+    }
+    .managerMetricValue{
+      margin-top:4px;
+      font-size:24px;
+      line-height:1;
+      font-weight:900;
+      color: rgba(242,251,255,.98);
+    }
+    .managerMetricValue.highlight{
+      color: rgba(183,238,255,.98);
+      text-shadow: 0 0 16px rgba(135,219,255,.32);
+    }
+    .managerMetricLink{
+      font-size:13px;
+      font-weight:900;
+      color: rgba(203,238,255,.95);
+      text-align:right;
+      align-self:center;
+      white-space:nowrap;
+    }
     .btnSubtleDanger{
       min-height:30px;
       padding:4px 10px;
@@ -1423,6 +1542,10 @@
 
       .statGrid{ grid-template-columns: repeat(5, minmax(0,1fr)); }
       .sumStats{ grid-template-columns: repeat(3, 1fr); }
+      .managerKpiGrid{ grid-template-columns: 1fr; }
+      .managerPrimaryBtn{ width:100%; }
+      .managerAgentMetrics{ grid-template-columns: 1fr 1fr; }
+      .managerMetricLink{ grid-column: 1 / -1; text-align:left; }
     }
 
 
@@ -1574,12 +1697,26 @@
       <!-- ============ TAB: AGENTS (MANAGER) ============ -->
       <div id="tab_agents" style="display:none;">
         <div class="calSurface" style="display:flex; flex-direction:column; gap:10px;">
-          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+          <div class="managerAgentsTop">
             <div id="agents_breadcrumb" class="statsMiniTitle">Agentes</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn" id="agents_add_btn">Agregar agente</button></div>
+            <button class="btn managerPrimaryBtn" id="agents_add_btn"><span class="plus">+</span>Agregar agente</button>
           </div>
-                    <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
-          <div id="agents_list" class="statsPanel" style="display:flex; flex-direction:column; gap:8px;"></div>
+          <div class="managerKpiGrid" id="manager_team_kpis">
+            <div class="managerKpiCard">
+              <div class="managerKpiLabel">Agentes activos</div>
+              <div class="managerKpiValue" id="kpi_agents_active">0</div>
+            </div>
+            <div class="managerKpiCard">
+              <div class="managerKpiLabel">Ventas semana (X)</div>
+              <div class="managerKpiValue" id="kpi_team_week">0</div>
+            </div>
+            <div class="managerKpiCard">
+              <div class="managerKpiLabel">Ventas mes (X)</div>
+              <div class="managerKpiValue" id="kpi_team_month">0</div>
+            </div>
+          </div>
+          <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
+          <div id="agents_list" class="managerAgentsList"></div>
 
           <div id="manager_agent_detail" style="display:none;">
             <div class="calHeader">
@@ -2391,6 +2528,9 @@
   const agentsListEl = document.getElementById("agents_list");
   const agentsErrorEl = document.getElementById("agents_error");
   const agentsBreadcrumbEl = document.getElementById("agents_breadcrumb");
+  const kpiAgentsActiveEl = document.getElementById("kpi_agents_active");
+  const kpiTeamWeekEl = document.getElementById("kpi_team_week");
+  const kpiTeamMonthEl = document.getElementById("kpi_team_month");
   const managerAgentDetailEl = document.getElementById("manager_agent_detail");
   const managerRemoveAgentBtn = document.getElementById("manager_remove_agent_btn");
 
@@ -2576,7 +2716,7 @@
     shareBtn.textContent = t("shareBtn");
 
     const agentsAddBtnEl = document.getElementById("agents_add_btn");
-    if (agentsAddBtnEl) agentsAddBtnEl.textContent = t("addAgent");
+    if (agentsAddBtnEl) agentsAddBtnEl.innerHTML = `<span class="plus">+</span>${t("addAgent")}`;
     if (agentsBreadcrumbEl && !managerState.selectedAgentUid) agentsBreadcrumbEl.textContent = t("agentTrail");
     const addAgentTitleEl = document.getElementById("add_agent_title");
     if (addAgentTitleEl) addAgentTitleEl.textContent = t("addAgent");
@@ -3196,37 +3336,53 @@
     const q = (managerState.search || "").toLowerCase();
     const filtered = managerState.list.filter((a) => (a.displayName || "").toLowerCase().includes(q) || (a.email || "").toLowerCase().includes(q) || (a.uid || "").toLowerCase().includes(q));
     agentsListEl.innerHTML = "";
-    if (!filtered.length) {
-      agentsListEl.innerHTML = `<div class="statCard">${t("agentsEmpty")}</div>`;
-      return;
-    }
+
     const now = new Date();
+    let totalWeekX = 0;
+    let totalMonthX = 0;
     const rowsData = [];
+
     for (const agent of filtered) {
       await ensureManagerAgentMonth(agent.uid, now.getFullYear(), now.getMonth());
       const weekTotals = sumRecords(recordsInRangeForAgent(agent.uid, startOfWeekMon(now), endOfWeekSun(now)));
       const monthTotals = sumRecords(recordsInMonthForAgent(agent.uid, now.getFullYear(), now.getMonth()));
-      rowsData.push({ agent, weekX: weekTotals.X || 0, monthX: monthTotals.X || 0 });
+      const weekX = weekTotals.X || 0;
+      const monthX = monthTotals.X || 0;
+      totalWeekX += weekX;
+      totalMonthX += monthX;
+      rowsData.push({ agent, weekX, monthX });
     }
+
+    if (kpiAgentsActiveEl) kpiAgentsActiveEl.textContent = String(filtered.length);
+    if (kpiTeamWeekEl) kpiTeamWeekEl.textContent = String(totalWeekX);
+    if (kpiTeamMonthEl) kpiTeamMonthEl.textContent = String(totalMonthX);
+
+    if (!filtered.length) {
+      agentsListEl.innerHTML = `<div class="statCard">${t("agentsEmpty")}</div>`;
+      return;
+    }
+
     rowsData.sort((a,b) => b.monthX - a.monthX);
     for (const rowData of rowsData) {
       const agent = rowData.agent;
       const row = document.createElement("button");
-      row.className = "btn";
-      row.style.textAlign = "left";
-      row.style.width = "100%";
-      row.innerHTML = `<b>${agent.displayName || agent.email || agent.uid}</b><div style="opacity:.82; font-size:12px;">${agent.email || ""}</div><div style="opacity:.82; font-size:12px;">${t("weekXLabel")}: ${rowData.weekX} • ${t("monthXLabel")}: ${rowData.monthX}</div>`;
+      const selected = managerState.selectedAgentUid === agent.uid;
+      row.className = `managerAgentCard ${selected ? "active" : ""}`;
+      row.innerHTML = `
+        <div class="managerAgentName">${agent.displayName || agent.email || agent.uid}</div>
+        <div class="managerAgentEmail">${agent.email || ""}</div>
+        <div class="managerAgentMetrics">
+          <div>
+            <div class="managerMetricLabel">${t("weekXLabel")}</div>
+            <div class="managerMetricValue ${rowData.weekX > 10 ? "highlight" : ""}">${rowData.weekX}</div>
+          </div>
+          <div>
+            <div class="managerMetricLabel">${t("monthXLabel")}</div>
+            <div class="managerMetricValue">${rowData.monthX}</div>
+          </div>
+          <div class="managerMetricLink">Ver Calendario →</div>
+        </div>`;
       row.addEventListener("click", async () => {
-        const isSameAgentOpen = managerState.selectedAgentUid === agent.uid && managerAgentDetailEl.style.display !== "none";
-        if (isSameAgentOpen) {
-          managerState.selectedAgentUid = "";
-          managerState.selectedAgentName = "";
-          managerState.selectedAgentEmail = "";
-          managerAgentDetailEl.style.display = "none";
-          if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "none";
-          agentsBreadcrumbEl.textContent = t("agentTrail");
-          return;
-        }
         managerState.selectedAgentUid = agent.uid;
         managerState.selectedAgentName = agent.displayName || agent.email || agent.uid;
         managerState.selectedAgentEmail = agent.email || "";
@@ -3236,6 +3392,7 @@
         managerAgentDetailEl.style.display = "";
         if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "";
         await renderManagerAgentCalendar();
+        await renderManagerAgentsList();
       });
       agentsListEl.appendChild(row);
     }
