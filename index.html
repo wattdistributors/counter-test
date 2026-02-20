@@ -3483,10 +3483,11 @@
 
   // ---------- Tabs logic ----------
   function setActiveTab(tabName) {
-    const nextTab = (tabName === "agents" && state.role !== "manager") ? "counter" : tabName;
+    const canUseSummary = state.role === "manager";
+    const nextTab = ((tabName === "agents" || tabName === "summary") && !canUseSummary) ? "counter" : tabName;
     tabEls.forEach(t => {
       const tabValue = t.dataset.tab;
-      const canShow = (tabValue !== "agents") || state.role === "manager";
+      const canShow = (tabValue === "counter" || tabValue === "calendar") || canUseSummary;
       t.style.display = canShow ? "" : "none";
       t.classList.toggle("active", tabValue === nextTab);
     });
@@ -4326,11 +4327,19 @@
   let hideAuthTimeout = null;
 
   // UI helpers: show/hide (sin transiciones para priorizar estabilidad)
+  function resetViewportScrollTop() {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+
   function showAuth() {
     if (hideAppTimeout) clearTimeout(hideAppTimeout);
     if (hideAuthTimeout) clearTimeout(hideAuthTimeout);
     appRootEl.style.display = "none";
     authRootEl.style.display = "flex";
+    resetViewportScrollTop();
+    requestAnimationFrame(resetViewportScrollTop);
     const overlay = document.getElementById("auth_signup_overlay");
     if (overlay) overlay.classList.remove("show");
   }
@@ -4340,6 +4349,8 @@
     if (hideAuthTimeout) clearTimeout(hideAuthTimeout);
     authRootEl.style.display = "none";
     appRootEl.style.display = "block";
+    resetViewportScrollTop();
+    requestAnimationFrame(resetViewportScrollTop);
   }
 
   function resetManagerUiState() {
@@ -4364,6 +4375,8 @@
       state.role = "agent";
       const agentsTabLabelPre = document.getElementById("tab_agents_label");
       if (agentsTabLabelPre) agentsTabLabelPre.style.display = "none";
+      const summaryTabLabelPre = document.getElementById("tab_summary_label");
+      if (summaryTabLabelPre) summaryTabLabelPre.style.display = "none";
       resetManagerUiState();
       if (typeof window.setActiveTab === "function") window.setActiveTab("counter");
 
@@ -4428,6 +4441,8 @@
           console.log("role/team loaded", { teamId: teamId || "", role, uid: user.uid });
           const agentsTabLabel = document.getElementById("tab_agents_label");
           if (agentsTabLabel) agentsTabLabel.style.display = role === "manager" ? "" : "none";
+          const summaryTabLabel = document.getElementById("tab_summary_label");
+          if (summaryTabLabel) summaryTabLabel.style.display = role === "manager" ? "" : "none";
           if (role === "manager" && typeof window.loadManagerAgents === "function") {
             await window.loadManagerAgents();
           }
@@ -4453,6 +4468,8 @@
       state.uid = "";
       const agentsTabLabel = document.getElementById("tab_agents_label");
       if (agentsTabLabel) agentsTabLabel.style.display = "none";
+      const summaryTabLabel = document.getElementById("tab_summary_label");
+      if (summaryTabLabel) summaryTabLabel.style.display = "none";
       resetManagerUiState();
       if (typeof window.setActiveTab === "function") window.setActiveTab("counter");
       showAuth();
