@@ -1703,20 +1703,20 @@
       <div id="tab_agents" style="display:none;">
         <div class="calSurface" style="display:flex; flex-direction:column; gap:10px;">
           <div class="managerAgentsTop">
-            <div class="statsMiniTitle">Agentes</div>
+            <div class="statsMiniTitle" id="agents_section_title">Agentes</div>
             <button class="btn managerPrimaryBtn" id="agents_add_btn"><span class="plus">+</span>Agregar agente</button>
           </div>
           <div class="managerKpiGrid" id="manager_team_kpis">
             <div class="managerKpiCard">
-              <div class="managerKpiLabel">Agentes activos</div>
+              <div class="managerKpiLabel" id="agents_kpi_active_label">Agentes activos</div>
               <div class="managerKpiValue" id="kpi_agents_active">0</div>
             </div>
             <div class="managerKpiCard">
-              <div class="managerKpiLabel">Ventas semana (X)</div>
+              <div class="managerKpiLabel" id="agents_kpi_week_label">Ventas semana (X)</div>
               <div class="managerKpiValue" id="kpi_team_week">0</div>
             </div>
             <div class="managerKpiCard">
-              <div class="managerKpiLabel">Ventas mes (X)</div>
+              <div class="managerKpiLabel" id="agents_kpi_month_label">Ventas mes (X)</div>
               <div class="managerKpiValue" id="kpi_team_month">0</div>
             </div>
           </div>
@@ -2109,6 +2109,9 @@
       agentTrail: "Agentes",
       viewDetails: "Ver detalles",
       hideDetails: "Ocultar detalles",
+      activeAgentsLabel: "Agentes activos",
+      teamWeekSalesLabel: "Ventas semana (X)",
+      teamMonthSalesLabel: "Ventas mes (X)",
       readOnlyManager: "Solo lectura (manager)",
       managerRulesNote: "Reglas sugeridas: agents solo escriben sus días; managers leen solo agentes asignados en su team; assignments sólo bajo su managerUid; acceso aislado por team.",
       addDay: "Agregar día",
@@ -2262,6 +2265,9 @@
       agentTrail: "Agents",
       viewDetails: "View details",
       hideDetails: "Hide details",
+      activeAgentsLabel: "Active agents",
+      teamWeekSalesLabel: "Team week sales (X)",
+      teamMonthSalesLabel: "Team month sales (X)",
       readOnlyManager: "Read-only (manager)",
       managerRulesNote: "Suggested rules: agents can write only own days; managers can read only assigned agents within team; assignments only under own managerUid; team data isolation required.",
       addDay: "Add day",
@@ -2725,6 +2731,14 @@
 
     const agentsAddBtnEl = document.getElementById("agents_add_btn");
     if (agentsAddBtnEl) agentsAddBtnEl.innerHTML = `<span class="plus">+</span>${t("addAgent")}`;
+    const agentsSectionTitleEl = document.getElementById("agents_section_title");
+    if (agentsSectionTitleEl) agentsSectionTitleEl.textContent = t("agentsTitle");
+    const agentsKpiActiveLabelEl = document.getElementById("agents_kpi_active_label");
+    if (agentsKpiActiveLabelEl) agentsKpiActiveLabelEl.textContent = t("activeAgentsLabel");
+    const agentsKpiWeekLabelEl = document.getElementById("agents_kpi_week_label");
+    if (agentsKpiWeekLabelEl) agentsKpiWeekLabelEl.textContent = t("teamWeekSalesLabel");
+    const agentsKpiMonthLabelEl = document.getElementById("agents_kpi_month_label");
+    if (agentsKpiMonthLabelEl) agentsKpiMonthLabelEl.textContent = t("teamMonthSalesLabel");
     const addAgentTitleEl = document.getElementById("add_agent_title");
     if (addAgentTitleEl) addAgentTitleEl.textContent = t("addAgent");
     const addAgentEmailLabelEl = document.getElementById("add_agent_email_label");
