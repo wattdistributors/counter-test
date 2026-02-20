@@ -2997,7 +2997,7 @@
     dayShareBtn.style.display = "";
     if (dayAddMissingBtn) dayAddMissingBtn.style.display = "none";
     dayEditBtn.style.display = isReadOnly ? "none" : "";
-    dayDeleteBtn.style.display = isReadOnly ? "none" : "";
+    dayDeleteBtn.style.display = (isReadOnly && state.role !== "manager") ? "none" : "";
     if (isReadOnly) dayModalMeta.innerHTML += `<div class="p" style="margin-top:6px;">${t("readOnlyManager")}</div>`;
     openModal(modalDay);
   }
@@ -3086,23 +3086,39 @@
   });
 
   dayDeleteBtn.addEventListener("click", async () => {
-    if (!activeDayISO || activeDayAgentUid !== state.uid) return;
+    if (!activeDayISO || !activeDayAgentUid) return;
+    const canDeleteOwn = activeDayAgentUid === state.uid;
+    const canDeleteAsManager = state.role === "manager";
+    if (!canDeleteOwn && !canDeleteAsManager) return;
     if (!confirm(`¿Borrar el día ${activeDayISO}?`)) return;
-    const hist = loadHistory();
-    delete hist[activeDayISO];
-    saveHistory(hist);
-    const uid = window.firebaseAuth?.currentUser?.uid;
-    if (uid && state.teamId && typeof window.cloudDeleteDay === "function") {
+
+    if (canDeleteOwn) {
+      const hist = loadHistory();
+      delete hist[activeDayISO];
+      saveHistory(hist);
+    } else {
+      managerState.records[activeDayAgentUid] = managerState.records[activeDayAgentUid] || {};
+      delete managerState.records[activeDayAgentUid][activeDayISO];
+      managerState.monthCache.delete(`${activeDayAgentUid}:${managerState.calCursor.y}-${managerState.calCursor.m}`);
+    }
+
+    if (state.teamId && typeof window.cloudDeleteDay === "function") {
       try {
-        await window.cloudDeleteDay(state.teamId, uid, activeDayISO);
+        await window.cloudDeleteDay(state.teamId, activeDayAgentUid, activeDayISO);
       } catch (err) {
         console.warn("Firestore write failed, using local cache", err);
       }
     }
+
     closeModal(modalDay);
-    renderCalendar();
-    renderCalendarStats();
-    renderProgress();
+    if (canDeleteOwn) {
+      renderCalendar();
+      renderCalendarStats();
+      renderProgress();
+    } else {
+      await renderManagerAgentCalendar();
+      await renderManagerAgentsList();
+    }
   });
 
   // ---------- Metrics interactions ----------
