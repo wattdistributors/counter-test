@@ -1348,6 +1348,11 @@
       align-self:center;
       white-space:nowrap;
     }
+    .managerAgentDetail{
+      margin-top:12px;
+      padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.16);
+    }
     .btnSubtleDanger{
       min-height:30px;
       padding:4px 10px;
@@ -1698,7 +1703,7 @@
       <div id="tab_agents" style="display:none;">
         <div class="calSurface" style="display:flex; flex-direction:column; gap:10px;">
           <div class="managerAgentsTop">
-            <div id="agents_breadcrumb" class="statsMiniTitle">Agentes</div>
+            <div class="statsMiniTitle">Agentes</div>
             <button class="btn managerPrimaryBtn" id="agents_add_btn"><span class="plus">+</span>Agregar agente</button>
           </div>
           <div class="managerKpiGrid" id="manager_team_kpis">
@@ -1718,7 +1723,7 @@
           <div id="agents_error" style="min-height:18px; font-size:12px; opacity:.9;"></div>
           <div id="agents_list" class="managerAgentsList"></div>
 
-          <div id="manager_agent_detail" style="display:none;">
+          <div id="manager_agent_detail" class="managerAgentDetail" style="display:none;">
             <div class="calHeader">
               <div class="iconBtn" id="mgr_cal_prev" aria-label="Previous month">‹</div>
               <div class="calTitle" id="mgr_cal_title">—</div>
@@ -2102,6 +2107,8 @@
       removeAgentSaved: "Agente eliminado correctamente.",
       removeAgentError: "No se pudo eliminar el agente.",
       agentTrail: "Agentes",
+      viewDetails: "Ver detalles",
+      hideDetails: "Ocultar detalles",
       readOnlyManager: "Solo lectura (manager)",
       managerRulesNote: "Reglas sugeridas: agents solo escriben sus días; managers leen solo agentes asignados en su team; assignments sólo bajo su managerUid; acceso aislado por team.",
       addDay: "Agregar día",
@@ -2253,6 +2260,8 @@
       removeAgentSaved: "Agent removed successfully.",
       removeAgentError: "Could not remove the agent.",
       agentTrail: "Agents",
+      viewDetails: "View details",
+      hideDetails: "Hide details",
       readOnlyManager: "Read-only (manager)",
       managerRulesNote: "Suggested rules: agents can write only own days; managers can read only assigned agents within team; assignments only under own managerUid; team data isolation required.",
       addDay: "Add day",
@@ -2527,7 +2536,6 @@
   const mgrMonthStatsEl = document.getElementById("mgr_month_stats");
   const agentsListEl = document.getElementById("agents_list");
   const agentsErrorEl = document.getElementById("agents_error");
-  const agentsBreadcrumbEl = document.getElementById("agents_breadcrumb");
   const kpiAgentsActiveEl = document.getElementById("kpi_agents_active");
   const kpiTeamWeekEl = document.getElementById("kpi_team_week");
   const kpiTeamMonthEl = document.getElementById("kpi_team_month");
@@ -2717,7 +2725,6 @@
 
     const agentsAddBtnEl = document.getElementById("agents_add_btn");
     if (agentsAddBtnEl) agentsAddBtnEl.innerHTML = `<span class="plus">+</span>${t("addAgent")}`;
-    if (agentsBreadcrumbEl && !managerState.selectedAgentUid) agentsBreadcrumbEl.textContent = t("agentTrail");
     const addAgentTitleEl = document.getElementById("add_agent_title");
     if (addAgentTitleEl) addAgentTitleEl.textContent = t("addAgent");
     const addAgentEmailLabelEl = document.getElementById("add_agent_email_label");
@@ -3335,6 +3342,15 @@
   async function renderManagerAgentsList() {
     const q = (managerState.search || "").toLowerCase();
     const filtered = managerState.list.filter((a) => (a.displayName || "").toLowerCase().includes(q) || (a.email || "").toLowerCase().includes(q) || (a.uid || "").toLowerCase().includes(q));
+
+    if (managerState.selectedAgentUid && !filtered.some((agent) => agent.uid === managerState.selectedAgentUid)) {
+      managerState.selectedAgentUid = "";
+      managerState.selectedAgentName = "";
+      managerState.selectedAgentEmail = "";
+      if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "none";
+      managerAgentDetailEl.style.display = "none";
+    }
+
     agentsListEl.innerHTML = "";
 
     const now = new Date();
@@ -3365,9 +3381,12 @@
     rowsData.sort((a,b) => b.monthX - a.monthX);
     for (const rowData of rowsData) {
       const agent = rowData.agent;
-      const row = document.createElement("button");
+      const row = document.createElement("div");
       const selected = managerState.selectedAgentUid === agent.uid;
       row.className = `managerAgentCard ${selected ? "active" : ""}`;
+      row.setAttribute("role", "button");
+      row.setAttribute("tabindex", "0");
+      row.setAttribute("aria-expanded", selected ? "true" : "false");
       row.innerHTML = `
         <div class="managerAgentName">${agent.displayName || agent.email || agent.uid}</div>
         <div class="managerAgentEmail">${agent.email || ""}</div>
@@ -3380,21 +3399,47 @@
             <div class="managerMetricLabel">${t("monthXLabel")}</div>
             <div class="managerMetricValue">${rowData.monthX}</div>
           </div>
-          <div class="managerMetricLink">Ver Calendario →</div>
+          <div class="managerMetricLink">${selected ? t("hideDetails") : t("viewDetails")}</div>
         </div>`;
-      row.addEventListener("click", async () => {
+
+      const toggleCard = async () => {
+        const shouldCollapse = managerState.selectedAgentUid === agent.uid;
+        if (shouldCollapse) {
+          managerState.selectedAgentUid = "";
+          managerState.selectedAgentName = "";
+          managerState.selectedAgentEmail = "";
+          managerAgentDetailEl.style.display = "none";
+          if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "none";
+          await renderManagerAgentsList();
+          return;
+        }
+
         managerState.selectedAgentUid = agent.uid;
         managerState.selectedAgentName = agent.displayName || agent.email || agent.uid;
         managerState.selectedAgentEmail = agent.email || "";
         managerState.addDayTargetUid = agent.uid;
         managerState.addDayTargetName = managerState.selectedAgentName;
-        agentsBreadcrumbEl.textContent = `${t("agentTrail")} > ${managerState.selectedAgentName}`;
-        managerAgentDetailEl.style.display = "";
         if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "";
-        await renderManagerAgentCalendar();
         await renderManagerAgentsList();
+      };
+
+      row.addEventListener("click", async (ev) => {
+        if (ev.target.closest("#manager_agent_detail")) return;
+        await toggleCard();
       });
+      row.addEventListener("keydown", async (ev) => {
+        if (ev.key !== "Enter" && ev.key !== " ") return;
+        ev.preventDefault();
+        await toggleCard();
+      });
+
       agentsListEl.appendChild(row);
+
+      if (selected) {
+        row.appendChild(managerAgentDetailEl);
+        managerAgentDetailEl.style.display = "";
+        await renderManagerAgentCalendar();
+      }
     }
   }
 
@@ -3474,7 +3519,6 @@
       managerState.selectedAgentEmail = "";
       managerAgentDetailEl.style.display = "none";
       if (managerRemoveAgentBtn) managerRemoveAgentBtn.style.display = "none";
-      agentsBreadcrumbEl.textContent = t("agentTrail");
       agentsErrorEl.textContent = t("removeAgentSaved");
       await renderManagerAgentsList();
     } catch (err) {
