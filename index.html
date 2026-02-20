@@ -1814,6 +1814,7 @@
   const metrics = ["S","Z","CC","C","X"];
   const STATE_KEY = "kpi_state_v44";
   const HISTORY_KEY = "kpi_history_v1";
+  const HISTORY_KEY_PREFIX = "kpi_history_v1_uid";
   const TEAM_KEY = "kpi_team_v1";
   const PROFILE_KEY = "kpi_profile_v1";
   const LANG_KEY = "app_lang";
@@ -2240,16 +2241,24 @@
   document.addEventListener("dblclick", (e) => e.preventDefault(), { passive:false });
 
   // ---------- History ----------
+  function resolveHistoryUid() {
+    return (state?.uid || window.firebaseAuth?.currentUser?.uid || "").trim();
+  }
+
+  function historyStorageKey(uid = resolveHistoryUid()) {
+    return uid ? `${HISTORY_KEY_PREFIX}:${uid}` : HISTORY_KEY;
+  }
+
   function loadHistory() {
     try {
-      const h = JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}");
+      const h = JSON.parse(localStorage.getItem(historyStorageKey()) || "{}");
       return (h && typeof h === "object") ? h : {};
     } catch {
       return {};
     }
   }
   function saveHistory(hist) {
-    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(hist)); } catch {}
+    try { localStorage.setItem(historyStorageKey(), JSON.stringify(hist)); } catch {}
   }
   function upsertDayInHistory(dayISO, payload) {
     const hist = loadHistory();
@@ -3627,6 +3636,7 @@
     if (!ok) return;
     try { localStorage.removeItem(PROFILE_KEY); } catch {}
     try { localStorage.removeItem(HISTORY_KEY); } catch {}
+    try { localStorage.removeItem(historyStorageKey()); } catch {}
     state.rep = "";
     state.store = "";
     saveStateNow();
